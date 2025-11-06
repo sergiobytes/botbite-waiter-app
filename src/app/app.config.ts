@@ -21,10 +21,16 @@ export const appConfig: ApplicationConfig = {
     provideAnimations(),
     importProvidersFrom(
       ToastrModule.forRoot({
-        timeOut: 2500,
+        timeOut: 3000,
         positionClass: 'toast-bottom-right',
         preventDuplicates: true,
         closeButton: true,
+        progressBar: true,
+        progressAnimation: 'increasing',
+        tapToDismiss: true,
+        newestOnTop: true,
+        maxOpened: 5,
+        autoDismiss: true,
       })
     ),
   ],

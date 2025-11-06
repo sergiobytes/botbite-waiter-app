@@ -1,0 +1,60 @@
+<div class="min-h-svh grid md:grid-cols-2">
+  <div class="hidden md:block bg-black text-white">
+    <div class="h-full flex items-center justify-center p-12">
+      <div class="max-w-md">
+        <h1 class="text-4xl font-semibold tracking-tight">BotBite</h1>
+        <p class="text-white/70 mt-4">Panel de administración - Acceso seguro</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-white text-black flex items-center justify-center p-6">
+    <div class="w-full max-w-sm">
+      <h2 class="text-2xl font-semibold mb-6">Iniciar sesión</h2>
+
+      <form [formGroup]="form" (ngSubmit)="submit()" class="space-y-4">
+        <div>
+          <label class="block text-sm mb-1">Correo</label>
+          <input
+            formControlName="email"
+            type="email"
+            class="w-full rounded-xl border border-black/10 px-4 py-3 outline-none focus:ring-2 focus:ring-black"
+            placeholder="ejemplo@gmail.com"
+          />
+          @if (form.controls.email.invalid && form.controls.email.touched) {
+          <p class="mt-1 text-xs text-neutral-500">Ingresa un correo válido</p>
+          }
+        </div>
+
+        <div>
+          <label class="block text-sm mb-1">Contraseña</label>
+          <input
+            formControlName="password"
+            type="password"
+            class="w-full rounded-xl border border-black/10 px-4 py-3 outline-none focus:ring-2 focus:ring-black"
+            placeholder="••••••••"
+          />
+          @if (form.controls.password.invalid && form.controls.password.touched) {
+          <p class="mt-1 text-xs text-neutral-500">Mínimo 6 caracteres</p>
+          }
+        </div>
+
+        <button
+          type="submit"
+          [disabled]="!canSubmit()"
+          class="w-full rounded-xl bg-black text-white py-3 disabled:opacity-50 transition hover:opacity-90"
+        >
+          @if (!loading()) {
+          <span>Entrar</span>
+          } @else {
+          <span>Procesando...</span>
+          }
+        </button>
+      </form>
+
+      <p class="mt-6 text-xs text-neutral-500">
+        &copy; {{ date.getFullYear() }} BotBite. Todos los derechos reservados.
+      </p>
+    </div>
+  </div>
+</div>
