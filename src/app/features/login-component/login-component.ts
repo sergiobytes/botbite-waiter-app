@@ -51,6 +51,7 @@ export class LoginComponent {
             : 'Error en el inicio de sesión. Revisa tus credenciales.';
 
         this.toast.error(msg);
+        this.loading.set(false);
       },
       complete: () => {
         this.loading.set(false);
