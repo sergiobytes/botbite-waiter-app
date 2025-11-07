@@ -8,7 +8,7 @@ import { ToastrService } from 'ngx-toastr';
 @Component({
   selector: 'app-login-component',
   imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: './login-component.html',
+  templateUrl: './login.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LoginComponent {
@@ -39,10 +39,9 @@ export class LoginComponent {
     const { email, password } = this.form.getRawValue();
 
     this.auth.login({ email, password }).subscribe({
-      next: () => {
+      next: (response) => {
         this.toast.success('Bienvenido');
-        console.log('Hola');
-        // this.router.navigateByUrl('/dashboard');
+        this.router.navigateByUrl('/dashboard');
       },
       error: (err) => {
         const msg =

@@ -9,8 +9,8 @@ export type LoginDto = {
 };
 
 export type LoginRes = {
-  accessToken: string;
-  refreshToken?: string;
+  access_token: string;
+  refresh_token?: string;
   user?: { id: string; email: string; name?: string; roles?: string[] };
 };
 
@@ -24,8 +24,8 @@ export class AuthService {
   login(payload: LoginDto) {
     return this.http.post<LoginRes>(`${this.apiUrl}/auth/login`, payload).pipe(
       tap((res) => {
-        if (res?.accessToken) localStorage.setItem(this.LS_ACCESS, res.accessToken);
-        if (res?.refreshToken) localStorage.setItem(this.LS_REFRESH, res.refreshToken);
+        if (res?.access_token) localStorage.setItem(this.LS_ACCESS, res.access_token);
+        if (res?.refresh_token) localStorage.setItem(this.LS_REFRESH, res.refresh_token);
       })
     );
   }
