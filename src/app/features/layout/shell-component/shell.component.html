@@ -1,1 +1,71 @@
-<p>shell-component works!</p>,
+<div class="min-h-svh bg-white text-black flex">
+  <!-- SIDENAV -->
+  <aside
+    class="fixed z-40 inset-y-0 left-0 w-72 bg-black text-white transform transition-transform duration-200 lg:translate-x-0"
+    [class.-translate-x-full]="!open()"
+    aria-label="Sidebar"
+  >
+    <div class="h-full flex flex-col">
+      <div class="px-5 py-4 border-b border-white/10">
+        <h1 class="text-2xl font-semibold tracking-tight">BotBite</h1>
+        <p class="text-white/60 text-xs">Panel de administración</p>
+      </div>
+
+      <nav class="flex-1 overflow-y-auto p-3 space-y-1">
+        @for(item of items; track $index) {
+        <a
+          [routerLink]="item.to"
+          routerLinkActive="bg-white/10"
+          class="block rounded-xl px-4 py-3 hover:bg-white/10 transition"
+          (click)="closeOnNavigate()"
+        >
+          <span>{{ item.label }}</span>
+        </a>
+        }
+      </nav>
+
+      <div class="p-4 border-t border-white/10">
+        <button
+          (click)="logout()"
+          class="w-full rounded-xl bg-white text-black py-3 hover:opacity-90 transition text-sm"
+        >
+          Cerrar sesión
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- OVERLAY para mobile -->
+  @if(open()) {
+  <div class="fixed inset-0 bg-black/40 z-30 lg:hidden" (click)="toggle()" aria-hidden="true"></div>
+  }
+
+  <!-- CONTENT -->
+  <div class="flex-1 flex flex-col lg:ml-72">
+    <!-- TOPBAR -->
+    <header class="sticky top-0 z-20 bg-white/95 backdrop-blur border-b border-black/10">
+      <div class="h-14 px-4 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <button class="lg:hidden rounded-xl border border-black/10 px-3 py-2" (click)="toggle()">
+            <span class="block w-5 h-0.5 bg-black mb-1"></span>
+            <span class="block w-5 h-0.5 bg-black mb-1"></span>
+            <span class="block w-5 h-0.5 bg-black"></span>
+          </button>
+
+          <div class="text-sm text-neutral-600">
+            <span class="font-medium">Restaurannte:</span>
+            <span class="text-neutral-800">{{ currentBranch() }}</span>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <div class="text-sm text-neutral-600">Usuario</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="flex-1 p-4">
+      <router-outlet />
+    </main>
+  </div>
+</div>
