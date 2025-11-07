@@ -12,6 +12,18 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadComponent: () =>
       import('./features/layout/shell-component/shell.component').then((m) => m.ShellComponent),
+    children: [
+      {
+        path: '',
+        pathMatch: 'full',
+        redirectTo: 'home',
+      },
+      {
+        path: 'home',
+        loadComponent: () =>
+          import('./features/dashboard/home-component/home.component').then((m) => m.HomeComponent),
+      },
+    ],
   },
   { path: '', pathMatch: 'full', redirectTo: '/login' },
   { path: '**', redirectTo: '/login' },
