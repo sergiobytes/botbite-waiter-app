@@ -1,7 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth.service';
+import { OrgService } from '../../../core/services/org.service';
 
 type NavItem = {
   label: string;
@@ -11,22 +13,26 @@ type NavItem = {
 
 @Component({
   selector: 'app-shell-component',
-  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [CommonModule, FormsModule, RouterOutlet, RouterLink, RouterLinkActive],
   templateUrl: './shell.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ShellComponent {
   private router = inject(Router);
   protected auth = inject(AuthService);
+  protected org = inject(OrgService);
 
   open = signal(false);
-  currentBranch = signal('Principal');
-
   items: NavItem[] = [{ label: 'Inicio', to: '/dashboard/home' }];
+
+  restaurants = this.org.restaurants;
+  selectedRestaurantId = this.org.selectedRestaurantId;
+  selectedRestaurant = this.org.selectedRestaurant;
 
   constructor() {
     if (this.auth.isAuthenticated() && !this.auth.user()) {
       this.auth.loadProfile().subscribe({ error: () => this.auth.logout() });
+      this.org.loadRestaurants().subscribe();
     }
   }
 
@@ -75,5 +81,10 @@ export class ShellComponent {
       default:
         return 'bg-neutral-100 text-neutral-700 border-neutral-200';
     }
+  }
+
+  onSelectRestaurant(id: string) {
+    this.org.selectRestaurant(id);
+    // TODO: Recargar información específica del restaurante
   }
 }

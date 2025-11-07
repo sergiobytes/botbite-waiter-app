@@ -48,15 +48,43 @@
     <header class="sticky top-0 z-20 bg-white/95 backdrop-blur border-b border-black/10">
       <div class="h-14 px-4 flex items-center justify-between min-w-0">
         <div class="flex items-center gap-3 min-w-0">
-          <button class="lg:hidden rounded-xl border border-black/10 px-3 py-2" (click)="toggle()">
+          <button
+            class="lg:hidden rounded-xl border border-black/10 px-3 py-2"
+            (click)="toggle()"
+            aria-label="Abrir menú"
+          >
             <span class="block w-5 h-0.5 bg-black mb-1"></span>
             <span class="block w-5 h-0.5 bg-black mb-1"></span>
             <span class="block w-5 h-0.5 bg-black"></span>
           </button>
-          <div class="text-sm text-neutral-600 truncate">
-            <span class="font-medium">Sucursal:</span>
-            <span class="text-neutral-800">{{ currentBranch() }}</span>
-          </div>
+
+          <ng-container *ngIf="restaurants().length > 0; else empty">
+            <ng-container *ngIf="restaurants().length > 1; else singleRestaurant">
+              <label class="sr-only" for="restaurantSelect">Restaurante</label>
+              <div class="flex items-center gap-2">
+                <span class="text-sm font-medium text-neutral-700">Restaurante:</span>
+                <select
+                  id="restaurantSelect"
+                  [ngModel]="selectedRestaurantId()"
+                  (ngModelChange)="onSelectRestaurant($event)"
+                  class="text-sm rounded-lg border border-black/10 px-3 py-2 bg-white text-black focus:outline-none focus:ring-2 focus:ring-black/20 max-w-3xs md:max-w-80"
+                >
+                  <option *ngFor="let r of restaurants()" [value]="r.id">
+                    {{ r.name }}
+                  </option>
+                </select>
+              </div>
+            </ng-container>
+
+            <ng-template #singleRestaurant>
+              <div class="text-sm text-neutral-700 truncate">
+                <span class="font-medium">Restaurante: </span>
+                <span class="text-neutral-900">{{ selectedRestaurant()?.name }}</span>
+              </div>
+            </ng-template>
+          </ng-container>
+
+          <ng-template #empty></ng-template>
         </div>
 
         <!-- USUARIO ACTIVO -->
