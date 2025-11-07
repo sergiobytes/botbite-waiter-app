@@ -46,23 +46,38 @@
   <div class="flex-1 flex flex-col lg:ml-72">
     <!-- TOPBAR -->
     <header class="sticky top-0 z-20 bg-white/95 backdrop-blur border-b border-black/10">
-      <div class="h-14 px-4 flex items-center justify-between">
-        <div class="flex items-center gap-3">
+      <div class="h-14 px-4 flex items-center justify-between min-w-0">
+        <div class="flex items-center gap-3 min-w-0">
           <button class="lg:hidden rounded-xl border border-black/10 px-3 py-2" (click)="toggle()">
             <span class="block w-5 h-0.5 bg-black mb-1"></span>
             <span class="block w-5 h-0.5 bg-black mb-1"></span>
             <span class="block w-5 h-0.5 bg-black"></span>
           </button>
-          <div class="text-sm text-neutral-600">
+          <div class="text-sm text-neutral-600 truncate">
             <span class="font-medium">Sucursal:</span>
             <span class="text-neutral-800">{{ currentBranch() }}</span>
           </div>
         </div>
 
-        <div class="flex items-center gap-4">
-          <!-- Nombre del usuario -->
-          <div class="text-sm text-neutral-700 truncate max-w-[140px]" title="{{ userName() }}">
-            {{ userName() }}
+        <!-- USUARIO ACTIVO -->
+        <div class="flex items-center gap-4 min-w-0">
+          <div class="flex items-center gap-2 min-w-0">
+            <!-- Email -->
+            <span
+              class="hidden sm:inline text-sm text-neutral-700 whitespace-nowrap overflow-hidden text-ellipsis max-w-[200px] md:max-w-[280px] lg:max-w-[360px] xl:max-w-[420px]"
+              [title]="auth.user()?.email"
+            >
+              {{ auth.user()?.email }}
+            </span>
+
+            <!-- Badge del rol -->
+            <span
+              *ngIf="bestRole(auth.user()?.roles)"
+              [ngClass]="getRoleBadgeClass(bestRole(auth.user()?.roles))"
+              class="border text-xs font-medium px-2 py-0.5 rounded-full whitespace-nowrap transition-colors"
+            >
+              {{ bestRole(auth.user()?.roles) }}
+            </span>
           </div>
 
           <!-- Botón engranaje -->
@@ -71,7 +86,6 @@
             title="Editar perfil"
             (click)="goToProfile()"
           >
-            <!-- Ícono engranaje -->
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"

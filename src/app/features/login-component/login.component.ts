@@ -39,9 +39,18 @@ export class LoginComponent {
     const { email, password } = this.form.getRawValue();
 
     this.auth.login({ email, password }).subscribe({
-      next: (response) => {
-        this.toast.success('Bienvenido');
-        this.router.navigateByUrl('/dashboard');
+      next: () => {
+        this.auth.loadProfile().subscribe({
+          next: () => {
+            this.toast.success('Bienvenido');
+            this.router.navigateByUrl('/dashboard');
+          },
+          error: () => {
+            this.auth.logout();
+            this.toast.error('Error al validar sesión');
+            this.loading.set(false);
+          },
+        });
       },
       error: (err) => {
         const msg =
@@ -50,9 +59,6 @@ export class LoginComponent {
             : 'Error en el inicio de sesión. Revisa tus credenciales.';
 
         this.toast.error(msg);
-        this.loading.set(false);
-      },
-      complete: () => {
         this.loading.set(false);
       },
     });

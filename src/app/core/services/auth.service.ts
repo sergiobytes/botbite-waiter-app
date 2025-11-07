@@ -1,18 +1,8 @@
 import { HttpClient } from '@angular/common/http';
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import { environment } from '../../../environments/environment';
-import { tap, from } from 'rxjs';
-
-export type LoginDto = {
-  email: string;
-  password: string;
-};
-
-export type LoginRes = {
-  access_token: string;
-  refresh_token?: string;
-  user?: { id: string; email: string; name?: string; roles?: string[] };
-};
+import { map, Observable, tap } from 'rxjs';
+import { LoginDto, LoginRes, UserProfile, ValidateTokenRes } from './types/auth.types';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -21,12 +11,24 @@ export class AuthService {
   private LS_REFRESH = 'botbite.refresh';
   apiUrl = environment.apiBaseUrl;
 
+  user = signal<UserProfile | null>(null);
+
   login(payload: LoginDto) {
-    return this.http.post<LoginRes>(`${this.apiUrl}/auth/login`, payload).pipe(
-      tap((res) => {
-        if (res?.access_token) localStorage.setItem(this.LS_ACCESS, res.access_token);
-        if (res?.refresh_token) localStorage.setItem(this.LS_REFRESH, res.refresh_token);
-      })
+    return this.http
+      .post<LoginRes>(`${this.apiUrl}/auth/login`, payload)
+      .pipe(tap((res) => this.setTokens(res)));
+  }
+
+  loadProfile(): Observable<UserProfile> {
+    return this.http.get<ValidateTokenRes>(`${this.apiUrl}/auth/validate-token`).pipe(
+      map(
+        (res) =>
+          ({
+            email: res.user.email,
+            roles: res.user.roles,
+          } as UserProfile)
+      ),
+      tap((profile) => this.user.set(profile))
     );
   }
 
@@ -45,5 +47,10 @@ export class AuthService {
 
   isAuthenticated(): boolean {
     return !!this.accessToken;
+  }
+
+  private setTokens(res: LoginRes) {
+    if (res?.access_token) localStorage.setItem(this.LS_ACCESS, res.access_token);
+    if (res?.refresh_token) localStorage.setItem(this.LS_REFRESH, res.refresh_token);
   }
 }
