@@ -20,8 +20,9 @@ export class ShellComponent {
   private auth = inject(AuthService);
 
   open = signal(false);
-
   currentBranch = signal('Principal');
+
+  userName = signal(this.auth.accessToken ? 'Usuario activo' : 'Invitado');
 
   items: NavItem[] = [{ label: 'Inicio', to: '/dashboard/home' }];
 
@@ -36,5 +37,9 @@ export class ShellComponent {
   logout() {
     this.auth.logout();
     this.router.navigateByUrl('/login');
+  }
+
+  goToProfile() {
+    this.router.navigateByUrl('/dashboard/profile')
   }
 }
