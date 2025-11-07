@@ -12,8 +12,8 @@
       </div>
 
       <nav class="flex-1 overflow-y-auto p-3 space-y-1">
+        @for (item of items; track item.to) {
         <a
-          *ngFor="let item of items"
           [routerLink]="item.to"
           routerLinkActive="bg-white/10"
           class="block rounded-xl px-4 py-3 text-sm hover:bg-white/10 transition"
@@ -21,6 +21,7 @@
         >
           <span class="align-middle">{{ item.label }}</span>
         </a>
+        }
       </nav>
 
       <div class="p-4 border-t border-white/10">
@@ -35,12 +36,9 @@
   </aside>
 
   <!-- OVERLAY para móvil -->
-  <div
-    class="fixed inset-0 bg-black/40 z-30 lg:hidden"
-    *ngIf="open()"
-    (click)="toggle()"
-    aria-hidden="true"
-  ></div>
+  @if (open()) {
+  <div class="fixed inset-0 bg-black/40 z-30 lg:hidden" (click)="toggle()" aria-hidden="true"></div>
+  }
 
   <!-- CONTENIDO -->
   <div class="flex-1 flex flex-col lg:ml-72">
@@ -58,33 +56,52 @@
             <span class="block w-5 h-0.5 bg-black"></span>
           </button>
 
-          <ng-container *ngIf="restaurants().length > 0; else empty">
-            <ng-container *ngIf="restaurants().length > 1; else singleRestaurant">
-              <label class="sr-only" for="restaurantSelect">Restaurante</label>
-              <div class="flex items-center gap-2">
-                <span class="text-sm font-medium text-neutral-700">Restaurante:</span>
-                <select
-                  id="restaurantSelect"
-                  [ngModel]="selectedRestaurantId()"
-                  (ngModelChange)="onSelectRestaurant($event)"
-                  class="text-sm rounded-lg border border-black/10 px-3 py-2 bg-white text-black focus:outline-none focus:ring-2 focus:ring-black/20 max-w-3xs md:max-w-80"
-                >
-                  <option *ngFor="let r of restaurants()" [value]="r.id">
-                    {{ r.name }}
-                  </option>
-                </select>
-              </div>
-            </ng-container>
-
-            <ng-template #singleRestaurant>
-              <div class="text-sm text-neutral-700 truncate">
-                <span class="font-medium">Restaurante: </span>
-                <span class="text-neutral-900">{{ selectedRestaurant()?.name }}</span>
-              </div>
-            </ng-template>
-          </ng-container>
-
-          <ng-template #empty></ng-template>
+          <!-- Selector de restaurantes -->
+          @if (restaurants().length > 0) { @if (restaurants().length > 1) {
+          <label class="sr-only" for="restaurantSelect">Restaurante</label>
+          <div class="flex items-center gap-2">
+            <span class="text-sm font-medium text-neutral-700">Restaurante:</span>
+            <select
+              id="restaurantSelect"
+              [ngModel]="selectedRestaurantId()"
+              (ngModelChange)="onSelectRestaurant($event)"
+              class="text-sm rounded-lg border border-black/10 px-3 py-2 bg-white text-black focus:outline-none focus:ring-2 focus:ring-black/20 max-w-3xs md:max-w-80"
+            >
+              @for (restaurant of restaurants(); track restaurant.id) {
+              <option [value]="restaurant.id">{{ restaurant.name }}</option>
+              }
+            </select>
+          </div>
+          } @else {
+          <div class="text-sm text-neutral-700 truncate">
+            <span class="font-medium">Restaurante: </span>
+            <span class="text-neutral-900">{{ selectedRestaurant()?.name }}</span>
+          </div>
+          } }
+          <!-- Selector de sucursales -->
+          @if (branches().length > 0) {
+          <span class="text-neutral-300 select-none">|</span>
+          @if (branches().length > 1) {
+          <label class="sr-only" for="branchSelect">Sucursal</label>
+          <div class="flex items-center gap-2">
+            <span class="text-sm font-medium text-neutral-700">Sucursal: </span>
+            <select
+              id="branchSelect"
+              [ngModel]="selectedBranchId()"
+              (ngModelChange)="onSelectBranch($event)"
+              class="text-sm rounded-lg border border-black/10 px-3 py-2 bg-white text-black focus:outline-none focus:ring-2 focus:ring-black/20 max-w-[220px] md:max-w-[280px]"
+            >
+              @for (branch of branches(); track branch.id) {
+              <option [value]="branch.id">{{ branch.name }}</option>
+              }
+            </select>
+          </div>
+          } @else {
+          <div class="text-sm text-neutral-700 truncate">
+            <span class="font-medium">Sucursal: </span>
+            <span class="text-neutral-900">{{ selectedBranch()?.name }}</span>
+          </div>
+          } }
         </div>
 
         <!-- USUARIO ACTIVO -->
@@ -99,13 +116,14 @@
             </span>
 
             <!-- Badge del rol -->
+            @if (getBestRole(auth.user()?.roles); as userRole) {
             <span
-              *ngIf="bestRole(auth.user()?.roles)"
-              [ngClass]="getRoleBadgeClass(bestRole(auth.user()?.roles))"
+              [class]="getRoleBadgeClass(userRole)"
               class="border text-xs font-medium px-2 py-0.5 rounded-full whitespace-nowrap transition-colors"
             >
-              {{ bestRole(auth.user()?.roles) }}
+              {{ userRole }}
             </span>
+            }
           </div>
 
           <!-- Botón engranaje -->

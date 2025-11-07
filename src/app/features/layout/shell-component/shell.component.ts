@@ -1,9 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth.service';
 import { OrgService } from '../../../core/services/org.service';
+import { catchError, switchMap, EMPTY } from 'rxjs';
 
 type NavItem = {
   label: string;
@@ -17,7 +18,7 @@ type NavItem = {
   templateUrl: './shell.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ShellComponent {
+export class ShellComponent implements OnInit {
   private router = inject(Router);
   protected auth = inject(AuthService);
   protected org = inject(OrgService);
@@ -29,62 +30,96 @@ export class ShellComponent {
   selectedRestaurantId = this.org.selectedRestaurantId;
   selectedRestaurant = this.org.selectedRestaurant;
 
-  constructor() {
-    if (this.auth.isAuthenticated() && !this.auth.user()) {
-      this.auth.loadProfile().subscribe({ error: () => this.auth.logout() });
-      this.org.loadRestaurants().subscribe();
+  branches = this.org.branches;
+  selectedBranchId = this.org.selectedBranchId;
+  selectedBranch = this.org.selectedBranch;
+
+  ngOnInit(): void {
+    this.initializeUserData();
+  }
+
+  private initializeUserData(): void {
+    if (!this.auth.isAuthenticated() || this.auth.user()) {
+      return;
     }
+
+    this.auth.loadProfile()
+      .pipe(
+        catchError(() => {
+          this.auth.logout();
+          return EMPTY;
+        }),
+        switchMap(() => this.org.loadRestaurants()),
+        catchError(() => EMPTY)
+      )
+      .subscribe({
+        next: () => {
+          const restaurantId = this.selectedRestaurantId();
+          if (restaurantId) {
+            this.org.loadBranches(restaurantId).subscribe();
+          }
+        }
+      });
   }
 
   displayUser(): string {
-    const u = this.auth.user();
-    if (!u) return '';
-    const role = this.bestRole(u.roles);
-    return role ? `${u.email} - ${role}` : u.email;
+    const user = this.auth.user();
+    if (!user?.email) return '';
+
+    const role = this.getBestRole(user.roles);
+    return role ? `${user.email} - ${role}` : user.email;
   }
 
-  toggle() {
-    this.open.update((v) => !v);
+  toggle(): void {
+    this.open.update(isOpen => !isOpen);
   }
 
-  closeOnNavigate() {
-    if (window.innerWidth < 1024) this.open.set(false);
+  closeOnNavigate(): void {
+    if (window.innerWidth < 1024) {
+      this.open.set(false);
+    }
   }
 
-  logout() {
+  logout(): void {
     this.auth.logout();
     this.router.navigateByUrl('/login');
   }
 
-  goToProfile() {
+  goToProfile(): void {
     this.router.navigateByUrl('/dashboard/profile');
   }
 
-  bestRole(roles?: string[]) {
+  getBestRole(roles?: string[]): string | undefined {
     if (!roles?.length) return undefined;
-    const set = new Set(roles.map((r) => r.toLowerCase()));
 
-    if (set.has('super')) return 'SUPER';
-    if (set.has('admin')) return 'ADMIN';
-    if (set.has('user')) return 'USER';
+    const roleSet = new Set(roles.map(role => role.toLowerCase()));
+    const roleHierarchy = ['super', 'admin', 'user'];
+
+    for (const role of roleHierarchy) {
+      if (roleSet.has(role)) {
+        return role.toUpperCase();
+      }
+    }
+
     return roles[0].toUpperCase();
   }
 
-  getRoleBadgeClass(role?: string) {
-    switch (role) {
-      case 'SUPER':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'ADMIN':
-        return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'USER':
-        return 'bg-green-100 text-green-800 border-green-200';
-      default:
-        return 'bg-neutral-100 text-neutral-700 border-neutral-200';
-    }
+  getRoleBadgeClass(role?: string): string {
+    const roleClasses = {
+      'SUPER': 'bg-yellow-100 text-yellow-800 border-yellow-200',
+      'ADMIN': 'bg-blue-100 text-blue-800 border-blue-200',
+      'USER': 'bg-green-100 text-green-800 border-green-200'
+    } as const;
+
+    return roleClasses[role as keyof typeof roleClasses] ?? 'bg-neutral-100 text-neutral-700 border-neutral-200';
   }
 
-  onSelectRestaurant(id: string) {
+  onSelectRestaurant(id: string): void {
     this.org.selectRestaurant(id);
-    // TODO: Recargar información específica del restaurante
+    // El effect _watchRestaurant se encargará de cargar las sucursales automáticamente
+  }
+
+  onSelectBranch(id: string): void {
+    this.org.selectBranch(id);
   }
 }
