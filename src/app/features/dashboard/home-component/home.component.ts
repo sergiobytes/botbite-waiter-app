@@ -20,6 +20,7 @@ export class HomeComponent {
 
   loadingToday = signal<boolean>(false);
   generatingQr = signal<boolean>(false);
+  downloadingQr = signal<boolean>(false);
 
   todayCount = signal<number>(0);
   avgInteractions = signal<number>(0);
@@ -97,5 +98,47 @@ export class HomeComponent {
         this.generatingQr.set(false);
       },
     });
+  }
+
+  async downloadBranchQr() {
+    const url = this.branchQrUrl();
+    const branch = this.org.selectedBranch();
+
+    if (!url || !branch) return;
+
+    try {
+      this.downloadingQr.set(true);
+
+      const res = await fetch(url, { mode: 'cors' });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const blob = await res.blob();
+
+      const ext = (blob.type?.split('/')?.[1] || 'png').replace('+xml', '');
+      const filename = `qr-${(branch.name || 'sucursal')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '')}.${ext}`;
+
+      const a = document.createElement('a');
+      const objectUrl = URL.createObjectURL(blob);
+      a.href = objectUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(objectUrl);
+
+      this.toast.success('Descarga iniciada');
+    } catch (error) {
+      const opened = window.open(url!, '_blank');
+
+      if (opened) {
+        this.toast.info('Abriendo imagen en una nueva pestaña para descargar manual.');
+      } else {
+        this.toast.error('No se pudo descargar el QR.');
+      }
+    } finally {
+      this.downloadingQr.set(false);
+    }
   }
 }

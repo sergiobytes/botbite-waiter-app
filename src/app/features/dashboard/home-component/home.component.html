@@ -18,6 +18,18 @@
         alt="Codigo QR de sucursal"
         class="w-40 h-40 md:w-48 md:h-48 object-contain border border-black/10 rounded-xl shadow-sm"
       />
+      <button
+        class="rounded-xl border border-black/10 px-4 py-2 bg-white text-black hover:bg-black/5 disabled:opacity-50 transition"
+        (click)="downloadBranchQr()"
+        [disabled]="downloadingQr()"
+      >
+        @if (!downloadingQr()) {
+        <span>Descargar QR</span>
+        } @else {
+        <span>Descargando...</span>
+        }
+      </button>
+
       } @else {
       <button
         class="flex items-center justify-center w-40 h-40 md:w-48 md:h-48 border border-black/10 rounded-xl shadow-sm bg-black text-white hover:opacity-90 disabled:opacity-50 transition"
