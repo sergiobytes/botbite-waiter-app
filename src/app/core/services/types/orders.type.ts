@@ -2,6 +2,7 @@ export type OrderDetails = {
   id: string;
   isActive: boolean;
   total: number;
+  interactions: number;
   orderItems: OrderItemDetails[];
 };
 

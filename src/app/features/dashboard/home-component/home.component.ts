@@ -22,6 +22,7 @@ export class HomeComponent {
   generatingQr = signal<boolean>(false);
 
   todayCount = signal<number>(0);
+  avgInteractions = signal<number>(0);
   availableMessages = signal<number>(0);
   branchQrUrl = signal<string>('');
 
@@ -48,6 +49,10 @@ export class HomeComponent {
     this.orders.getAll({ branchId, date }).subscribe({
       next: (res) => {
         this.todayCount.set(res.length);
+
+        const totalInteractions = res.reduce((acc, order) => acc + order.interactions, 0);
+        this.avgInteractions.set(totalInteractions / res.length);
+
         this.loadingToday.set(false);
       },
       error: () => {
