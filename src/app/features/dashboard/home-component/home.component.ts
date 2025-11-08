@@ -17,6 +17,7 @@ export class HomeComponent {
   loadingToday = signal<boolean>(false);
   todayCount = signal<number>(0);
   availableMessages = signal<number>(0);
+  branchQrUrl = signal<string>('');
 
   constructor() {
     effect(() => {
@@ -25,10 +26,12 @@ export class HomeComponent {
       if (!branchId) {
         this.todayCount.set(0);
         this.availableMessages.set(0);
+        this.branchQrUrl.set('');
         return;
       }
       this.fetchToday(branchId);
       this.availableMessages.set(this.org.selectedBranch()?.availableMessages ?? 0);
+      this.branchQrUrl.set(this.org.selectedBranch()?.qrUrl ?? '');
     });
   }
 
