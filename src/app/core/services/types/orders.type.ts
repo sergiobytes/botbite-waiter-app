@@ -35,9 +35,7 @@ export type ProductDetails = {
   description?: string;
 };
 
-export type OrdersByDateResponse = {
+export type OrdersList = {
   orders: OrderDetails[];
-  date: string;
-  count: number;
   message: string;
 };

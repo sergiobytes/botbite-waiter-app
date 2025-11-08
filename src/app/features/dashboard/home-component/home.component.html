@@ -11,18 +11,27 @@
       </p>
     </div>
 
-    @if (branchQrUrl()) {
-      <div class="flex flex-col items-center justify-center gap-2 shrink-0">
-        <img
-          [src]="branchQrUrl()"
-          alt="Codigo QR de sucursal"
-          class="w-40 h-40 md:w-48 md:h-48 object-contain border border-black/10 rounded-xl shadow-sm"
-        />
-        <p class="text-sm text-neutral-600 text-center max-w-48">
-          Escanéalo para conocer al mesero virtual de esta sucursal.
-        </p>
-      </div>
-    }
+    <div class="flex flex-col items-center justify-center gap-2 shrink-0">
+      @if (branchQrUrl()) {
+      <img
+        [src]="branchQrUrl()"
+        alt="Codigo QR de sucursal"
+        class="w-40 h-40 md:w-48 md:h-48 object-contain border border-black/10 rounded-xl shadow-sm"
+      />
+      } @else {
+      <button
+        class="w-40 h-40 md:w-48 md:h-48 object-contain border border-black/10 rounded-xl shadow-sm px-4 py-2 bg-black text-white hover:opacity-90 disabled:opacity-50"
+        (click)="(generateBranchQr)"
+      >
+        @if (!generatingQr()) {
+        <span>Generar QR</span>
+        } @else {
+        <span>Generando</span>
+        }
+      </button>
+
+      }
+    </div>
   </section>
 
   <section class="grid md:grid-cols-3 gap-4">

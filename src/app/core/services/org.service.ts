@@ -82,6 +82,17 @@ export class OrgService {
     else if (rid && !branchId) localStorage.removeItem(this.LS_BRANCHKEY(rid));
   }
 
+  updateSelectedBranch(patch: Partial<BranchDetails>) {
+    const current = this.selectedBranch();
+    if (!current) return;
+
+    const updated = { ...current, ...patch };
+    const next = this.branches().map((b) => (b.id === updated.id ? updated : b));
+
+    this.branches.set(next);
+    this.selectedBranchId.set(updated.id);
+  }
+
   _watchRestaurant = effect(() => {
     const rid = this.selectedRestaurantId();
     if (!rid) {
