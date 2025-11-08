@@ -24,7 +24,10 @@ export class ShellComponent implements OnInit {
   protected org = inject(OrgService);
 
   open = signal(false);
-  items: NavItem[] = [{ label: 'Inicio', to: '/dashboard/home' }];
+  items: NavItem[] = [
+    { label: 'Inicio', to: '/dashboard/home' },
+    { label: 'Categorías', to: '/dashboard/categories' },
+  ];
 
   restaurants = this.org.restaurants;
   selectedRestaurantId = this.org.selectedRestaurantId;
@@ -43,7 +46,8 @@ export class ShellComponent implements OnInit {
       return;
     }
 
-    this.auth.loadProfile()
+    this.auth
+      .loadProfile()
       .pipe(
         catchError(() => {
           this.auth.logout();
@@ -58,7 +62,7 @@ export class ShellComponent implements OnInit {
           if (restaurantId) {
             this.org.loadBranches(restaurantId).subscribe();
           }
-        }
+        },
       });
   }
 
@@ -71,7 +75,7 @@ export class ShellComponent implements OnInit {
   }
 
   toggle(): void {
-    this.open.update(isOpen => !isOpen);
+    this.open.update((isOpen) => !isOpen);
   }
 
   closeOnNavigate(): void {
@@ -92,7 +96,7 @@ export class ShellComponent implements OnInit {
   getBestRole(roles?: string[]): string | undefined {
     if (!roles?.length) return undefined;
 
-    const roleSet = new Set(roles.map(role => role.toLowerCase()));
+    const roleSet = new Set(roles.map((role) => role.toLowerCase()));
     const roleHierarchy = ['super', 'admin', 'user'];
 
     for (const role of roleHierarchy) {
@@ -106,12 +110,15 @@ export class ShellComponent implements OnInit {
 
   getRoleBadgeClass(role?: string): string {
     const roleClasses = {
-      'SUPER': 'bg-yellow-100 text-yellow-800 border-yellow-200',
-      'ADMIN': 'bg-blue-100 text-blue-800 border-blue-200',
-      'USER': 'bg-green-100 text-green-800 border-green-200'
+      SUPER: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+      ADMIN: 'bg-blue-100 text-blue-800 border-blue-200',
+      USER: 'bg-green-100 text-green-800 border-green-200',
     } as const;
 
-    return roleClasses[role as keyof typeof roleClasses] ?? 'bg-neutral-100 text-neutral-700 border-neutral-200';
+    return (
+      roleClasses[role as keyof typeof roleClasses] ??
+      'bg-neutral-100 text-neutral-700 border-neutral-200'
+    );
   }
 
   onSelectRestaurant(id: string): void {

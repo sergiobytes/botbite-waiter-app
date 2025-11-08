@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
+import { adminGuard, superGuard } from './core/guards/roles.guard';
 
 export const routes: Routes = [
   {
@@ -22,6 +23,14 @@ export const routes: Routes = [
         path: 'home',
         loadComponent: () =>
           import('./features/dashboard/home-component/home.component').then((m) => m.HomeComponent),
+      },
+      {
+        path: 'categories',
+        canActivate: [superGuard, adminGuard],
+        loadComponent: () =>
+          import('./features/dashboard/categories-component/categories.component').then(
+            (m) => m.CategoriesComponent
+          ),
       },
     ],
   },
