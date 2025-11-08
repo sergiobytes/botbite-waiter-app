@@ -22,8 +22,14 @@
     </div>
 
     <div class="rounded-2xl border border-black/10 p-5">
-      <p class="text-sm text-neutral-500">Ingresos estimados</p>
-      <div class="text-3xl font-semibold mt-2">-</div>
+      <p class="text-sm text-neutral-500">Mensajes disponibles</p>
+      <div class="mt-2">
+        @if(!loadingToday()){
+        <p class="text-3xl font-semibold text-black">{{ availableMessages() }}</p>
+        }@else {
+        <div class="h-8 w-16 bg-black/10 rounded animate-pulse"></div>
+        }
+      </div>
     </div>
 
     <div class="rounded-2xl border border-black/10 p-5">

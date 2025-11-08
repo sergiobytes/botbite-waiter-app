@@ -22,6 +22,7 @@ export type BranchDetails = {
   address: string;
   isActive: boolean;
   qrUrl: string;
+  availableMessages: number;
 };
 
 export type BranchList = {
