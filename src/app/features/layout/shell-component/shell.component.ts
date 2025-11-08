@@ -42,28 +42,41 @@ export class ShellComponent implements OnInit {
   }
 
   private initializeUserData(): void {
-    if (!this.auth.isAuthenticated() || this.auth.user()) {
+    if (!this.auth.isAuthenticated()) {
       return;
     }
 
-    this.auth
-      .loadProfile()
-      .pipe(
-        catchError(() => {
-          this.auth.logout();
-          return EMPTY;
-        }),
-        switchMap(() => this.org.loadRestaurants()),
-        catchError(() => EMPTY)
-      )
-      .subscribe({
-        next: () => {
-          const restaurantId = this.selectedRestaurantId();
-          if (restaurantId) {
-            this.org.loadBranches(restaurantId).subscribe();
-          }
-        },
-      });
+    // Si no tenemos usuario, cargar perfil primero
+    if (!this.auth.user()) {
+      this.auth
+        .loadProfile()
+        .pipe(
+          catchError(() => {
+            this.auth.logout();
+            return EMPTY;
+          }),
+          switchMap(() => this.loadOrganizationData()),
+          catchError(() => EMPTY)
+        )
+        .subscribe();
+    } else {
+      // Si ya tenemos usuario, solo cargar datos de organización
+      this.loadOrganizationData().subscribe();
+    }
+  }
+
+  private loadOrganizationData() {
+    return this.org.loadRestaurants().pipe(
+      catchError(() => EMPTY),
+      switchMap(() => {
+        const restaurantId = this.selectedRestaurantId();
+        if (restaurantId) {
+          return this.org.loadBranches(restaurantId);
+        }
+        return EMPTY;
+      }),
+      catchError(() => EMPTY)
+    );
   }
 
   displayUser(): string {

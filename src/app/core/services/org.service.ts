@@ -25,19 +25,48 @@ export class OrgService {
     () => this.branches().find((b) => b.id === this.selectedBranchId()) ?? null
   );
 
+  constructor() {
+    // Inicializar desde localStorage al crear el servicio
+    this.initializeFromStorage();
+  }
+
+  private initializeFromStorage(): void {
+    const savedRestaurant = localStorage.getItem(this.LS_RESTAURANT);
+    if (savedRestaurant) {
+      this.selectedRestaurantId.set(savedRestaurant);
+
+      const savedBranch = localStorage.getItem(this.LS_BRANCHKEY(savedRestaurant));
+      if (savedBranch) {
+        this.selectedBranchId.set(savedBranch);
+      }
+    }
+  }
+
   loadRestaurants() {
     return this.http.get<RestaurantsList>(`${this.apiUrl}/restaurants`).pipe(
       tap((list) => {
         this.restaurants.set(Array.isArray(list.restaurants) ? list.restaurants : []);
 
+        // Mantener la selección actual si existe en la lista
+        const currentSelection = this.selectedRestaurantId();
+        const exists = currentSelection && list.restaurants.some((r) => r.id === currentSelection);
+
+        if (exists) {
+          // Ya está seleccionado y existe, no hacer nada
+          return;
+        }
+
+        // Si no existe la selección actual, buscar en localStorage
         const saved = localStorage.getItem(this.LS_RESTAURANT);
-        const exists = saved && list.restaurants.some((r) => r.id === saved);
+        const savedExists = saved && list.restaurants.some((r) => r.id === saved);
         const fallback = list.restaurants[0]?.id ?? null;
 
-        this.selectedRestaurantId.set(exists ? saved! : fallback);
+        const newSelection = savedExists ? saved! : fallback;
+        this.selectedRestaurantId.set(newSelection);
 
-        if (exists) return;
-        if (fallback) localStorage.setItem(this.LS_RESTAURANT, fallback);
+        if (newSelection) {
+          localStorage.setItem(this.LS_RESTAURANT, newSelection);
+        }
       }),
       catchError(() => {
         this.restaurants.set([]);
@@ -58,14 +87,26 @@ export class OrgService {
       tap((list) => {
         this.branches.set(Array.isArray(list.branches) ? list.branches : []);
 
+        // Mantener la selección actual si existe en la nueva lista
+        const currentSelection = this.selectedBranchId();
+        const exists = currentSelection && list.branches.some((b) => b.id === currentSelection);
+
+        if (exists) {
+          // Ya está seleccionado y existe, no hacer nada
+          return;
+        }
+
+        // Si no existe la selección actual, buscar en localStorage
         const saved = localStorage.getItem(this.LS_BRANCHKEY(restaurantId));
-        const exists = saved && list.branches.some((b) => b.id === saved);
+        const savedExists = saved && list.branches.some((b) => b.id === saved);
         const fallback = list.branches[0]?.id ?? null;
 
-        const nextBranchId = exists ? (saved as string) : fallback;
+        const nextBranchId = savedExists ? saved : fallback;
         this.selectedBranchId.set(nextBranchId);
 
-        if (nextBranchId) localStorage.setItem(this.LS_BRANCHKEY(restaurantId), nextBranchId);
+        if (nextBranchId) {
+          localStorage.setItem(this.LS_BRANCHKEY(restaurantId), nextBranchId);
+        }
       }),
       catchError(() => {
         this.branches.set([]);
