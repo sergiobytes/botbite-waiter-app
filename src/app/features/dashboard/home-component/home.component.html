@@ -21,7 +21,7 @@
       } @else {
       <button
         class="flex items-center justify-center w-40 h-40 md:w-48 md:h-48 border border-black/10 rounded-xl shadow-sm bg-black text-white hover:opacity-90 disabled:opacity-50 transition"
-        (click)="(generateBranchQr)"
+        (click)="generateBranchQr()"
         [disabled]="generatingQr()"
       >
         @if (!generatingQr()) {
