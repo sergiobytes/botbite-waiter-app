@@ -26,7 +26,7 @@ export const routes: Routes = [
       },
       {
         path: 'categories',
-        canActivate: [superGuard, adminGuard],
+        canActivate: [adminGuard],
         loadComponent: () =>
           import('./features/dashboard/categories-component/categories.component').then(
             (m) => m.CategoriesComponent
