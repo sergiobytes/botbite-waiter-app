@@ -107,21 +107,21 @@ export class CategoriesComponent {
       });
   }
 
-  delete(): void {
+  disable(): void {
     const targetCategory = this.target();
     if (!targetCategory?.id) return;
 
     this.categoriesService
-      .removeCategory(targetCategory.id)
+      .updateCategory(targetCategory.id, { isActive: false })
       .pipe(
         catchError((error) => {
-          console.error('Error deleting category:', error);
-          this.toastService.error('Error al eliminar la categoría');
+          console.error('Error disabling category:', error);
+          this.toastService.error('Error al deshabilitar la categoría');
           return EMPTY;
         })
       )
       .subscribe(() => {
-        this.toastService.success('Categoría eliminada correctamente');
+        this.toastService.success('Categoría deshabilitada correctamente');
         this.confirming.set(false);
         this.target.set(null);
         this.loadCategories();
@@ -133,7 +133,7 @@ export class CategoriesComponent {
     this.form.set({ name: '', isActive: true });
   }
 
-  confirmDelete(category: Category): void {
+  confirmDisable(category: Category): void {
     this.target.set(category);
     this.confirming.set(true);
   }
@@ -146,5 +146,9 @@ export class CategoriesComponent {
   updateFormActive(event: Event): void {
     const input = event.target as HTMLInputElement;
     this.form.update((form) => ({ ...form, isActive: input.checked }));
+  }
+
+  handleSave(): void {
+    this.save();
   }
 }

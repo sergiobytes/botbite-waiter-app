@@ -47,12 +47,14 @@
               >
                 Editar
               </button>
-              <button
-                class="px-3 py-1 border border-black/10 rounded-lg hover:bg-black/5"
-                (click)="confirmDelete(restaurant)"
-              >
-                Eliminar
-              </button>
+              @if (restaurant.isActive) {
+                <button
+                  class="px-3 py-1 border border-black/10 rounded-lg hover:bg-black/5"
+                  (click)="confirmDisable(restaurant)"
+                >
+                  Deshabilitar
+                </button>
+              }
             </div>
           </td>
         </tr>
@@ -127,9 +129,9 @@
   <div class="fixed inset-0 z-50 flex items-center justify-center">
     <div class="absolute inset-0 bg-black/40" (click)="confirming.set(false)"></div>
     <div class="relative bg-white w-full max-w-sm rounded-2xl border border-black/10 p-6 shadow-xl">
-      <h3 class="text-lg font-semibold mb-2">Eliminar restaurante</h3>
+      <h3 class="text-lg font-semibold mb-2">Deshabilitar restaurante</h3>
       <p class="text-sm text-neutral-600 mb-4">
-        ¿Seguro que quieres eliminar "{{ target()?.name }}"?
+        ¿Seguro que quieres deshabilitar "{{ target()?.name }}"?
       </p>
       <div class="flex items-center justify-end gap-3">
         <button
@@ -140,9 +142,9 @@
         </button>
         <button
           class="px-4 py-2 rounded-xl bg-black text-white hover:opacity-90"
-          (click)="delete()"
+          (click)="disable()"
         >
-          Eliminar
+          Deshabilitar
         </button>
       </div>
     </div>

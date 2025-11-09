@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
 import { environment } from '../../../environments/environment';
 import { Category } from './types/category.types';
-import { Observable, tap } from 'rxjs';
+import { Observable, tap, map } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -26,6 +26,7 @@ export class CategoriesService {
         isActive: newCategory.isActive,
       })
       .pipe(
+        map((response) => response),
         tap((category) => {
           this.categories.update((categories) => [...categories, category]);
         })
@@ -34,8 +35,12 @@ export class CategoriesService {
 
   updateCategory(id: number, updatedCategory: Partial<Category>): Observable<Category> {
     return this.http
-      .patch<Category>(`${this.apiUrl}/categories/${id}`, { ...updatedCategory })
+      .patch<Category>(`${this.apiUrl}/categories/${id}`, {
+        name: updatedCategory.name,
+        isActive: updatedCategory.isActive,
+      })
       .pipe(
+        map((response) => response),
         tap((uCategory) => {
           this.categories.update((categories) =>
             categories.map((cat) => (cat.id === id ? uCategory : cat))

@@ -45,12 +45,14 @@
               >
                 Editar
               </button>
-              <button
-                class="px-3 py-1 border border-black/10 rounded-lg hover:bg-black/5"
-                (click)="confirmDelete(category)"
-              >
-                Eliminar
-              </button>
+              @if (category.isActive) {
+                <button
+                  class="px-3 py-1 border border-black/10 rounded-lg hover:bg-black/5"
+                  (click)="confirmDisable(category)"
+                >
+                  Deshabilitar
+                </button>
+              }
             </div>
           </td>
         </tr>
@@ -79,47 +81,48 @@
           {{ mode() === 'create' ? 'Nueva categoría' : 'Editar categoría' }}
         </h2>
 
-        <form (ngSubmit)="save()" class="space-y-4">
-        <div class="space-y-1">
-          <label class="text-sm font-medium">Nombre</label>
-          <input
-            type="text"
-            class="w-full rounded-xl border border-black/10 px-3 py-2"
-            [value]="form().name"
-            (input)="updateFormName($event)"
-            required
-            maxlength="80"
-          />
-        </div>
+        <div class="space-y-4">
+          <div class="space-y-1">
+            <label class="text-sm font-medium">Nombre</label>
+            <input
+              type="text"
+              class="w-full rounded-xl border border-black/10 px-3 py-2"
+              [value]="form().name"
+              (input)="updateFormName($event)"
+              required
+              maxlength="80"
+            />
+          </div>
 
-        <div class="flex items-center gap-2">
-          <input
-            id="active"
-            type="checkbox"
-            [checked]="form().isActive"
-            (change)="updateFormActive($event)"
-            class="rounded"
-          />
-          <label for="active" class="text-sm">Activa</label>
-        </div>
+          <div class="flex items-center gap-2">
+            <input
+              id="active"
+              type="checkbox"
+              [checked]="form().isActive"
+              (change)="updateFormActive($event)"
+              class="rounded"
+            />
+            <label for="active" class="text-sm">Activa</label>
+          </div>
 
-        <div class="flex items-center justify-end gap-3 pt-2">
-          <button
-            type="button"
-            class="px-4 py-2 rounded-xl border border-black/10 hover:bg-black/5"
-            (click)="closeModal()"
-          >
-            Cancelar
-          </button>
-          <button
-            type="submit"
-            class="px-4 py-2 rounded-xl bg-black text-white hover:opacity-90 disabled:opacity-50"
-            [disabled]="saving()"
-          >
-            {{ saving() ? 'Guardando...' : 'Guardar' }}
-          </button>
+          <div class="flex items-center justify-end gap-3 pt-2">
+            <button
+              type="button"
+              class="px-4 py-2 rounded-xl border border-black/10 hover:bg-black/5"
+              (click)="closeModal()"
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              class="px-4 py-2 rounded-xl bg-black text-white hover:opacity-90 disabled:opacity-50"
+              [disabled]="saving()"
+              (click)="handleSave()"
+            >
+              {{ saving() ? 'Guardando...' : 'Guardar' }}
+            </button>
+          </div>
         </div>
-        </form>
       </div>
     </div>
   }
@@ -128,9 +131,9 @@
     <div class="fixed inset-0 z-50 flex items-center justify-center">
       <div class="absolute inset-0 bg-black/40" (click)="confirming.set(false)"></div>
       <div class="relative bg-white w-full max-w-sm rounded-2xl border border-black/10 p-6 shadow-xl">
-        <h3 class="text-lg font-semibold mb-2">Eliminar categoría</h3>
+        <h3 class="text-lg font-semibold mb-2">Deshabilitar categoría</h3>
         <p class="text-sm text-neutral-600 mb-4">
-          ¿Seguro que quieres eliminar "{{ target()?.name }}"?
+          ¿Seguro que quieres deshabilitar "{{ target()?.name }}"?
         </p>
         <div class="flex items-center justify-end gap-3">
           <button
@@ -141,9 +144,9 @@
           </button>
           <button
             class="px-4 py-2 rounded-xl bg-black text-white hover:opacity-90"
-            (click)="delete()"
+            (click)="disable()"
           >
-            Eliminar
+            Deshabilitar
           </button>
         </div>
       </div>

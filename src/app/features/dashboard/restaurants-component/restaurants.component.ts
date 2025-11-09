@@ -86,21 +86,21 @@ export class RestaurantsComponent {
       });
   }
 
-  delete(): void {
+  disable(): void {
     const targetRestaurant = this.target();
     if (!targetRestaurant?.id) return;
 
     this.restaurantsService
-      .removeRestaurant(targetRestaurant.id)
+      .updateRestaurant(targetRestaurant.id, { isActive: false })
       .pipe(
         catchError((error) => {
-          console.error('Error deleting restaurant:', error);
-          this.toastService.error('No se pudo eliminar el restaurante');
+          console.error('Error disabling restaurant:', error);
+          this.toastService.error('No se pudo deshabilitar el restaurante');
           return EMPTY;
         })
       )
       .subscribe(() => {
-        this.toastService.success('Restaurante eliminado correctamente');
+        this.toastService.success('Restaurante deshabilitado correctamente');
         this.confirming.set(false);
         this.target.set(null);
       });
@@ -111,7 +111,7 @@ export class RestaurantsComponent {
     this.form.set({ name: '', isActive: true });
   }
 
-  confirmDelete(restaurant: RestaurantDetails): void {
+  confirmDisable(restaurant: RestaurantDetails): void {
     this.target.set(restaurant);
     this.confirming.set(true);
   }
