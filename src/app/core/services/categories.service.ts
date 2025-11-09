@@ -19,22 +19,29 @@ export class CategoriesService {
       .pipe(tap((categories) => this.categories.set(categories)));
   }
 
-  createCategory(name: string): Observable<Category> {
-    return this.http.post<Category>(`${this.apiUrl}/categories`, { name }).pipe(
-      tap((category) => {
-        this.categories.update((categories) => [...categories, category]);
+  createCategory(newCategory: Partial<Category>): Observable<Category> {
+    return this.http
+      .post<Category>(`${this.apiUrl}/categories`, {
+        name: newCategory.name,
+        isActive: newCategory.isActive,
       })
-    );
+      .pipe(
+        tap((category) => {
+          this.categories.update((categories) => [...categories, category]);
+        })
+      );
   }
 
-  updateCategory(id: number, name: string): Observable<Category> {
-    return this.http.patch<Category>(`${this.apiUrl}/categories/${id}`, { name }).pipe(
-      tap((uCategory) => {
-        this.categories.update((categories) =>
-          categories.map((cat) => (cat.id === id ? uCategory : cat))
-        );
-      })
-    );
+  updateCategory(id: number, updatedCategory: Partial<Category>): Observable<Category> {
+    return this.http
+      .patch<Category>(`${this.apiUrl}/categories/${id}`, { ...updatedCategory })
+      .pipe(
+        tap((uCategory) => {
+          this.categories.update((categories) =>
+            categories.map((cat) => (cat.id === id ? uCategory : cat))
+          );
+        })
+      );
   }
 
   removeCategory(id: number): Observable<void> {
