@@ -12,7 +12,7 @@
       </div>
 
       <nav class="flex-1 overflow-y-auto p-3 space-y-1">
-        @for (item of items; track item.to) {
+        @for (item of items(); track item.to) {
         <a
           [routerLink]="item.to"
           routerLinkActive="bg-white/10"

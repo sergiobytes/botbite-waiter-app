@@ -2,13 +2,13 @@ import { inject } from '@angular/core';
 import { Router, UrlTree, type CanActivateFn } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 
-type UserRole = 'SUPER' | 'ADMIN' | 'USER' | 'CLIENT';
+export type UserRole = 'SUPER' | 'ADMIN' | 'USER' | 'CLIENT';
 
 const ROLE_HIERARCHY: Record<UserRole, number> = {
-  'SUPER': 4,
-  'ADMIN': 3,
-  'USER': 2,
-  'CLIENT': 1
+  SUPER: 4,
+  ADMIN: 3,
+  USER: 2,
+  CLIENT: 1,
 };
 
 function hasRequiredRole(userRoles: string[] | null | undefined, requiredRole: UserRole): boolean {
@@ -16,7 +16,7 @@ function hasRequiredRole(userRoles: string[] | null | undefined, requiredRole: U
 
   const requiredLevel = ROLE_HIERARCHY[requiredRole];
 
-  return userRoles.some(role => {
+  return userRoles.some((role) => {
     const normalizedRole = role.toUpperCase() as UserRole;
     const userLevel = ROLE_HIERARCHY[normalizedRole];
     return userLevel >= requiredLevel;
@@ -35,7 +35,11 @@ export function createRolesGuard(requiredRole: UserRole): CanActivateFn {
       return new Promise<boolean | UrlTree>((resolve) => {
         auth.loadProfile().subscribe({
           next: (profile) =>
-            resolve(hasRequiredRole(profile.roles, requiredRole) ? true : router.navigateByUrl('/dashboard/home')),
+            resolve(
+              hasRequiredRole(profile.roles, requiredRole)
+                ? true
+                : router.navigateByUrl('/dashboard/home')
+            ),
           error: () => resolve(router.navigateByUrl('/login')),
         });
       });
@@ -65,7 +69,7 @@ export function getHighestUserLevel(userRoles: string[] | null | undefined): num
 
   return Math.max(
     ...userRoles
-      .map(role => ROLE_HIERARCHY[role.toUpperCase() as UserRole])
-      .filter(level => level !== undefined)
+      .map((role) => ROLE_HIERARCHY[role.toUpperCase() as UserRole])
+      .filter((level) => level !== undefined)
   );
 }

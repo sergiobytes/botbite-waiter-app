@@ -1,15 +1,24 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  OnInit,
+  signal,
+} from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth.service';
 import { OrgService } from '../../../core/services/org.service';
+import { hasRole, type UserRole } from '../../../core/guards/roles.guard';
 import { catchError, switchMap, EMPTY } from 'rxjs';
 
 type NavItem = {
   label: string;
   icon?: string;
   to: string;
+  requiredRole?: UserRole; // Rol mínimo requerido para mostrar el item
 };
 
 @Component({
@@ -24,10 +33,23 @@ export class ShellComponent implements OnInit {
   protected org = inject(OrgService);
 
   open = signal(false);
-  items: NavItem[] = [
+
+  // Todos los items posibles con sus roles requeridos
+  private allItems: NavItem[] = [
     { label: 'Inicio', to: '/dashboard/home' },
-    { label: 'Categorías', to: '/dashboard/categories' },
+    { label: 'Categorías', to: '/dashboard/categories', requiredRole: 'ADMIN' },
   ];
+
+  // Items filtrados según el rol del usuario
+  items = computed(() => {
+    const user = this.auth.user();
+    if (!user?.roles) return [this.allItems[0]]; // Solo Inicio si no hay roles
+
+    return this.allItems.filter((item) => {
+      if (!item.requiredRole) return true; // Sin restricción
+      return hasRole(user.roles, item.requiredRole);
+    });
+  });
 
   restaurants = this.org.restaurants;
   selectedRestaurantId = this.org.selectedRestaurantId;
