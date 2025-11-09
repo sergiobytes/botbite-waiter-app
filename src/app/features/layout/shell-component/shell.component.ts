@@ -38,6 +38,7 @@ export class ShellComponent implements OnInit {
   private allItems: NavItem[] = [
     { label: 'Inicio', to: '/dashboard/home' },
     { label: 'Categorías', to: '/dashboard/categories', requiredRole: 'ADMIN' },
+    { label: 'Restaurantes', to: '/dashboard/restaurants' },
   ];
 
   // Items filtrados según el rol del usuario

@@ -32,6 +32,13 @@ export const routes: Routes = [
             (m) => m.CategoriesComponent
           ),
       },
+      {
+        path: 'restaurants',
+        loadComponent: () =>
+          import('./features/dashboard/restaurants-component/restaurants.component').then(
+            (m) => m.RestaurantsComponent
+          ),
+      },
     ],
   },
   { path: '', pathMatch: 'full', redirectTo: '/login' },

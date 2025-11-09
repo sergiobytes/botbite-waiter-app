@@ -1,12 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { catchError, EMPTY, finalize } from 'rxjs';
 import { CategoriesService } from '../../../core/services/categories.service';
 import { Category } from '../../../core/services/types/category.types';
-
-type Mode = 'create' | 'edit' | null;
+import { Mode } from '../../../core/services/types/common.types';
 
 interface CategoryForm {
   readonly id?: number;
@@ -16,7 +14,7 @@ interface CategoryForm {
 
 @Component({
   selector: 'app-categories',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule],
   templateUrl: './categories.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -38,29 +36,18 @@ export class CategoriesComponent {
     isActive: true,
   });
 
-  // Computed properties
-  readonly hasCategories = computed(() => this.categoriesList().length > 0);
-  readonly isModalOpen = computed(() => this.mode() !== null);
-
-  // Readonly methods
+  // Track function for ngFor
   readonly trackById = (_: number, category: Category) => category.id;
 
   constructor() {
     this.loadCategories();
   }
 
-  private readonly debouncedReload = (() => {
-    let timeoutId: ReturnType<typeof setTimeout>;
-    return () => {
-      clearTimeout(timeoutId);
-      timeoutId = setTimeout(() => this.loadCategories(), 300);
-    };
-  })();
-
   private loadCategories(): void {
     this.loading.set(true);
 
-    this.categoriesService.getCategories()
+    this.categoriesService
+      .getCategories()
       .pipe(
         catchError((error) => {
           console.error('Error loading categories:', error);
@@ -84,7 +71,7 @@ export class CategoriesComponent {
     this.form.set({
       id: category.id,
       name: category.name,
-      isActive: Boolean(category.isActive)
+      isActive: Boolean(category.isActive),
     });
   }
 
@@ -99,9 +86,10 @@ export class CategoriesComponent {
       isActive: formValue.isActive,
     };
 
-    const operation = this.mode() === 'create'
-      ? this.categoriesService.createCategory(categoryData)
-      : this.categoriesService.updateCategory(formValue.id!, categoryData);
+    const operation =
+      this.mode() === 'create'
+        ? this.categoriesService.createCategory(categoryData)
+        : this.categoriesService.updateCategory(formValue.id!, categoryData);
 
     operation
       .pipe(
@@ -123,7 +111,8 @@ export class CategoriesComponent {
     const targetCategory = this.target();
     if (!targetCategory?.id) return;
 
-    this.categoriesService.removeCategory(targetCategory.id)
+    this.categoriesService
+      .removeCategory(targetCategory.id)
       .pipe(
         catchError((error) => {
           console.error('Error deleting category:', error);
@@ -151,11 +140,11 @@ export class CategoriesComponent {
 
   updateFormName(event: Event): void {
     const input = event.target as HTMLInputElement;
-    this.form.update(form => ({ ...form, name: input.value }));
+    this.form.update((form) => ({ ...form, name: input.value }));
   }
 
   updateFormActive(event: Event): void {
     const input = event.target as HTMLInputElement;
-    this.form.update(form => ({ ...form, isActive: input.checked }));
+    this.form.update((form) => ({ ...form, isActive: input.checked }));
   }
 }

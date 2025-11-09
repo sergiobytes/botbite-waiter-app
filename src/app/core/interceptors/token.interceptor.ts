@@ -11,9 +11,7 @@ export const tokenInterceptor: HttpInterceptorFn = (req, next) => {
 
   const token = auth.accessToken;
 
-  const withAuth = token ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } }) : req;
-
-  return next(withAuth).pipe(
+  const withAuth = token ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } }) : req;  return next(withAuth).pipe(
     catchError((err: HttpErrorResponse) => {
       if (err.status === 401 && auth.refreshToken && !refreshing) {
         refreshing = true;
