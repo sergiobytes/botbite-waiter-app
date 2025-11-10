@@ -3,21 +3,23 @@
   <aside
     class="fixed z-40 inset-y-0 left-0 w-72 bg-black text-white transform transition-transform duration-200 lg:translate-x-0"
     [class.-translate-x-full]="!open()"
-    aria-label="Sidebar"
+    role="navigation"
+    aria-label="Menú principal"
   >
     <div class="h-full flex flex-col">
       <div class="px-5 py-4 border-b border-white/10">
-        <div class="text-2xl font-semibold tracking-tight">BotBite</div>
+        <h1 class="text-2xl font-semibold tracking-tight">BotBite</h1>
         <p class="text-white/60 text-xs mt-1">Panel de administración</p>
       </div>
 
-      <nav class="flex-1 overflow-y-auto p-3 space-y-1">
+      <nav class="flex-1 overflow-y-auto p-3 space-y-1" aria-label="Navegación principal">
         @for (item of items(); track item.to) {
         <a
           [routerLink]="item.to"
           routerLinkActive="bg-white/10"
           class="block rounded-xl px-4 py-3 text-sm hover:bg-white/10 transition"
           (click)="closeOnNavigate()"
+          [attr.aria-label]="'Ir a ' + item.label"
         >
           <span class="align-middle">{{ item.label }}</span>
         </a>
@@ -28,6 +30,7 @@
         <button
           (click)="logout()"
           class="w-full rounded-xl bg-white text-black py-3 hover:opacity-90 transition text-sm"
+          aria-label="Cerrar sesión"
         >
           Cerrar sesión
         </button>
@@ -37,19 +40,25 @@
 
   <!-- OVERLAY para móvil -->
   @if (open()) {
-  <div class="fixed inset-0 bg-black/40 z-30 lg:hidden" (click)="toggle()" aria-hidden="true"></div>
+  <div
+    class="fixed inset-0 bg-black/40 z-30 lg:hidden"
+    (click)="toggle()"
+    aria-hidden="true"
+    role="presentation"
+  ></div>
   }
 
   <!-- CONTENIDO -->
   <div class="flex-1 flex flex-col lg:ml-72">
     <!-- TOPBAR -->
     <header class="sticky top-0 z-20 bg-white/95 backdrop-blur border-b border-black/10">
-      <div class="h-14 px-4 flex items-center justify-between min-w-0">
-        <div class="flex items-center gap-3 min-w-0">
+      <div class="h-14 px-4 flex items-center justify-between gap-3 min-w-0">
+        <div class="flex items-center gap-3 min-w-0 flex-1 overflow-x-auto">
           <button
-            class="lg:hidden rounded-xl border border-black/10 px-3 py-2"
+            class="lg:hidden rounded-xl border border-black/10 px-3 py-2 shrink-0"
             (click)="toggle()"
-            aria-label="Abrir menú"
+            aria-label="Abrir menú de navegación"
+            aria-expanded="{{ open() }}"
           >
             <span class="block w-5 h-0.5 bg-black mb-1"></span>
             <span class="block w-5 h-0.5 bg-black mb-1"></span>
@@ -57,60 +66,69 @@
           </button>
 
           <!-- Selector de restaurantes -->
-          @if (restaurants().length > 0) { @if (restaurants().length > 1) {
-          <label class="sr-only" for="restaurantSelect">Restaurante</label>
-          <div class="flex items-center gap-2">
-            <span class="text-sm font-medium text-neutral-700">Restaurante:</span>
-            <select
-              id="restaurantSelect"
-              [ngModel]="selectedRestaurantId()"
-              (ngModelChange)="onSelectRestaurant($event)"
-              class="text-sm rounded-lg border border-black/10 px-3 py-2 bg-white text-black focus:outline-none focus:ring-2 focus:ring-black/20 max-w-3xs md:max-w-80"
-            >
-              @for (restaurant of restaurants(); track restaurant.id) {
-              <option [value]="restaurant.id">{{ restaurant.name }}</option>
-              }
-            </select>
-          </div>
-          } @else {
-          <div class="text-sm text-neutral-700 truncate">
-            <span class="font-medium">Restaurante: </span>
-            <span class="text-neutral-900">{{ selectedRestaurant()?.name }}</span>
-          </div>
-          } }
+          @if (restaurants().length > 0) {
+            @if (restaurants().length > 1) {
+              <div class="flex items-center gap-2 shrink-0">
+                <label class="text-sm font-medium text-neutral-700 hidden sm:inline" for="restaurantSelect">
+                  Restaurante:
+                </label>
+                <select
+                  id="restaurantSelect"
+                  [ngModel]="selectedRestaurantId()"
+                  (ngModelChange)="onSelectRestaurant($event)"
+                  class="text-sm rounded-lg border border-black/10 px-3 py-2 bg-white text-black focus:outline-none focus:ring-2 focus:ring-black/20 max-w-40 sm:max-w-50 md:max-w-70"
+                  aria-label="Seleccionar restaurante"
+                >
+                  @for (restaurant of restaurants(); track restaurant.id) {
+                  <option [value]="restaurant.id">{{ restaurant.name }}</option>
+                  }
+                </select>
+              </div>
+            } @else {
+              <div class="text-sm text-neutral-700 truncate">
+                <span class="font-medium hidden sm:inline">Restaurante: </span>
+                <span class="text-neutral-900">{{ selectedRestaurant()?.name }}</span>
+              </div>
+            }
+          }
+
           <!-- Selector de sucursales -->
           @if (branches().length > 0) {
-          <span class="text-neutral-300 select-none">|</span>
-          @if (branches().length > 1) {
-          <label class="sr-only" for="branchSelect">Sucursal</label>
-          <div class="flex items-center gap-2">
-            <span class="text-sm font-medium text-neutral-700">Sucursal: </span>
-            <select
-              id="branchSelect"
-              [ngModel]="selectedBranchId()"
-              (ngModelChange)="onSelectBranch($event)"
-              class="text-sm rounded-lg border border-black/10 px-3 py-2 bg-white text-black focus:outline-none focus:ring-2 focus:ring-black/20 max-w-[220px] md:max-w-[280px]"
-            >
-              @for (branch of branches(); track branch.id) {
-              <option [value]="branch.id">{{ branch.name }}</option>
-              }
-            </select>
-          </div>
-          } @else {
-          <div class="text-sm text-neutral-700 truncate">
-            <span class="font-medium">Sucursal: </span>
-            <span class="text-neutral-900">{{ selectedBranch()?.name }}</span>
-          </div>
-          } }
+            <span class="text-neutral-300 select-none hidden sm:inline">|</span>
+            @if (branches().length > 1) {
+              <div class="flex items-center gap-2 shrink-0">
+                <label class="text-sm font-medium text-neutral-700 hidden sm:inline" for="branchSelect">
+                  Sucursal:
+                </label>
+                <select
+                  id="branchSelect"
+                  [ngModel]="selectedBranchId()"
+                  (ngModelChange)="onSelectBranch($event)"
+                  class="text-sm rounded-lg border border-black/10 px-3 py-2 bg-white text-black focus:outline-none focus:ring-2 focus:ring-black/20 max-w-40 sm:max-w-50 md:max-w-70"
+                  aria-label="Seleccionar sucursal"
+                >
+                  @for (branch of branches(); track branch.id) {
+                  <option [value]="branch.id">{{ branch.name }}</option>
+                  }
+                </select>
+              </div>
+            } @else {
+              <div class="text-sm text-neutral-700 truncate">
+                <span class="font-medium hidden sm:inline">Sucursal: </span>
+                <span class="text-neutral-900">{{ selectedBranch()?.name }}</span>
+              </div>
+            }
+          }
         </div>
 
         <!-- USUARIO ACTIVO -->
-        <div class="flex items-center gap-4 min-w-0">
+        <div class="flex items-center gap-2 sm:gap-4 shrink-0">
           <div class="flex items-center gap-2 min-w-0">
             <!-- Email -->
             <span
-              class="hidden sm:inline text-sm text-neutral-700 whitespace-nowrap overflow-hidden text-ellipsis max-w-[200px] md:max-w-[280px] lg:max-w-[360px] xl:max-w-[420px]"
+              class="hidden sm:inline text-sm text-neutral-700 whitespace-nowrap overflow-hidden text-ellipsis max-w-30 md:max-w-45 lg:max-w-60"
               [title]="auth.user()?.email"
+              [attr.aria-label]="'Usuario: ' + auth.user()?.email"
             >
               {{ auth.user()?.email }}
             </span>
@@ -120,6 +138,7 @@
             <span
               [class]="getRoleBadgeClass(userRole)"
               class="border text-xs font-medium px-2 py-0.5 rounded-full whitespace-nowrap transition-colors"
+              [attr.aria-label]="'Rol: ' + userRole"
             >
               {{ userRole }}
             </span>
@@ -128,8 +147,8 @@
 
           <!-- Botón engranaje -->
           <button
-            class="p-2 rounded-full border border-black/10 hover:bg-black/5 transition"
-            title="Editar perfil"
+            class="p-2 rounded-full border border-black/10 hover:bg-black/5 transition shrink-0"
+            aria-label="Editar perfil"
             (click)="goToProfile()"
           >
             <svg
@@ -139,6 +158,7 @@
               stroke="currentColor"
               stroke-width="1.8"
               class="w-5 h-5"
+              aria-hidden="true"
             >
               <path
                 stroke-linecap="round"
@@ -157,7 +177,7 @@
     </header>
 
     <!-- MAIN -->
-    <main class="flex-1 p-4">
+    <main class="flex-1 p-4" role="main">
       <router-outlet></router-outlet>
     </main>
   </div>

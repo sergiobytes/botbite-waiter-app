@@ -2,16 +2,16 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
 import { environment } from '../../../environments/environment';
 import { Category } from './types/category.types';
-import { Observable, tap, map } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
 })
 export class CategoriesService {
-  private http = inject(HttpClient);
-  apiUrl = environment.apiBaseUrl;
+  private readonly http = inject(HttpClient);
+  private readonly apiUrl = environment.apiBaseUrl;
 
-  categories = signal<Category[]>([]);
+  readonly categories = signal<Category[]>([]);
 
   getCategories(): Observable<Category[]> {
     return this.http
@@ -26,7 +26,6 @@ export class CategoriesService {
         isActive: newCategory.isActive,
       })
       .pipe(
-        map((response) => response),
         tap((category) => {
           this.categories.update((categories) => [...categories, category]);
         })
@@ -40,10 +39,9 @@ export class CategoriesService {
         isActive: updatedCategory.isActive,
       })
       .pipe(
-        map((response) => response),
-        tap((uCategory) => {
+        tap((category) => {
           this.categories.update((categories) =>
-            categories.map((cat) => (cat.id === id ? uCategory : cat))
+            categories.map((cat) => (cat.id === id ? category : cat))
           );
         })
       );

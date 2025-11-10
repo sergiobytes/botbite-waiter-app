@@ -4,6 +4,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../../core/services/auth.service';
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
+import { catchError, finalize, of, switchMap } from 'rxjs';
 
 @Component({
   selector: 'app-login-component',
@@ -12,24 +13,20 @@ import { ToastrService } from 'ngx-toastr';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LoginComponent {
-  private fb = inject(FormBuilder);
-  private auth = inject(AuthService);
-  private router = inject(Router);
-  private toast = inject(ToastrService);
+  private readonly fb = inject(FormBuilder);
+  private readonly auth = inject(AuthService);
+  private readonly router = inject(Router);
+  private readonly toast = inject(ToastrService);
 
-  protected date: Date = new Date();
+  protected readonly date = new Date();
+  protected readonly loading = signal(false);
 
-  loading = signal(false);
-
-  form = this.fb.nonNullable.group({
+  protected readonly form = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(6)]],
-    remember: [true],
   });
 
-  canSubmit = computed(() => !this.loading());
-
-  submit() {
+  submit(): void {
     this.form.markAllAsTouched();
 
     if (this.form.invalid || this.loading()) return;
@@ -38,29 +35,35 @@ export class LoginComponent {
 
     const { email, password } = this.form.getRawValue();
 
-    this.auth.login({ email, password }).subscribe({
-      next: () => {
-        this.auth.loadProfile().subscribe({
-          next: () => {
-            this.toast.success('Bienvenido');
-            this.router.navigateByUrl('/dashboard');
-          },
-          error: () => {
-            this.auth.logout();
-            this.toast.error('Error al validar sesión');
-            this.loading.set(false);
-          },
-        });
-      },
-      error: (err) => {
-        const msg =
-          err.error.message ?? err.status === 429
-            ? 'Demasiados intentos. Inténtalo más tarde.'
-            : 'Error en el inicio de sesión. Revisa tus credenciales.';
+    this.auth
+      .login({ email, password })
+      .pipe(
+        switchMap(() => this.auth.loadProfile()),
+        catchError((err) => {
+          this.handleLoginError(err);
+          return of(null);
+        }),
+        finalize(() => this.loading.set(false))
+      )
+      .subscribe((profile) => {
+        if (profile) {
+          this.toast.success('Bienvenido');
+          this.router.navigateByUrl('/dashboard');
+        }
+      });
+  }
 
-        this.toast.error(msg);
-        this.loading.set(false);
-      },
-    });
+  private handleLoginError(err: any): void {
+    if (err.status === 401) {
+      this.auth.logout();
+    }
+
+    const msg =
+      err.error?.message ||
+      (err.status === 429
+        ? 'Demasiados intentos. Inténtalo más tarde.'
+        : 'Error en el inicio de sesión. Revisa tus credenciales.');
+
+    this.toast.error(msg);
   }
 }

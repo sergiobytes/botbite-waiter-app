@@ -1,14 +1,17 @@
 import { Pagination } from './common.types';
 
-export type Restaurant = {
+export interface Restaurant {
   id: string;
   name: string;
-  logoUrl: string;
+  logoUrl?: string | null;
   isActive: boolean;
-};
+  userId: string;
+  createdAt: Date | string;
+  updatedAt: Date | string;
+}
 
-export type RestaurantListResponse = {
+export interface RestaurantListResponse {
   restaurants: Restaurant[];
   total: number;
   pagination: Pagination;
-};
+}

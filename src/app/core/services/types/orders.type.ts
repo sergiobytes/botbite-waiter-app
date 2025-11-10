@@ -1,37 +1,47 @@
 import { Category } from './category.types';
 
-export type Order = {
+export interface Order {
   id: string;
-  isActive: boolean;
   total: number;
   interactions: number;
+  customerId: string;
+  branchId: string;
   orderItems: OrderItem[];
-};
-
-export type OrderItem = {
-  id: string;
   isActive: boolean;
+  createdAt: Date | string;
+  updatedAt: Date | string;
+}
+
+export interface OrderItem {
+  id: string;
   price: number;
-  notes?: string;
+  notes?: string | null;
   menuItem: MenuItem;
-};
-
-export type MenuItem = {
-  id: string;
   isActive: boolean;
+  createdAt: Date | string;
+  updatedAt: Date | string;
+}
+
+export interface MenuItem {
+  id: string;
   price: number;
   category: Category;
   product: Product;
-};
-
-export type Product = {
-  id: string;
   isActive: boolean;
-  name: string;
-  description?: string;
-};
+  createdAt: Date | string;
+  updatedAt: Date | string;
+}
 
-export type OrderListResponse = {
+export interface Product {
+  id: string;
+  name: string;
+  description?: string | null;
+  isActive: boolean;
+  createdAt: Date | string;
+  updatedAt: Date | string;
+}
+
+export interface OrderListResponse {
   orders: Order[];
   message: string;
-};
+}

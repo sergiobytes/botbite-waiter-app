@@ -1,11 +1,10 @@
-import { HttpClient, HttpXsrfTokenExtractor } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { environment } from '../../../environments/environment';
 import { OrgService } from './org.service';
-import { Observable, tap, map } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { Restaurant } from './types/restaurants.types';
 
-// Tipos para las respuestas del backend
 interface RestaurantResponse {
   restaurant: Restaurant;
   message: string;
@@ -15,45 +14,37 @@ interface RestaurantResponse {
   providedIn: 'root',
 })
 export class RestaurantsService {
-  private http = inject(HttpClient);
-  private org = inject(OrgService);
-  apiUrl = environment.apiBaseUrl;
+  private readonly http = inject(HttpClient);
+  private readonly org = inject(OrgService);
+  private readonly apiUrl = environment.apiBaseUrl;
 
   createRestaurant(newRestaurant: Partial<Restaurant>): Observable<Restaurant> {
     return this.http
-      .post<RestaurantResponse>(`${this.apiUrl}/restaurants`, {
-        ...newRestaurant,
-      })
+      .post<RestaurantResponse>(`${this.apiUrl}/restaurants`, newRestaurant)
       .pipe(
         map((response) => {
-          const restaurant = response.restaurant;
-          this.org.restaurants.update((restaurants) => [...restaurants, restaurant]);
-          return restaurant;
+          this.org.restaurants.update((restaurants) => [...restaurants, response.restaurant]);
+          return response.restaurant;
         })
       );
   }
 
   updateRestaurant(id: string, updatedRestaurant: Partial<Restaurant>): Observable<Restaurant> {
-    const url = `${this.apiUrl}/restaurants/${id}`;
-
     return this.http
-      .patch<RestaurantResponse>(url, {
-        ...updatedRestaurant,
-      })
+      .patch<RestaurantResponse>(`${this.apiUrl}/restaurants/${id}`, updatedRestaurant)
       .pipe(
         map((response) => {
-          const restaurant = response.restaurant;
           this.org.restaurants.update((restaurants) =>
-            restaurants.map((res) => (res.id === id ? restaurant : res))
+            restaurants.map((res) => (res.id === id ? response.restaurant : res))
           );
-          return restaurant;
+          return response.restaurant;
         })
       );
   }
 
   removeRestaurant(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/restaurants/${id}`).pipe(
-      tap(() => {
+      map(() => {
         this.org.restaurants.update((restaurants) => restaurants.filter((res) => res.id !== id));
       })
     );

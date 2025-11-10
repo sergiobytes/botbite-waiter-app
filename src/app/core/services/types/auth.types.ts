@@ -1,24 +1,29 @@
-export type LoginDto = {
+export interface LoginDto {
   email: string;
   password: string;
-};
+}
 
-export type LoginRes = {
+export interface LoginRes {
   access_token: string;
   refresh_token?: string;
-  user?: { id: string; email: string; name?: string; roles?: string[] };
-};
+  user?: {
+    id: string;
+    email: string;
+    name?: string;
+    roles?: string[];
+  };
+}
 
-export type ValidateTokenRes = {
+export interface ValidateTokenRes {
   valid: boolean;
   user: {
     email: string;
     roles: string[];
   };
-};
+}
 
-export type UserProfile = {
+export interface UserProfile {
   email: string;
   name?: string;
-  roles?: string[];
-};
+  roles: string[];
+}

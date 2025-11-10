@@ -29,15 +29,10 @@ export class CategoriesComponent {
   readonly target = signal<Category | null>(null);
   readonly confirming = signal(false);
   readonly categoriesList = signal<Category[]>([]);
-
-  // Form state
   readonly form = signal<CategoryForm>({
     name: '',
     isActive: true,
   });
-
-  // Track function for ngFor
-  readonly trackById = (_: number, category: Category) => category.id;
 
   constructor() {
     this.loadCategories();

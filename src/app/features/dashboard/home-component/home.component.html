@@ -3,8 +3,10 @@
     class="rounded-xl border border-black/10 p-6 bg-linear-to-br from-white to-neutral-50 shadow-sm flex flex-col md:flex-row items-center md:items-start justify-between gap-6"
   >
     <div class="text-center md:text-left md:flex-1">
-      <h1 class="text-3xl font-semibold text-black tracking-tight mb-2">¡Hola de nuevo! 👋</h1>
-      <p class="text-neutral-600 max-w-2xl leading-relaxed">
+      <h1 class="text-2xl sm:text-3xl font-semibold text-black tracking-tight mb-2">
+        ¡Hola de nuevo! 👋
+      </h1>
+      <p class="text-neutral-600 max-w-2xl leading-relaxed text-sm sm:text-base">
         Bienvenido al panel de administración de
         <span class="font-medium text-black">BotBite</span>. Aquí podrás gestionar tus pedidos,
         menús y sucursales. Usa el menú lateral para comenzar.
@@ -15,21 +17,23 @@
       @if (branchQrUrl(); as qrUrl) {
       <img
         [src]="qrUrl"
-        alt="Codigo QR de sucursal"
+        alt="Código QR de la sucursal {{ org.selectedBranch()?.name || 'actual' }}"
         class="w-40 h-40 md:w-48 md:h-48 object-contain border border-black/10 rounded-xl shadow-sm"
       />
       <button
-        class="rounded-xl border border-black/10 px-4 py-2 bg-white text-black hover:bg-black/5 disabled:opacity-50 transition"
+        class="rounded-xl border border-black/10 px-4 py-2 bg-white text-black hover:bg-black/5 disabled:opacity-50 transition text-sm"
         (click)="downloadBranchQr()"
         [disabled]="downloadingQr()"
+        [attr.aria-label]="downloadingQr() ? 'Descargando QR' : 'Descargar código QR'"
       >
         {{ downloadingQr() ? 'Descargando...' : 'Descargar QR' }}
       </button>
       } @else {
       <button
-        class="flex items-center justify-center w-40 h-40 md:w-48 md:h-48 border border-black/10 rounded-xl shadow-sm bg-black text-white hover:opacity-90 disabled:opacity-50 transition"
+        class="flex items-center justify-center w-40 h-40 md:w-48 md:h-48 border border-black/10 rounded-xl shadow-sm bg-black text-white hover:opacity-90 disabled:opacity-50 transition text-sm"
         (click)="generateBranchQr()"
         [disabled]="generatingQr()"
+        [attr.aria-label]="generatingQr() ? 'Generando QR' : 'Generar código QR'"
       >
         {{ generatingQr() ? 'Generando...' : 'Generar QR' }}
       </button>
@@ -37,20 +41,20 @@
     </div>
   </section>
 
-  <section class="grid md:grid-cols-3 gap-4">
+  <section class="grid sm:grid-cols-2 md:grid-cols-3 gap-4" role="region" aria-label="Métricas del día">
     @for (metric of metrics(); track metric.label) {
-    <div class="rounded-2xl border border-black/10 p-5">
+    <div class="rounded-2xl border border-black/10 p-5" role="article">
       <p class="text-sm text-neutral-500">{{ metric.label }}</p>
       <div class="mt-2">
         @if (!loadingToday()) {
-        <p class="text-3xl font-semibold text-black">{{ metric.value }}</p>
+        <p class="text-2xl sm:text-3xl font-semibold text-black" [attr.aria-label]="metric.label + ': ' + metric.value">
+          {{ metric.value }}
+        </p>
         } @else {
-        <div class="h-8 w-16 bg-black/10 rounded animate-pulse"></div>
+        <div class="h-8 w-16 bg-black/10 rounded animate-pulse" aria-label="Cargando..."></div>
         }
       </div>
     </div>
     }
   </section>
-
-  <section class="hidden rounded-2xl border border-black/10 p-5"></section>
 </div>

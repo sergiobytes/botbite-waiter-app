@@ -5,11 +5,14 @@ import { OrdersService } from '../../../core/services/orders.service';
 import { todayYYYYMMDD } from '../../../shared/utils/date.utils';
 import { BranchesService } from '../../../core/services/branches.service';
 import { ToastrService } from 'ngx-toastr';
+import { Order } from '../../../core/services/types/orders.type';
+import { Branch } from '../../../core/services/types/branches.types';
+import { catchError, finalize, of } from 'rxjs';
 
-type MetricCard = {
+interface MetricCard {
   label: string;
   value: string | number;
-};
+}
 
 @Component({
   selector: 'app-home',
@@ -18,33 +21,33 @@ type MetricCard = {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HomeComponent {
-  private org = inject(OrgService);
-  private orders = inject(OrdersService);
-  private branches = inject(BranchesService);
-  private toast = inject(ToastrService);
+  protected readonly org = inject(OrgService);
+  private readonly orders = inject(OrdersService);
+  private readonly branches = inject(BranchesService);
+  private readonly toast = inject(ToastrService);
 
-  loadingToday = signal<boolean>(false);
-  generatingQr = signal<boolean>(false);
-  downloadingQr = signal<boolean>(false);
+  protected readonly loadingToday = signal<boolean>(false);
+  protected readonly generatingQr = signal<boolean>(false);
+  protected readonly downloadingQr = signal<boolean>(false);
 
-  todayCount = signal<number>(0);
-  avgInteractions = signal<number>(0);
-  availableMessages = signal<number>(0);
-  branchQrUrl = signal<string>('');
+  private readonly todayCount = signal<number>(0);
+  private readonly avgInteractions = signal<number>(0);
+  protected readonly availableMessages = signal<number>(0);
+  protected readonly branchQrUrl = signal<string>('');
 
-  metrics = computed<MetricCard[]>(() => [
+  protected readonly metrics = computed<MetricCard[]>(() => [
     {
       label: 'Órdenes totales',
-      value: this.todayCount()
+      value: this.todayCount(),
     },
     {
       label: 'Mensajes disponibles',
-      value: this.availableMessages()
+      value: this.availableMessages(),
     },
     {
       label: 'Interacciones promedio con el asistente',
-      value: this.avgInteractions()
-    }
+      value: this.avgInteractions(),
+    },
   ]);
 
   constructor() {
@@ -52,11 +55,11 @@ export class HomeComponent {
       const branchId = this.org.selectedBranchId();
 
       if (!branchId) {
-        this.todayCount.set(0);
-        this.availableMessages.set(0);
+        this.resetMetrics();
         this.branchQrUrl.set('');
         return;
       }
+
       this.fetchToday(branchId);
       this.availableMessages.set(this.org.selectedBranch()?.availableMessages ?? 0);
       this.branchQrUrl.set(this.org.selectedBranch()?.qrUrl ?? '');
@@ -67,19 +70,21 @@ export class HomeComponent {
     this.loadingToday.set(true);
 
     const date = todayYYYYMMDD();
-    this.orders.getAll({ branchId, date }).subscribe({
-      next: (orders) => {
+    this.orders
+      .getAll({ branchId, date })
+      .pipe(
+        catchError(() => {
+          this.resetMetrics();
+          return of([]);
+        }),
+        finalize(() => this.loadingToday.set(false))
+      )
+      .subscribe((orders) => {
         this.updateMetrics(orders);
-        this.loadingToday.set(false);
-      },
-      error: () => {
-        this.resetMetrics();
-        this.loadingToday.set(false);
-      },
-    });
+      });
   }
 
-  private updateMetrics(orders: any[]): void {
+  private updateMetrics(orders: Order[]): void {
     this.todayCount.set(orders.length);
 
     if (orders.length > 0) {
@@ -93,6 +98,7 @@ export class HomeComponent {
   private resetMetrics(): void {
     this.todayCount.set(0);
     this.avgInteractions.set(0);
+    this.availableMessages.set(0);
   }
 
   generateBranchQr(): void {
@@ -104,22 +110,24 @@ export class HomeComponent {
 
     this.generatingQr.set(true);
 
-    this.branches.generateQr(restaurantId!, branchId!).subscribe({
-      next: ({ qrUrl }) => {
+    this.branches
+      .generateQr(restaurantId!, branchId!)
+      .pipe(
+        catchError(() => {
+          this.toast.error('Error al generar el QR');
+          return of({ qrUrl: '' });
+        }),
+        finalize(() => this.generatingQr.set(false))
+      )
+      .subscribe(({ qrUrl }) => {
         this.handleQrGenerated(qrUrl);
-        this.generatingQr.set(false);
-      },
-      error: () => {
-        this.toast.error('Error al generar el QR');
-        this.generatingQr.set(false);
-      },
-    });
+      });
   }
 
-  private getSelectedIds() {
+  private getSelectedIds(): { restaurantId: string | null; branchId: string | null } {
     return {
       restaurantId: this.org.selectedRestaurantId(),
-      branchId: this.org.selectedBranchId()
+      branchId: this.org.selectedBranchId(),
     };
   }
 
@@ -164,7 +172,7 @@ export class HomeComponent {
     }
   }
 
-  private async downloadQrDirectly(url: string, branch: any): Promise<void> {
+  private async downloadQrDirectly(url: string, branch: Branch): Promise<void> {
     const response = await fetch(url, { mode: 'cors' });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
@@ -174,9 +182,9 @@ export class HomeComponent {
     this.triggerDownload(blob, filename);
   }
 
-  private generateQrFilename(branch: any, blob: Blob): string {
+  private generateQrFilename(branch: Branch, blob: Blob): string {
     const ext = (blob.type?.split('/')?.[1] || 'png').replace('+xml', '');
-    const sanitizedName = (branch.name || 'sucursal')
+    const sanitizedName = branch.name
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/(^-|-$)/g, '');
@@ -198,12 +206,7 @@ export class HomeComponent {
   }
 
   private handleDownloadFallback(url: string): void {
-    const opened = window.open(url, '_blank');
-
-    if (opened) {
-      this.toast.info('Abriendo imagen en una nueva pestaña para descargar manual.');
-    } else {
-      this.toast.error('No se pudo descargar el QR.');
-    }
+    this.toast.info('No se pudo descargar automáticamente. Abriendo en nueva pestaña.');
+    window.open(url, '_blank');
   }
 }

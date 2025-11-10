@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { computed, effect, inject, Injectable, signal } from '@angular/core';
 import { environment } from '../../../environments/environment';
-import { catchError, of, tap } from 'rxjs';
+import { catchError, finalize, of, tap } from 'rxjs';
 import { Restaurant, RestaurantListResponse } from './types/restaurants.types';
 import { Branch, BranchListResponse } from './types/branches.types';
 
@@ -9,26 +9,41 @@ import { Branch, BranchListResponse } from './types/branches.types';
   providedIn: 'root',
 })
 export class OrgService {
-  private http = inject(HttpClient);
-  private LS_RESTAURANT = 'botbite.restaurantId';
-  private LS_BRANCHKEY = (restaurantId: string) => `botbite.branchId::${restaurantId}`;
-  apiUrl = environment.apiBaseUrl;
+  private readonly http = inject(HttpClient);
+  private readonly LS_RESTAURANT = 'botbite.restaurantId';
+  private readonly LS_BRANCHKEY = (restaurantId: string) => `botbite.branchId::${restaurantId}`;
+  private readonly apiUrl = environment.apiBaseUrl;
 
-  restaurants = signal<Restaurant[]>([]);
-  selectedRestaurantId = signal<string | null>(null);
-  selectedRestaurant = computed(
+  readonly restaurants = signal<Restaurant[]>([]);
+  readonly selectedRestaurantId = signal<string | null>(null);
+  readonly selectedRestaurant = computed(
     () => this.restaurants()?.find((r) => r.id === this.selectedRestaurantId()) ?? null
   );
 
-  branches = signal<Branch[]>([]);
-  selectedBranchId = signal<string | null>(null);
-  selectedBranch = computed(
+  readonly branches = signal<Branch[]>([]);
+  readonly selectedBranchId = signal<string | null>(null);
+  readonly selectedBranch = computed(
     () => this.branches().find((b) => b.id === this.selectedBranchId()) ?? null
   );
 
+  readonly loadingRestaurants = signal<boolean>(false);
+  readonly loadingBranches = signal<boolean>(false);
+
   constructor() {
-    // Inicializar desde localStorage al crear el servicio
     this.initializeFromStorage();
+
+    // Effect para cargar branches automáticamente cuando cambia el restaurante
+    effect(() => {
+      const rid = this.selectedRestaurantId();
+
+      if (!rid) {
+        this.branches.set([]);
+        this.selectedBranchId.set(null);
+        return;
+      }
+
+      this.loadBranches(rid).subscribe();
+    });
   }
 
   private initializeFromStorage(): void {
@@ -44,6 +59,8 @@ export class OrgService {
   }
 
   loadRestaurants() {
+    this.loadingRestaurants.set(true);
+
     return this.http.get<RestaurantListResponse>(`${this.apiUrl}/restaurants`).pipe(
       tap((list) => {
         this.restaurants.set(Array.isArray(list.restaurants) ? list.restaurants : []);
@@ -53,7 +70,6 @@ export class OrgService {
         const exists = currentSelection && list.restaurants.some((r) => r.id === currentSelection);
 
         if (exists) {
-          // Ya está seleccionado y existe, no hacer nada
           return;
         }
 
@@ -69,23 +85,38 @@ export class OrgService {
           localStorage.setItem(this.LS_RESTAURANT, newSelection);
         }
       }),
-      catchError(() => {
+      catchError((error) => {
+        console.error('Error loading restaurants:', error);
         this.restaurants.set([]);
         this.selectedRestaurantId.set(null);
-        return of([]);
-      })
+        return of({ restaurants: [], total: 0, pagination: {} as any });
+      }),
+      finalize(() => this.loadingRestaurants.set(false))
     );
   }
 
-  selectRestaurant(id: string | null) {
+  selectRestaurant(id: string | null): void {
     this.selectedRestaurantId.set(id);
-    if (id) localStorage.setItem(this.LS_RESTAURANT, id);
-    else localStorage.removeItem(this.LS_RESTAURANT);
+    if (id) {
+      localStorage.setItem(this.LS_RESTAURANT, id);
+    } else {
+      localStorage.removeItem(this.LS_RESTAURANT);
+    }
   }
 
-  loadBranches(restaurantId: string) {
+  loadBranches(
+    restaurantId: string,
+    params?: {
+      search?: string;
+      isActive?: boolean;
+      limit?: number;
+      offset?: number;
+    }
+  ) {
+    this.loadingBranches.set(true);
+
     return this.http
-      .get<BranchListResponse>(`${this.apiUrl}/branches/restaurant/${restaurantId}`)
+      .get<BranchListResponse>(`${this.apiUrl}/branches/restaurant/${restaurantId}`, { params })
       .pipe(
         tap((list) => {
           this.branches.set(Array.isArray(list.branches) ? list.branches : []);
@@ -95,7 +126,6 @@ export class OrgService {
           const exists = currentSelection && list.branches.some((b) => b.id === currentSelection);
 
           if (exists) {
-            // Ya está seleccionado y existe, no hacer nada
             return;
           }
 
@@ -111,22 +141,28 @@ export class OrgService {
             localStorage.setItem(this.LS_BRANCHKEY(restaurantId), nextBranchId);
           }
         }),
-        catchError(() => {
+        catchError((error) => {
+          console.error('Error loading branches:', error);
           this.branches.set([]);
           this.selectedBranchId.set(null);
-          return of([]);
-        })
+          return of({ branches: [], total: 0 });
+        }),
+        finalize(() => this.loadingBranches.set(false))
       );
   }
 
-  selectBranch(branchId: string | null) {
+  selectBranch(branchId: string | null): void {
     const rid = this.selectedRestaurantId();
     this.selectedBranchId.set(branchId);
-    if (rid && branchId) localStorage.setItem(this.LS_BRANCHKEY(rid), branchId);
-    else if (rid && !branchId) localStorage.removeItem(this.LS_BRANCHKEY(rid));
+
+    if (rid && branchId) {
+      localStorage.setItem(this.LS_BRANCHKEY(rid), branchId);
+    } else if (rid && !branchId) {
+      localStorage.removeItem(this.LS_BRANCHKEY(rid));
+    }
   }
 
-  updateSelectedBranch(patch: Partial<Branch>) {
+  updateSelectedBranch(patch: Partial<Branch>): void {
     const current = this.selectedBranch();
     if (!current) return;
 
@@ -134,17 +170,5 @@ export class OrgService {
     const next = this.branches().map((b) => (b.id === updated.id ? updated : b));
 
     this.branches.set(next);
-    this.selectedBranchId.set(updated.id);
   }
-
-  _watchRestaurant = effect(() => {
-    const rid = this.selectedRestaurantId();
-    if (!rid) {
-      this.branches.set([]);
-      this.selectedBranchId.set(null);
-      return;
-    }
-
-    this.loadBranches(rid).subscribe();
-  });
 }

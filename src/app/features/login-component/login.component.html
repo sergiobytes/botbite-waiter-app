@@ -44,7 +44,7 @@
 
         <button
           type="submit"
-          [disabled]="!canSubmit()"
+          [disabled]="form.invalid || loading()"
           class="w-full rounded-xl bg-black text-white py-3 disabled:opacity-50 transition hover:opacity-90"
         >
           @if (!loading()) {

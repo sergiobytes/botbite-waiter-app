@@ -1,21 +1,20 @@
 <div class="space-y-6">
-  <div class="flex items-center justify-between">
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
     <div>
       <h1 class="text-2xl font-semibold">Categorías</h1>
       <p class="text-sm text-neutral-600">Administra las categorías de los productos</p>
     </div>
 
     <button
-      class="rounded-xl bg-black text-white px-4 py-2 hover:opacity-90 disabled:opacity-50"
+      class="rounded-xl bg-black text-white px-4 py-2 hover:opacity-90 disabled:opacity-50 self-start sm:self-auto"
       (click)="openCreate()"
-      title="Crear categoría"
-    >
+      aria-label="Crear nueva categoría">
       Nueva categoría
     </button>
   </div>
 
-  <div class="rounded-2xl border border-black/10 overflow-hidden">
-    <table class="w-full text-sm">
+  <div class="rounded-2xl border border-black/10 overflow-hidden overflow-x-auto">
+    <table class="w-full text-sm min-w-[600px]">
       <thead class="bg-neutral-50 text-neutral-600">
         <tr>
           <th class="text-left font-medium px-4 py-3">Nombre</th>
@@ -28,126 +27,62 @@
         <tr class="border-t border-black/10">
           <td class="px-4 py-3">{{ category.name }}</td>
           <td class="px-4 py-3">
-            <span
-              [class]="category.isActive
-                ? 'bg-green-100 text-green-800 border-green-200'
-                : 'bg-neutral-100 text-neutral-700 border-neutral-200'"
-              class="text-xs border px-2 py-0.5 rounded-full"
-            >
+            <span [class]="category.isActive ? 'bg-green-100 text-green-800 border-green-200' : 'bg-neutral-100 text-neutral-700 border-neutral-200'" class="text-xs border px-2 py-0.5 rounded-full">
               {{ category.isActive ? 'Activa' : 'Inactiva' }}
             </span>
           </td>
           <td class="px-4 py-3">
             <div class="flex items-center gap-2 justify-end">
-              <button
-                class="px-3 py-1 border border-black/10 rounded-lg hover:bg-black/5"
-                (click)="openEdit(category)"
-              >
-                Editar
-              </button>
+              <button class="px-3 py-1 border border-black/10 rounded-lg hover:bg-black/5" (click)="openEdit(category)" [attr.aria-label]="'Editar categoría ' + category.name">Editar</button>
               @if (category.isActive) {
-                <button
-                  class="px-3 py-1 border border-black/10 rounded-lg hover:bg-black/5"
-                  (click)="confirmDisable(category)"
-                >
-                  Deshabilitar
-                </button>
+                <button class="px-3 py-1 border border-black/10 rounded-lg hover:bg-black/5" (click)="confirmDisable(category)" [attr.aria-label]="'Deshabilitar categoría ' + category.name">Deshabilitar</button>
               }
             </div>
           </td>
         </tr>
         }
         @if (!loading() && categoriesList().length === 0) {
-          <tr>
-            <td colspan="3" class="px-4 py-6 text-center text-neutral-600">No hay categorías.</td>
-          </tr>
+          <tr><td colspan="3" class="px-4 py-6 text-center text-neutral-600">No hay categorías.</td></tr>
         }
         @if (loading()) {
-          <tr>
-            <td colspan="3" class="px-4 py-6">
-              <div class="h-6 w-full rounded bg-black/10 animate-pulse"></div>
-            </td>
-          </tr>
+          <tr><td colspan="3" class="px-4 py-6"><div class="h-6 w-full rounded bg-black/10 animate-pulse"></div></td></tr>
         }
       </tbody>
     </table>
   </div>
 
   @if (mode()) {
-    <div class="fixed inset-0 z-50 flex items-center justify-center">
-      <div class="absolute inset-0 bg-black/40" (click)="closeModal()"></div>
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" [attr.aria-label]="mode() === 'create' ? 'Crear nueva categoría' : 'Editar categoría'">
+      <div class="absolute inset-0 bg-black/40" (click)="closeModal()" aria-hidden="true"></div>
       <div class="relative bg-white w-full max-w-lg rounded-2xl border border-black/10 p-6 shadow-xl">
-        <h2 class="text-lg font-semibold mb-4">
-          {{ mode() === 'create' ? 'Nueva categoría' : 'Editar categoría' }}
-        </h2>
-
-        <div class="space-y-4">
+        <h2 class="text-lg font-semibold mb-4">{{ mode() === 'create' ? 'Nueva categoría' : 'Editar categoría' }}</h2>
+        <form (submit)="$event.preventDefault(); handleSave();" class="space-y-4">
           <div class="space-y-1">
-            <label class="text-sm font-medium">Nombre</label>
-            <input
-              type="text"
-              class="w-full rounded-xl border border-black/10 px-3 py-2"
-              [value]="form().name"
-              (input)="updateFormName($event)"
-              required
-              maxlength="80"
-            />
+            <label for="categoryName" class="text-sm font-medium">Nombre</label>
+            <input id="categoryName" type="text" class="w-full rounded-xl border border-black/10 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black/20" [value]="form().name" (input)="updateFormName($event)" required maxlength="80" aria-required="true" />
           </div>
-
           <div class="flex items-center gap-2">
-            <input
-              id="active"
-              type="checkbox"
-              [checked]="form().isActive"
-              (change)="updateFormActive($event)"
-              class="rounded"
-            />
-            <label for="active" class="text-sm">Activa</label>
+            <input id="activeCategory" type="checkbox" [checked]="form().isActive" (change)="updateFormActive($event)" class="rounded" />
+            <label for="activeCategory" class="text-sm">Activa</label>
           </div>
-
           <div class="flex items-center justify-end gap-3 pt-2">
-            <button
-              type="button"
-              class="px-4 py-2 rounded-xl border border-black/10 hover:bg-black/5"
-              (click)="closeModal()"
-            >
-              Cancelar
-            </button>
-            <button
-              type="button"
-              class="px-4 py-2 rounded-xl bg-black text-white hover:opacity-90 disabled:opacity-50"
-              [disabled]="saving()"
-              (click)="handleSave()"
-            >
-              {{ saving() ? 'Guardando...' : 'Guardar' }}
-            </button>
+            <button type="button" class="px-4 py-2 rounded-xl border border-black/10 hover:bg-black/5" (click)="closeModal()" aria-label="Cancelar">Cancelar</button>
+            <button type="submit" class="px-4 py-2 rounded-xl bg-black text-white hover:opacity-90 disabled:opacity-50" [disabled]="saving()" [attr.aria-label]="saving() ? 'Guardando' : 'Guardar categoría'">{{ saving() ? 'Guardando...' : 'Guardar' }}</button>
           </div>
-        </div>
+        </form>
       </div>
     </div>
   }
 
   @if (confirming()) {
-    <div class="fixed inset-0 z-50 flex items-center justify-center">
-      <div class="absolute inset-0 bg-black/40" (click)="confirming.set(false)"></div>
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="confirmDialogTitle">
+      <div class="absolute inset-0 bg-black/40" (click)="confirming.set(false)" aria-hidden="true"></div>
       <div class="relative bg-white w-full max-w-sm rounded-2xl border border-black/10 p-6 shadow-xl">
-        <h3 class="text-lg font-semibold mb-2">Deshabilitar categoría</h3>
-        <p class="text-sm text-neutral-600 mb-4">
-          ¿Seguro que quieres deshabilitar "{{ target()?.name }}"?
-        </p>
+        <h3 id="confirmDialogTitle" class="text-lg font-semibold mb-2">Deshabilitar categoría</h3>
+        <p class="text-sm text-neutral-600 mb-4">¿Seguro que quieres deshabilitar "{{ target()?.name }}"?</p>
         <div class="flex items-center justify-end gap-3">
-          <button
-            class="px-4 py-2 rounded-xl border border-black/10 hover:bg-black/5"
-            (click)="confirming.set(false)"
-          >
-            Cancelar
-          </button>
-          <button
-            class="px-4 py-2 rounded-xl bg-black text-white hover:opacity-90"
-            (click)="disable()"
-          >
-            Deshabilitar
-          </button>
+          <button class="px-4 py-2 rounded-xl border border-black/10 hover:bg-black/5" (click)="confirming.set(false)" aria-label="Cancelar">Cancelar</button>
+          <button class="px-4 py-2 rounded-xl bg-black text-white hover:opacity-90" (click)="disable()" aria-label="Confirmar deshabilitar">Deshabilitar</button>
         </div>
       </div>
     </div>

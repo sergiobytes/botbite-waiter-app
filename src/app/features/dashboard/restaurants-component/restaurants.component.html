@@ -1,21 +1,21 @@
 <div class="space-y-6">
-  <div class="flex items-center justify-between">
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
     <div>
       <h1 class="text-2xl font-semibold">Restaurantes</h1>
       <p class="text-sm text-neutral-600">Administra tus restaurantes aquí</p>
     </div>
 
     <button
-      class="rounded-xl bg-black text-white px-4 py-2 hover:opacity-90 disabled:opacity-50"
+      class="rounded-xl bg-black text-white px-4 py-2 hover:opacity-90 disabled:opacity-50 self-start sm:self-auto"
       (click)="openCreate()"
-      title="Crear restaurante"
+      aria-label="Crear nuevo restaurante"
     >
       Nuevo restaurante
     </button>
   </div>
 
-  <div class="rounded-2xl border border-black/10 overflow-hidden">
-    <table class="w-full text-sm">
+  <div class="rounded-2xl border border-black/10 overflow-hidden overflow-x-auto">
+    <table class="w-full text-sm min-w-[600px]">
       <thead class="bg-neutral-50 text-neutral-600">
         <tr>
           <th class="text-left font-medium px-4 py-3">Nombre</th>
@@ -44,6 +44,7 @@
               <button
                 class="px-3 py-1 border border-black/10 rounded-lg hover:bg-black/5"
                 (click)="openEdit(restaurant)"
+                [attr.aria-label]="'Editar restaurante ' + restaurant.name"
               >
                 Editar
               </button>
@@ -51,6 +52,7 @@
                 <button
                   class="px-3 py-1 border border-black/10 rounded-lg hover:bg-black/5"
                   (click)="confirmDisable(restaurant)"
+                  [attr.aria-label]="'Deshabilitar restaurante ' + restaurant.name"
                 >
                   Deshabilitar
                 </button>
@@ -74,23 +76,25 @@
   </div>
 
   @if (mode()) {
-  <div class="fixed inset-0 z-50 flex items-center justify-center">
-    <div class="absolute inset-0 bg-black/40" (click)="closeModal()"></div>
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" [attr.aria-label]="mode() === 'create' ? 'Crear nuevo restaurante' : 'Editar restaurante'">
+    <div class="absolute inset-0 bg-black/40" (click)="closeModal()" aria-hidden="true"></div>
     <div class="relative bg-white w-full max-w-lg rounded-2xl border border-black/10 p-6 shadow-xl">
       <h2 class="text-lg font-semibold mb-4">
         {{ mode() === 'create' ? 'Nuevo restaurante' : 'Editar restaurante' }}
       </h2>
 
-      <div class="space-y-4">
+      <form (submit)="$event.preventDefault(); handleSave();" class="space-y-4">
         <div class="space-y-1">
-          <label class="text-sm font-medium">Nombre</label>
+          <label for="restaurantName" class="text-sm font-medium">Nombre</label>
           <input
+            id="restaurantName"
             type="text"
-            class="w-full rounded-xl border border-black/10 px-3 py-2"
+            class="w-full rounded-xl border border-black/10 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black/20"
             [value]="form().name"
             (input)="updateFormName($event)"
             required
             maxlength="80"
+            aria-required="true"
           />
         </div>
 
@@ -110,26 +114,29 @@
             type="button"
             class="px-4 py-2 rounded-xl border border-black/10 hover:bg-black/5"
             (click)="closeModal()"
+            aria-label="Cancelar"
           >
             Cancelar
           </button>
           <button
-            type="button"
+            type="submit"
             class="px-4 py-2 rounded-xl bg-black text-white hover:opacity-90 disabled:opacity-50"
             [disabled]="saving()"
-            (click)="handleSave()"
+            [attr.aria-label]="saving() ? 'Guardando' : 'Guardar restaurante'"
           >
             {{ saving() ? 'Guardando...' : 'Guardar' }}
           </button>
         </div>
-      </div>
+      </form>
     </div>
   </div>
-  } @if (confirming()) {
-  <div class="fixed inset-0 z-50 flex items-center justify-center">
-    <div class="absolute inset-0 bg-black/40" (click)="confirming.set(false)"></div>
+  }
+
+  @if (confirming()) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="confirmDialogTitle">
+    <div class="absolute inset-0 bg-black/40" (click)="confirming.set(false)" aria-hidden="true"></div>
     <div class="relative bg-white w-full max-w-sm rounded-2xl border border-black/10 p-6 shadow-xl">
-      <h3 class="text-lg font-semibold mb-2">Deshabilitar restaurante</h3>
+      <h3 id="confirmDialogTitle" class="text-lg font-semibold mb-2">Deshabilitar restaurante</h3>
       <p class="text-sm text-neutral-600 mb-4">
         ¿Seguro que quieres deshabilitar "{{ target()?.name }}"?
       </p>
@@ -137,12 +144,14 @@
         <button
           class="px-4 py-2 rounded-xl border border-black/10 hover:bg-black/5"
           (click)="confirming.set(false)"
+          aria-label="Cancelar"
         >
           Cancelar
         </button>
         <button
           class="px-4 py-2 rounded-xl bg-black text-white hover:opacity-90"
           (click)="disable()"
+          aria-label="Confirmar deshabilitar"
         >
           Deshabilitar
         </button>
