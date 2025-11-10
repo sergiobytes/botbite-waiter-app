@@ -7,8 +7,8 @@ export type UserRole = 'SUPER' | 'ADMIN' | 'USER' | 'CLIENT';
 const ROLE_HIERARCHY: Record<UserRole, number> = {
   SUPER: 4,
   ADMIN: 3,
-  USER: 2,
-  CLIENT: 1,
+  CLIENT: 2,
+  USER: 1,
 };
 
 function hasRequiredRole(userRoles: string[] | null | undefined, requiredRole: UserRole): boolean {
