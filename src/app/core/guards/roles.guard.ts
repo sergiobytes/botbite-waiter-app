@@ -55,21 +55,7 @@ export const adminGuard = createRolesGuard('ADMIN');
 export const userGuard = createRolesGuard('USER');
 export const clientGuard = createRolesGuard('CLIENT');
 
-// Guard legacy (mantener compatibilidad) - requiere ADMIN o superior
-export const rolesGuardGuard = adminGuard;
-
 // Función helper para verificar roles específicos (uso en componentes)
-export function hasRole(userRoles: string[] | null | undefined, role: UserRole): boolean {
+export function hasRole(userRoles: string[], role: UserRole): boolean {
   return hasRequiredRole(userRoles, role);
-}
-
-// Función helper para obtener el nivel más alto del usuario
-export function getHighestUserLevel(userRoles: string[] | null | undefined): number {
-  if (!userRoles?.length) return 0;
-
-  return Math.max(
-    ...userRoles
-      .map((role) => ROLE_HIERARCHY[role.toUpperCase() as UserRole])
-      .filter((level) => level !== undefined)
-  );
 }
