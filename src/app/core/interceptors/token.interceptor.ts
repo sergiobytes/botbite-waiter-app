@@ -2,48 +2,64 @@ import { HttpClient, HttpErrorResponse, type HttpInterceptorFn } from '@angular/
 import { inject } from '@angular/core';
 import { AuthService } from '../services/auth.service';
 import { catchError, switchMap, throwError } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
-let refreshing = false;
+let isRefreshing = false;
+
+interface RefreshTokenResponse {
+  accessToken: string;
+  refreshToken?: string;
+}
 
 export const tokenInterceptor: HttpInterceptorFn = (req, next) => {
   const auth = inject(AuthService);
   const http = inject(HttpClient);
 
   const token = auth.accessToken;
+  const withAuth = token ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } }) : req;
 
-  const withAuth = token ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } }) : req;  return next(withAuth).pipe(
+  return next(withAuth).pipe(
     catchError((err: HttpErrorResponse) => {
-      if (err.status === 401 && auth.refreshToken && !refreshing) {
-        refreshing = true;
+      // Solo intentar refresh si: 401, tenemos refresh token, no estamos refrescando ya,
+      // y no es la petición de refresh en sí misma
+      if (
+        err.status === 401 &&
+        auth.refreshToken &&
+        !isRefreshing &&
+        !req.url.includes('/auth/refresh-token')
+      ) {
+        isRefreshing = true;
 
         return http
-          .post<any>(
-            `${location.origin.includes('localhost') ? '' : ''}${
-              (window as any).ENV_API_BASE ?? ''
-            }/auth/refresh-token`,
-            {
-              refreshToken: auth.refreshToken,
-            }
-          )
+          .post<RefreshTokenResponse>(`${environment.apiBaseUrl}/auth/refresh-token`, {
+            refreshToken: auth.refreshToken,
+          })
           .pipe(
             switchMap((res) => {
-              refreshing = false;
+              isRefreshing = false;
+
               if (res?.accessToken) {
                 localStorage.setItem('botbite.access', res.accessToken);
+
+                // Reintentar la petición original con el nuevo token
                 const retried = req.clone({
                   setHeaders: { Authorization: `Bearer ${res.accessToken}` },
                 });
                 return next(retried);
               }
+
+              // Si no hay token en la respuesta, hacer logout
+              auth.logout();
               return throwError(() => err);
             }),
-            catchError((e) => {
-              refreshing = false;
+            catchError((refreshErr) => {
+              isRefreshing = false;
               auth.logout();
-              return throwError(() => e);
+              return throwError(() => refreshErr);
             })
           );
       }
+
       return throwError(() => err);
     })
   );
