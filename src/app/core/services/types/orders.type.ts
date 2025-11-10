@@ -1,42 +1,37 @@
-export type OrderDetails = {
+import { Category } from './category.types';
+
+export type Order = {
   id: string;
   isActive: boolean;
   total: number;
   interactions: number;
-  orderItems: OrderItemDetails[];
+  orderItems: OrderItem[];
 };
 
-export type OrderItemDetails = {
+export type OrderItem = {
   id: string;
   isActive: boolean;
   price: number;
   notes?: string;
-  menuItem: MenuItemDetails;
+  menuItem: MenuItem;
 };
 
-export type MenuItemDetails = {
+export type MenuItem = {
   id: string;
   isActive: boolean;
   price: number;
-  category: CategoryDetails;
-  product: ProductDetails;
+  category: Category;
+  product: Product;
 };
 
-export type CategoryDetails = {
+export type Product = {
   id: string;
   isActive: boolean;
   name: string;
   description?: string;
 };
 
-export type ProductDetails = {
-  id: string;
-  isActive: boolean;
-  name: string;
-  description?: string;
-};
-
-export type OrdersList = {
-  orders: OrderDetails[];
+export type OrderListResponse = {
+  orders: Order[];
   message: string;
 };

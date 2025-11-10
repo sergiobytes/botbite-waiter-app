@@ -3,11 +3,11 @@ import { inject, Injectable } from '@angular/core';
 import { environment } from '../../../environments/environment';
 import { OrgService } from './org.service';
 import { Observable, tap, map } from 'rxjs';
-import { RestaurantDetails } from './types/org.types';
+import { Restaurant } from './types/restaurants.types';
 
 // Tipos para las respuestas del backend
 interface RestaurantResponse {
-  restaurant: RestaurantDetails;
+  restaurant: Restaurant;
   message: string;
 }
 
@@ -19,7 +19,7 @@ export class RestaurantsService {
   private org = inject(OrgService);
   apiUrl = environment.apiBaseUrl;
 
-  createRestaurant(newRestaurant: Partial<RestaurantDetails>): Observable<RestaurantDetails> {
+  createRestaurant(newRestaurant: Partial<Restaurant>): Observable<Restaurant> {
     return this.http
       .post<RestaurantResponse>(`${this.apiUrl}/restaurants`, {
         ...newRestaurant,
@@ -33,13 +33,8 @@ export class RestaurantsService {
       );
   }
 
-  updateRestaurant(
-    id: string,
-    updatedRestaurant: Partial<RestaurantDetails>
-  ): Observable<RestaurantDetails> {
+  updateRestaurant(id: string, updatedRestaurant: Partial<Restaurant>): Observable<Restaurant> {
     const url = `${this.apiUrl}/restaurants/${id}`;
-
-
 
     return this.http
       .patch<RestaurantResponse>(url, {

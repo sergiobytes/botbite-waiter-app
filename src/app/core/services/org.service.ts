@@ -1,8 +1,9 @@
 import { HttpClient } from '@angular/common/http';
 import { computed, effect, inject, Injectable, signal } from '@angular/core';
-import { BranchDetails, BranchList, RestaurantDetails, RestaurantsList } from './types/org.types';
 import { environment } from '../../../environments/environment';
 import { catchError, of, tap } from 'rxjs';
+import { Restaurant, RestaurantListResponse } from './types/restaurants.types';
+import { Branch, BranchListResponse } from './types/branches.types';
 
 @Injectable({
   providedIn: 'root',
@@ -13,13 +14,13 @@ export class OrgService {
   private LS_BRANCHKEY = (restaurantId: string) => `botbite.branchId::${restaurantId}`;
   apiUrl = environment.apiBaseUrl;
 
-  restaurants = signal<RestaurantDetails[]>([]);
+  restaurants = signal<Restaurant[]>([]);
   selectedRestaurantId = signal<string | null>(null);
   selectedRestaurant = computed(
     () => this.restaurants()?.find((r) => r.id === this.selectedRestaurantId()) ?? null
   );
 
-  branches = signal<BranchDetails[]>([]);
+  branches = signal<Branch[]>([]);
   selectedBranchId = signal<string | null>(null);
   selectedBranch = computed(
     () => this.branches().find((b) => b.id === this.selectedBranchId()) ?? null
@@ -43,7 +44,7 @@ export class OrgService {
   }
 
   loadRestaurants() {
-    return this.http.get<RestaurantsList>(`${this.apiUrl}/restaurants`).pipe(
+    return this.http.get<RestaurantListResponse>(`${this.apiUrl}/restaurants`).pipe(
       tap((list) => {
         this.restaurants.set(Array.isArray(list.restaurants) ? list.restaurants : []);
 
@@ -83,37 +84,39 @@ export class OrgService {
   }
 
   loadBranches(restaurantId: string) {
-    return this.http.get<BranchList>(`${this.apiUrl}/branches/restaurant/${restaurantId}`).pipe(
-      tap((list) => {
-        this.branches.set(Array.isArray(list.branches) ? list.branches : []);
+    return this.http
+      .get<BranchListResponse>(`${this.apiUrl}/branches/restaurant/${restaurantId}`)
+      .pipe(
+        tap((list) => {
+          this.branches.set(Array.isArray(list.branches) ? list.branches : []);
 
-        // Mantener la selección actual si existe en la nueva lista
-        const currentSelection = this.selectedBranchId();
-        const exists = currentSelection && list.branches.some((b) => b.id === currentSelection);
+          // Mantener la selección actual si existe en la nueva lista
+          const currentSelection = this.selectedBranchId();
+          const exists = currentSelection && list.branches.some((b) => b.id === currentSelection);
 
-        if (exists) {
-          // Ya está seleccionado y existe, no hacer nada
-          return;
-        }
+          if (exists) {
+            // Ya está seleccionado y existe, no hacer nada
+            return;
+          }
 
-        // Si no existe la selección actual, buscar en localStorage
-        const saved = localStorage.getItem(this.LS_BRANCHKEY(restaurantId));
-        const savedExists = saved && list.branches.some((b) => b.id === saved);
-        const fallback = list.branches[0]?.id ?? null;
+          // Si no existe la selección actual, buscar en localStorage
+          const saved = localStorage.getItem(this.LS_BRANCHKEY(restaurantId));
+          const savedExists = saved && list.branches.some((b) => b.id === saved);
+          const fallback = list.branches[0]?.id ?? null;
 
-        const nextBranchId = savedExists ? saved : fallback;
-        this.selectedBranchId.set(nextBranchId);
+          const nextBranchId = savedExists ? saved : fallback;
+          this.selectedBranchId.set(nextBranchId);
 
-        if (nextBranchId) {
-          localStorage.setItem(this.LS_BRANCHKEY(restaurantId), nextBranchId);
-        }
-      }),
-      catchError(() => {
-        this.branches.set([]);
-        this.selectedBranchId.set(null);
-        return of([]);
-      })
-    );
+          if (nextBranchId) {
+            localStorage.setItem(this.LS_BRANCHKEY(restaurantId), nextBranchId);
+          }
+        }),
+        catchError(() => {
+          this.branches.set([]);
+          this.selectedBranchId.set(null);
+          return of([]);
+        })
+      );
   }
 
   selectBranch(branchId: string | null) {
@@ -123,7 +126,7 @@ export class OrgService {
     else if (rid && !branchId) localStorage.removeItem(this.LS_BRANCHKEY(rid));
   }
 
-  updateSelectedBranch(patch: Partial<BranchDetails>) {
+  updateSelectedBranch(patch: Partial<Branch>) {
     const current = this.selectedBranch();
     if (!current) return;
 

@@ -4,7 +4,7 @@ import { ToastrService } from 'ngx-toastr';
 import { RestaurantsService } from '../../../core/services/restaurants.service';
 import { OrgService } from '../../../core/services/org.service';
 import { Mode } from '../../../core/services/types/common.types';
-import { RestaurantDetails } from '../../../core/services/types/org.types';
+import { Restaurant } from '../../../core/services/types/restaurants.types';
 import { catchError, EMPTY, finalize, tap } from 'rxjs';
 
 interface RestaurantForm {
@@ -27,7 +27,7 @@ export class RestaurantsComponent {
   readonly loading = signal(false);
   readonly saving = signal(false);
   readonly mode = signal<Mode>(null);
-  readonly target = signal<RestaurantDetails | null>(null);
+  readonly target = signal<Restaurant | null>(null);
   readonly confirming = signal(false);
 
   readonly form = signal<RestaurantForm>({
@@ -35,7 +35,7 @@ export class RestaurantsComponent {
     isActive: true,
   });
 
-  readonly trackById = (_: string, restaurant: RestaurantDetails) => restaurant.id;
+  readonly trackById = (_: string, restaurant: Restaurant) => restaurant.id;
 
   // Computed signal reactivo en lugar de getter
   readonly restaurants = computed(() => this.orgService.restaurants());
@@ -45,7 +45,7 @@ export class RestaurantsComponent {
     this.form.set({ name: '', isActive: true });
   }
 
-  openEdit(restaurant: RestaurantDetails): void {
+  openEdit(restaurant: Restaurant): void {
     this.mode.set('edit');
     this.form.set({
       id: restaurant.id,
@@ -61,7 +61,7 @@ export class RestaurantsComponent {
 
     this.saving.set(true);
 
-    const restaurantData: Partial<RestaurantDetails> = {
+    const restaurantData: Partial<Restaurant> = {
       name: formValue.name.trim(),
       isActive: formValue.isActive,
     };
@@ -111,7 +111,7 @@ export class RestaurantsComponent {
     this.form.set({ name: '', isActive: true });
   }
 
-  confirmDisable(restaurant: RestaurantDetails): void {
+  confirmDisable(restaurant: Restaurant): void {
     this.target.set(restaurant);
     this.confirming.set(true);
   }
