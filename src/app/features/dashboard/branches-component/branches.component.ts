@@ -13,7 +13,7 @@ import { OrgService } from '../../../core/services/org.service';
 import { Branch } from '../../../core/services/types/branches.types';
 import { Mode, Pagination } from '../../../core/services/types/common.types';
 import { TitleComponent } from '../../../shared/components/title/title';
-import { catchError, EMPTY, filter, finalize } from 'rxjs';
+import { catchError, EMPTY, finalize } from 'rxjs';
 
 interface BranchForm {
   readonly id?: string;
@@ -50,7 +50,7 @@ export class BranchesComponent {
   readonly total = computed(() => this.branches().length);
 
   readonly restaurantId = computed(() => this.orgService.selectedRestaurantId());
-  readonly confirmingTargetStatus = computed(() => !!this.confirmEnable());
+  readonly confirmTargetStatus = computed(() => !!this.confirmEnable());
 
   readonly generatingQr = signal<string | null>(null);
 
@@ -194,10 +194,55 @@ export class BranchesComponent {
     });
   }
 
-  // closeModal
+  closeModal() {
+    this.mode.set(null);
+    this.form.set({
+      name: '',
+      address: '',
+      phoneNumberAssistant: '',
+      phoneNumberReception: '',
+      availableMessages: 0,
+      isActive: true,
+    });
+  }
 
-  // handleSave
-  // save
+  handleSave() {
+    this.save();
+  }
+
+  save() {
+    const f = this.form();
+    if (!f.name.trim() || !f.address.trim()) return;
+
+    this.saving.set(true);
+
+    const dto: Partial<Branch> = {
+      name: f.name.trim(),
+      address: f.address.trim(),
+      phoneNumberAssistant: f.phoneNumberAssistant?.trim() || null,
+      phoneNumberReception: f.phoneNumberReception?.trim() || null,
+      availableMessages: f.availableMessages ?? 0,
+      isActive: !!f.isActive,
+    };
+
+    const op =
+      this.mode() === 'create'
+        ? this.branchesService.create(dto)
+        : this.branchesService.update({ id: f.id!, ...dto });
+
+    op.pipe(
+      catchError((e) => {
+        console.error('Error saving branch:', e);
+        this.toastrService.error('Error al guardar la sucursal');
+        return EMPTY;
+      }),
+      finalize(() => this.saving.set(false))
+    ).subscribe(() => {
+      this.toastrService.success('Sucursal guardada correctamente');
+      this.mode.set(null);
+      this.reload();
+    });
+  }
 
   confirmToggle(branch: Branch, enable: boolean) {
     this.target.set(branch);
@@ -205,7 +250,12 @@ export class BranchesComponent {
     this.confirming.set(true);
   }
 
-  // toggleActive
+  toggleActive() {
+    const b = this.target();
+    const enable = this.confirmEnable();
+    this.confirming.set(false);
+    if (!b || enable === null) return;
+  }
 
   onGenerateQr(branch: Branch) {
     const rid = this.restaurantId();
@@ -254,7 +304,19 @@ export class BranchesComponent {
       });
   }
 
-  // updateForm
-  // updateFormNumber
-  // updateFormChecked
+  updateForm<K extends keyof BranchForm>(key: K, ev: Event) {
+    const el = ev.target as HTMLInputElement;
+    this.form.update((f) => ({ ...f, [key]: el.value as any }));
+  }
+
+  updateFormNumber<K extends keyof BranchForm>(key: K, ev: Event) {
+    const el = ev.target as HTMLInputElement;
+    const n = Number(el.value);
+    this.form.update((f) => ({ ...f, [key]: isNaN(n) ? (undefined as any) : n }));
+  }
+
+  updateFormChecked<K extends keyof BranchForm>(key: K, ev: Event) {
+    const el = ev.target as HTMLInputElement;
+    this.form.update((f) => ({ ...f, [key]: el.checked as any }));
+  }
 }
