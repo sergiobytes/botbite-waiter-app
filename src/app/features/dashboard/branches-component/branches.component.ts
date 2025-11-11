@@ -10,10 +10,10 @@ import {
 import { ToastrService } from 'ngx-toastr';
 import { BranchesService } from '../../../core/services/branches.service';
 import { OrgService } from '../../../core/services/org.service';
-import { Branch } from '../../../core/services/types/branches.types';
+import { Branch, BranchListResponse } from '../../../core/services/types/branches.types';
 import { Mode, Pagination } from '../../../core/services/types/common.types';
 import { TitleComponent } from '../../../shared/components/title/title';
-import { catchError, EMPTY, finalize } from 'rxjs';
+import { catchError, EMPTY, finalize, tap } from 'rxjs';
 
 interface BranchForm {
   readonly id?: string;
@@ -21,7 +21,6 @@ interface BranchForm {
   address: string;
   phoneNumberAssistant?: string;
   phoneNumberReception?: string;
-  availableMessages: number;
   isActive: boolean;
 }
 
@@ -43,6 +42,10 @@ export class BranchesComponent {
   private confirmEnable = signal<boolean | null>(null);
   readonly target = signal<Branch | null>(null);
 
+  readonly addingMessages = signal(false);
+  readonly messagesToAdd = signal(0);
+  readonly targetForMessages = signal<Branch | null>(null);
+
   readonly filters = signal<{ search?: string; isActive?: boolean }>({});
   readonly pagination = signal<Partial<Pagination>>({ limit: 10, offset: 0 });
 
@@ -59,7 +62,6 @@ export class BranchesComponent {
     address: '',
     phoneNumberAssistant: '',
     phoneNumberReception: '',
-    availableMessages: 0,
     isActive: true,
   });
 
@@ -176,7 +178,6 @@ export class BranchesComponent {
       address: '',
       phoneNumberAssistant: '',
       phoneNumberReception: '',
-      availableMessages: 0,
       isActive: true,
     });
   }
@@ -189,7 +190,6 @@ export class BranchesComponent {
       address: branch.address,
       phoneNumberAssistant: branch.phoneNumberAssistant ?? '',
       phoneNumberReception: branch.phoneNumberReception ?? '',
-      availableMessages: branch.availableMessages,
       isActive: branch.isActive,
     });
   }
@@ -201,7 +201,6 @@ export class BranchesComponent {
       address: '',
       phoneNumberAssistant: '',
       phoneNumberReception: '',
-      availableMessages: 0,
       isActive: true,
     });
   }
@@ -221,7 +220,6 @@ export class BranchesComponent {
       address: f.address.trim(),
       phoneNumberAssistant: f.phoneNumberAssistant?.trim() || null,
       phoneNumberReception: f.phoneNumberReception?.trim() || null,
-      availableMessages: f.availableMessages ?? 0,
       isActive: !!f.isActive,
     };
 
@@ -231,6 +229,11 @@ export class BranchesComponent {
         : this.branchesService.update({ id: f.id!, ...dto });
 
     op.pipe(
+      tap((response: BranchListResponse | never[]) => {
+        // Actualizar el estado local sin recargar
+        if (Array.isArray(response)) return;
+        this.orgService.branches.set(response.branches);
+      }),
       catchError((e) => {
         console.error('Error saving branch:', e);
         this.toastrService.error('Error al guardar la sucursal');
@@ -240,7 +243,6 @@ export class BranchesComponent {
     ).subscribe(() => {
       this.toastrService.success('Sucursal guardada correctamente');
       this.mode.set(null);
-      this.reload();
     });
   }
 
@@ -255,6 +257,70 @@ export class BranchesComponent {
     const enable = this.confirmEnable();
     this.confirming.set(false);
     if (!b || enable === null) return;
+
+    const op = enable ? this.branchesService.activate(b.id) : this.branchesService.deactivate(b.id);
+
+    op.pipe(
+      tap((response: BranchListResponse | never[]) => {
+        if (Array.isArray(response)) return;
+        this.orgService.branches.set(response.branches);
+      }),
+      catchError((e) => {
+        console.error('Error toggling branch status:', e);
+        this.toastrService.error('Error al cambiar el estado de la sucursal');
+        return EMPTY;
+      })
+    ).subscribe(() => {
+      this.toastrService.success(
+        `Sucursal ${enable ? 'activada' : 'desactivada'} correctamente`
+      );
+    });
+  }
+
+  openAddMessages(branch: Branch) {
+    this.targetForMessages.set(branch);
+    this.messagesToAdd.set(0);
+    this.addingMessages.set(true);
+  }
+
+  closeAddMessagesModal() {
+    this.addingMessages.set(false);
+    this.targetForMessages.set(null);
+    this.messagesToAdd.set(0);
+  }
+
+  handleAddMessages() {
+    const branch = this.targetForMessages();
+    const amount = this.messagesToAdd();
+
+    if (!branch || amount <= 0) {
+      this.toastrService.warning('Ingresa una cantidad válida de mensajes');
+      return;
+    }
+
+    this.saving.set(true);
+
+    this.branchesService
+      .update({
+        id: branch.id,
+        availableMessages: branch.availableMessages + amount,
+      })
+      .pipe(
+        tap((response: BranchListResponse | never[]) => {
+          if (Array.isArray(response)) return;
+          this.orgService.branches.set(response.branches);
+        }),
+        catchError((e) => {
+          console.error('Error adding messages:', e);
+          this.toastrService.error('Error al agregar mensajes');
+          return EMPTY;
+        }),
+        finalize(() => this.saving.set(false))
+      )
+      .subscribe(() => {
+        this.toastrService.success(`${amount} mensajes agregados correctamente`);
+        this.closeAddMessagesModal();
+      });
   }
 
   onGenerateQr(branch: Branch) {
@@ -266,6 +332,18 @@ export class BranchesComponent {
     this.branchesService
       .generateQr(rid, branch.id)
       .pipe(
+        tap((res) => {
+          // Actualizar el QR en el branch actual
+          const updated = this.orgService.branches().map((b) =>
+            b.id === branch.id ? { ...b, qrUrl: res.qrUrl } : b
+          );
+          this.orgService.branches.set(updated);
+
+          // Si es el branch seleccionado, actualizar también
+          if (branch.id === this.orgService.selectedBranch()?.id) {
+            this.orgService.updateSelectedBranch({ qrUrl: res.qrUrl });
+          }
+        }),
         catchError((e) => {
           console.error('Error generating QR code:', e);
           this.toastrService.error('Error al generar el código QR');
@@ -273,11 +351,7 @@ export class BranchesComponent {
         }),
         finalize(() => this.generatingQr.set(null))
       )
-      .subscribe((res) => {
-        this.orgService.updateSelectedBranch(
-          branch.id === this.orgService.selectedBranch()?.id ? { qrUrl: res.qrUrl } : {}
-        );
-        this.reload();
+      .subscribe(() => {
         this.toastrService.success('Código QR generado correctamente');
       });
   }
@@ -291,6 +365,10 @@ export class BranchesComponent {
     this.branchesService
       .bulkUploadByCsv(file)
       .pipe(
+        tap((response: BranchListResponse | never[]) => {
+          if (Array.isArray(response)) return;
+          this.orgService.branches.set(response.branches);
+        }),
         catchError((e) => {
           console.error('Error uploading CSV:', e);
           this.toastrService.error('Error al subir el archivo CSV');
@@ -307,12 +385,6 @@ export class BranchesComponent {
   updateForm<K extends keyof BranchForm>(key: K, ev: Event) {
     const el = ev.target as HTMLInputElement;
     this.form.update((f) => ({ ...f, [key]: el.value as any }));
-  }
-
-  updateFormNumber<K extends keyof BranchForm>(key: K, ev: Event) {
-    const el = ev.target as HTMLInputElement;
-    const n = Number(el.value);
-    this.form.update((f) => ({ ...f, [key]: isNaN(n) ? (undefined as any) : n }));
   }
 
   updateFormChecked<K extends keyof BranchForm>(key: K, ev: Event) {

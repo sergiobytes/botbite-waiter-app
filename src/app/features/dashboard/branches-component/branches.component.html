@@ -103,6 +103,14 @@
           </td>
           <td class="px-4 py-3">
             <div class="flex items-center gap-2 justify-end">
+              <button
+                class="px-3 py-1 border border-black/10 rounded-lg hover:bg-black/5"
+                (click)="openAddMessages(branch)"
+                [attr.aria-label]="'Agregar mensajes a ' + branch.name"
+              >
+                + Mensajes
+              </button>
+
               @if(!branch.qrUrl) {
               <button
                 class="px-3 py-1 border border-black/10 rounded-lg hover:bg-black/5"
@@ -257,16 +265,6 @@
             maxlength="30"
           />
         </div>
-        <div class="md:col-span-2">
-          <label class="text-sm font-medium">Mensajes disponibles</label>
-          <input
-            id="bavailableMessages"
-            type="text"
-            class="w-full rounded-xl border border-black/10 px-3 py-2"
-            [value]="form().availableMessages"
-            (input)="updateFormNumber('availableMessages', $event)"
-          />
-        </div>
 
         <div class="md:col-span-2 flex items-center gap-2">
           <input
@@ -338,6 +336,63 @@
           aria-label="Confirmar"
         >
           Confirmar
+        </button>
+      </div>
+    </div>
+  </div>
+  }
+
+  <!-- Modal para agregar mensajes -->
+  @if(addingMessages()) {
+  <div
+    class="fixed inset-0 z-50 flex items-center justify-center p-4"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="addMessagesDialogTitle"
+  >
+    <div
+      class="absolute inset-0 bg-black/40"
+      (click)="closeAddMessagesModal()"
+      aria-hidden="true"
+    ></div>
+    <div class="relative bg-white w-full max-w-md rounded-2xl border border-black/10 p-6 shadow-xl">
+      <h3 id="addMessagesDialogTitle" class="text-lg font-semibold mb-2">
+        Agregar mensajes
+      </h3>
+      <p class="text-sm text-neutral-600 mb-4">
+        Sucursal: <strong>{{ targetForMessages()?.name }}</strong><br>
+        Mensajes actuales: <strong>{{ targetForMessages()?.availableMessages }}</strong>
+      </p>
+
+      <div class="mb-4">
+        <label class="text-sm font-medium block mb-2">Cantidad a agregar</label>
+        <input
+          type="number"
+          min="1"
+          step="1"
+          class="w-full rounded-xl border border-black/10 px-3 py-2"
+          [value]="messagesToAdd()"
+          (input)="messagesToAdd.set(+($any($event.target).value))"
+          placeholder="Ej: 100"
+        />
+      </div>
+
+      <div class="flex items-center justify-end gap-3">
+        <button
+          class="px-4 py-2 rounded-xl border border-black/10 hover:bg-black/5"
+          (click)="closeAddMessagesModal()"
+          [disabled]="saving()"
+          aria-label="Cancelar"
+        >
+          Cancelar
+        </button>
+        <button
+          class="px-4 py-2 rounded-xl bg-black text-white hover:opacity-90 disabled:opacity-50"
+          (click)="handleAddMessages()"
+          [disabled]="saving() || messagesToAdd() <= 0"
+          aria-label="Agregar mensajes"
+        >
+          {{ saving() ? 'Agregando...' : 'Agregar' }}
         </button>
       </div>
     </div>
