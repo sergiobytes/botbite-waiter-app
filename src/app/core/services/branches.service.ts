@@ -30,13 +30,6 @@ export class BranchesService {
       throw new Error('No restaurant selected');
     }
 
-    let q = new HttpParams();
-
-    if (params.search !== undefined) q = q.set('search', params.search);
-    if (params.isActive !== undefined) q = q.set('isActive', params.isActive);
-    if (params.limit !== undefined) q = q.set('limit', params.limit);
-    if (params.offset !== undefined) q = q.set('offset', params.offset);
-
     return this.orgService.loadBranches(restaurantId, params);
   }
 

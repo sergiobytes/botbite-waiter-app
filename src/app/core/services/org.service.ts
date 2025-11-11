@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { computed, effect, inject, Injectable, signal } from '@angular/core';
 import { environment } from '../../../environments/environment';
 import { catchError, finalize, of, tap } from 'rxjs';
@@ -115,8 +115,25 @@ export class OrgService {
   ) {
     this.loadingBranches.set(true);
 
+    let httpParams = new HttpParams();
+
+    if (params?.search) {
+      httpParams = httpParams.set('search', params.search);
+    }
+    if (params?.isActive !== undefined) {
+      httpParams = httpParams.set('isActive', params.isActive.toString());
+    }
+    if (params?.limit !== undefined) {
+      httpParams = httpParams.set('limit', params.limit.toString());
+    }
+    if (params?.offset !== undefined) {
+      httpParams = httpParams.set('offset', params.offset.toString());
+    }
+
     return this.http
-      .get<BranchListResponse>(`${this.apiUrl}/branches/restaurant/${restaurantId}`, { params })
+      .get<BranchListResponse>(`${this.apiUrl}/branches/restaurant/${restaurantId}`, {
+        params: httpParams
+      })
       .pipe(
         tap((list) => {
           this.branches.set(Array.isArray(list.branches) ? list.branches : []);

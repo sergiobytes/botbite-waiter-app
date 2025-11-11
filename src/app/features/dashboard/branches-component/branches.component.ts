@@ -29,7 +29,6 @@ export class BranchesComponent {
   protected readonly orgService = inject(OrgService);
   private readonly toastrService = inject(ToastrService);
 
-  readonly loading = signal(false);
   readonly saving = signal(false);
   readonly mode = signal<Mode>(null);
 
@@ -40,8 +39,38 @@ export class BranchesComponent {
   readonly filters = signal<{ search?: string; isActive?: boolean }>({});
   readonly pagination = signal<Partial<Pagination>>({ limit: 10, offset: 0 });
 
-  readonly branches = computed(() => this.orgService.branches());
+  readonly allBranches = computed(() => this.orgService.branches());
+
+  // Filtrado y paginación en el cliente
+  readonly branches = computed(() => {
+    let filtered = this.allBranches();
+
+    // Aplicar filtro de búsqueda
+    const searchTerm = this.filters().search?.toLowerCase();
+    if (searchTerm) {
+      filtered = filtered.filter(b =>
+        b.name.toLowerCase().includes(searchTerm) ||
+        b.address.toLowerCase().includes(searchTerm)
+      );
+    }
+
+    // Aplicar filtro de estado
+    const isActive = this.filters().isActive;
+    if (isActive !== undefined) {
+      filtered = filtered.filter(b => b.isActive === isActive);
+    }
+
+    return filtered;
+  });
+
   readonly total = computed(() => this.branches().length);
+
+  // Branches paginados para mostrar en la tabla
+  readonly paginatedBranches = computed(() => {
+    const offset = this.pagination().offset ?? 0;
+    const limit = this.pagination().limit ?? 10;
+    return this.branches().slice(offset, offset + limit);
+  });
 
   readonly restaurantId = computed(() => this.orgService.selectedRestaurantId());
   readonly confirmingTargetStatus = computed(() => !!this.confirmEnable());
@@ -59,33 +88,12 @@ export class BranchesComponent {
 
   readonly trackById = (_: number, b: Branch) => b.id;
 
-  private fetch() {
-    const rid = this.restaurantId();
-    if (!rid) {
-      return;
-    }
-
-    this.loading.set(true);
-    this.branchesService
-      .listByRestaurant({
-        search: this.filters().search,
-        isActive: this.filters().isActive,
-        limit: this.pagination().limit,
-        offset: this.pagination().offset,
-      })
-      .pipe(
-        catchError((e) => {
-          console.error('Error loading branches:', e);
-          this.toastrService.error('Error al cargar las sucursales');
-          return EMPTY;
-        }),
-        finalize(() => this.loading.set(false))
-      )
-      .subscribe();
-  }
-
   reload() {
-    this.fetch();
+    // Ya no necesita fetch(), el effect() del OrgService maneja la carga
+    const rid = this.restaurantId();
+    if (rid) {
+      this.orgService.loadBranches(rid).subscribe();
+    }
   }
 
   pageFrom = computed(() => {
@@ -113,27 +121,23 @@ export class BranchesComponent {
   nextPage() {
     if (!this.canNext()) return;
     this.pagination.update((p) => ({ ...p, offset: p.offset! + p.limit! }));
-    this.reload();
   }
 
   prevPage() {
     if (!this.canPrev()) return;
     this.pagination.update((p) => ({ ...p, offset: Math.max(0, p.offset! - p.limit!) }));
-    this.reload();
   }
 
   changeLimit(event: Event) {
     const select = event.target as HTMLSelectElement;
     const limit = Number(select.value) || 10;
     this.pagination.set({ limit, offset: 0 });
-    this.reload();
   }
 
   updateFilterSearch(event: Event) {
     const input = event.target as HTMLInputElement;
     this.filters.update((f) => ({ ...f, search: input.value || undefined }));
-    clearTimeout((this as any)._t);
-    (this as any)._t = setTimeout(() => this.goFirst(), 250);
+    this.pagination.update((p) => ({ ...p, offset: 0 })); // Reset a primera página
   }
 
   updateFilterActive(event: Event) {
@@ -145,12 +149,11 @@ export class BranchesComponent {
       isActive: value === '' ? undefined : value === 'true',
     }));
 
-    this.goFirst();
+    this.pagination.update((p) => ({ ...p, offset: 0 })); // Reset a primera página
   }
 
   goFirst() {
     this.pagination.update((p) => ({ ...p, offset: 0 }));
-    this.reload();
   }
 
   openCreate() {
