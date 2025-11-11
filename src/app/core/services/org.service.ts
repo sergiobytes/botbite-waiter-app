@@ -32,17 +32,14 @@ export class OrgService {
   constructor() {
     this.initializeFromStorage();
 
-    // Effect para cargar branches automáticamente cuando cambia el restaurante
+    // Effect para limpiar branches cuando cambia el restaurante
     effect(() => {
       const rid = this.selectedRestaurantId();
 
       if (!rid) {
         this.branches.set([]);
         this.selectedBranchId.set(null);
-        return;
       }
-
-      this.loadBranches(rid).subscribe();
     });
   }
 

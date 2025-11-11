@@ -1,5 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  inject,
+  signal,
+} from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { BranchesService } from '../../../core/services/branches.service';
 import { OrgService } from '../../../core/services/org.service';
@@ -39,38 +46,8 @@ export class BranchesComponent {
   readonly filters = signal<{ search?: string; isActive?: boolean }>({});
   readonly pagination = signal<Partial<Pagination>>({ limit: 10, offset: 0 });
 
-  readonly allBranches = computed(() => this.orgService.branches());
-
-  // Filtrado y paginación en el cliente
-  readonly branches = computed(() => {
-    let filtered = this.allBranches();
-
-    // Aplicar filtro de búsqueda
-    const searchTerm = this.filters().search?.toLowerCase();
-    if (searchTerm) {
-      filtered = filtered.filter(b =>
-        b.name.toLowerCase().includes(searchTerm) ||
-        b.address.toLowerCase().includes(searchTerm)
-      );
-    }
-
-    // Aplicar filtro de estado
-    const isActive = this.filters().isActive;
-    if (isActive !== undefined) {
-      filtered = filtered.filter(b => b.isActive === isActive);
-    }
-
-    return filtered;
-  });
-
+  readonly branches = computed(() => this.orgService.branches());
   readonly total = computed(() => this.branches().length);
-
-  // Branches paginados para mostrar en la tabla
-  readonly paginatedBranches = computed(() => {
-    const offset = this.pagination().offset ?? 0;
-    const limit = this.pagination().limit ?? 10;
-    return this.branches().slice(offset, offset + limit);
-  });
 
   readonly restaurantId = computed(() => this.orgService.selectedRestaurantId());
   readonly confirmingTargetStatus = computed(() => !!this.confirmEnable());
@@ -88,12 +65,42 @@ export class BranchesComponent {
 
   readonly trackById = (_: number, b: Branch) => b.id;
 
-  reload() {
-    // Ya no necesita fetch(), el effect() del OrgService maneja la carga
+  private previousRestaurantId: string | null = null;
+
+  constructor() {
+    // Effect para recargar branches cuando cambia el restaurante
+    effect(() => {
+      const rid = this.restaurantId();
+
+      // Solo resetear y recargar si cambió el restaurante
+      if (rid && rid !== this.previousRestaurantId) {
+        this.previousRestaurantId = rid;
+        this.pagination.set({ limit: 10, offset: 0 }); // Reset paginación
+        this.filters.set({}); // Reset filtros
+        this.reload();
+      }
+    });
+  }
+
+  private fetch() {
     const rid = this.restaurantId();
-    if (rid) {
-      this.orgService.loadBranches(rid).subscribe();
-    }
+    if (!rid) return;
+
+    const limit = this.pagination().limit ?? 10;
+    const offset = this.pagination().offset ?? 0;
+
+    this.branchesService
+      .listByRestaurant({
+        search: this.filters().search,
+        isActive: this.filters().isActive,
+        limit,
+        offset,
+      })
+      .subscribe();
+  }
+
+  reload() {
+    this.fetch();
   }
 
   pageFrom = computed(() => {
@@ -121,23 +128,28 @@ export class BranchesComponent {
   nextPage() {
     if (!this.canNext()) return;
     this.pagination.update((p) => ({ ...p, offset: p.offset! + p.limit! }));
+    this.reload();
   }
 
   prevPage() {
     if (!this.canPrev()) return;
     this.pagination.update((p) => ({ ...p, offset: Math.max(0, p.offset! - p.limit!) }));
+    this.reload();
   }
 
   changeLimit(event: Event) {
     const select = event.target as HTMLSelectElement;
     const limit = Number(select.value) || 10;
     this.pagination.set({ limit, offset: 0 });
+    this.reload();
   }
 
   updateFilterSearch(event: Event) {
     const input = event.target as HTMLInputElement;
     this.filters.update((f) => ({ ...f, search: input.value || undefined }));
-    this.pagination.update((p) => ({ ...p, offset: 0 })); // Reset a primera página
+    this.pagination.update((p) => ({ ...p, offset: 0 }));
+    clearTimeout((this as any)._searchTimeout);
+    (this as any)._searchTimeout = setTimeout(() => this.reload(), 300);
   }
 
   updateFilterActive(event: Event) {
@@ -149,11 +161,12 @@ export class BranchesComponent {
       isActive: value === '' ? undefined : value === 'true',
     }));
 
-    this.pagination.update((p) => ({ ...p, offset: 0 })); // Reset a primera página
+    this.goFirst();
   }
 
   goFirst() {
     this.pagination.update((p) => ({ ...p, offset: 0 }));
+    this.reload();
   }
 
   openCreate() {

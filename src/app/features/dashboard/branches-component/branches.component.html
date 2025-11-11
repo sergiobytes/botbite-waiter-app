@@ -69,7 +69,7 @@
         </tr>
       </thead>
       <tbody>
-        @for(branch of paginatedBranches(); track branch.id){
+        @for(branch of branches(); track branch.id){
         <tr class="border-t border-black/10">
           <td class="px-4 py-3">
             <div class="flex items-center gap-2">
@@ -142,7 +142,7 @@
             </div>
           </td>
         </tr>
-        } @if(!orgService.loadingBranches() && paginatedBranches().length === 0) {
+        } @if(!orgService.loadingBranches() && branches().length === 0) {
         <tr>
           <td colspan="7" class="px-4 py-6 text-center text-neutral-600">No hay sucursales</td>
         </tr>
