@@ -51,9 +51,6 @@ export class BranchesService {
   ): Observable<BranchListResponse | never[]> {
     const restaurantId = this.orgService.selectedRestaurantId();
 
-    console.log('Updating branch:', { ...updatedBranch });
-    console.log('Restaurant ID:', restaurantId);
-
     if (!restaurantId) {
       throw new Error('No restaurant selected');
     }
