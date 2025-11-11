@@ -222,18 +222,20 @@ export class BranchesComponent {
 
     this.saving.set(true);
 
+    const { id, ...data } = f;
+
     const dto: Partial<Branch> = {
-      name: f.name.trim(),
-      address: f.address.trim(),
-      phoneNumberAssistant: f.phoneNumberAssistant?.trim() || null,
-      phoneNumberReception: f.phoneNumberReception?.trim() || null,
-      isActive: !!f.isActive,
+      name: data.name.trim(),
+      address: data.address.trim(),
+      phoneNumberAssistant: data.phoneNumberAssistant?.trim() || null,
+      phoneNumberReception: data.phoneNumberReception?.trim() || null,
+      isActive: !!data.isActive,
     };
 
     const op =
       this.mode() === 'create'
         ? this.branchesService.create(dto)
-        : this.branchesService.update({ id: f.id!, ...dto });
+        : this.branchesService.update(id!, { ...dto });
 
     op.pipe(
       tap((response: BranchListResponse | never[]) => {
@@ -278,9 +280,7 @@ export class BranchesComponent {
         return EMPTY;
       })
     ).subscribe(() => {
-      this.toastrService.success(
-        `Sucursal ${enable ? 'activada' : 'desactivada'} correctamente`
-      );
+      this.toastrService.success(`Sucursal ${enable ? 'activada' : 'desactivada'} correctamente`);
     });
   }
 
@@ -308,9 +308,8 @@ export class BranchesComponent {
     this.saving.set(true);
 
     this.branchesService
-      .update({
-        id: branch.id,
-        availableMessages: branch.availableMessages + amount,
+      .update(branch.id, {
+        availableMessages: amount,
       })
       .pipe(
         tap((response: BranchListResponse | never[]) => {
@@ -341,9 +340,9 @@ export class BranchesComponent {
       .pipe(
         tap((res) => {
           // Actualizar el QR en el branch actual
-          const updated = this.orgService.branches().map((b) =>
-            b.id === branch.id ? { ...b, qrUrl: res.qrUrl } : b
-          );
+          const updated = this.orgService
+            .branches()
+            .map((b) => (b.id === branch.id ? { ...b, qrUrl: res.qrUrl } : b));
           this.orgService.branches.set(updated);
 
           // Si es el branch seleccionado, actualizar también

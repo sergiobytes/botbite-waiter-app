@@ -45,18 +45,23 @@ export class BranchesService {
       .pipe(switchMap(() => this.orgService.loadBranches(restaurantId)));
   }
 
-  update(updatedBranch: Partial<Branch>): Observable<BranchListResponse | never[]> {
+  update(
+    branchId: string,
+    updatedBranch: Partial<Branch>
+  ): Observable<BranchListResponse | never[]> {
     const restaurantId = this.orgService.selectedRestaurantId();
+
+    console.log('Updating branch:', { ...updatedBranch });
+    console.log('Restaurant ID:', restaurantId);
 
     if (!restaurantId) {
       throw new Error('No restaurant selected');
     }
 
     return this.http
-      .patch(
-        `${this.apiUrl}/branches/restaurant/${restaurantId}/${updatedBranch.id}`,
-        updatedBranch
-      )
+      .patch(`${this.apiUrl}/branches/restaurant/${restaurantId}/${branchId}`, {
+        ...updatedBranch,
+      })
       .pipe(switchMap(() => this.orgService.loadBranches(restaurantId)));
   }
 
