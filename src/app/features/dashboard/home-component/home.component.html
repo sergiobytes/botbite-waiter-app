@@ -17,7 +17,7 @@
       @if (branchQrUrl(); as qrUrl) {
       <img
         [src]="qrUrl"
-        alt="Código QR de la sucursal {{ org.selectedBranch()?.name || 'actual' }}"
+        alt="Código QR de la sucursal {{ orgService.selectedBranch()?.name || 'actual' }}"
         class="w-40 h-40 md:w-48 md:h-48 object-contain border border-black/10 rounded-xl shadow-sm"
       />
       <button

@@ -6,6 +6,7 @@ import { OrgService } from '../../../core/services/org.service';
 import { Mode } from '../../../core/services/types/common.types';
 import { Restaurant } from '../../../core/services/types/restaurants.types';
 import { catchError, EMPTY, finalize, tap } from 'rxjs';
+import { TitleComponent } from '../../../shared/components/title/title';
 
 interface RestaurantForm {
   readonly id?: string;
@@ -15,14 +16,14 @@ interface RestaurantForm {
 
 @Component({
   selector: 'app-restaurants.component',
-  imports: [CommonModule],
+  imports: [CommonModule, TitleComponent],
   templateUrl: './restaurants.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RestaurantsComponent {
   private readonly restaurantsService = inject(RestaurantsService);
   private readonly orgService = inject(OrgService);
-  private readonly toastService = inject(ToastrService);
+  private readonly toastrService = inject(ToastrService);
 
   readonly loading = signal(false);
   readonly saving = signal(false);
@@ -75,13 +76,13 @@ export class RestaurantsComponent {
       .pipe(
         catchError((error) => {
           console.error('Error saving restaurant:', error);
-          this.toastService.error('No se pudo guardar el restaurante');
+          this.toastrService.error('No se pudo guardar el restaurante');
           return EMPTY;
         }),
         finalize(() => this.saving.set(false))
       )
       .subscribe(() => {
-        this.toastService.success('Restaurante guardado correctamente');
+        this.toastrService.success('Restaurante guardado correctamente');
         this.mode.set(null);
       });
   }
@@ -95,12 +96,12 @@ export class RestaurantsComponent {
       .pipe(
         catchError((error) => {
           console.error('Error disabling restaurant:', error);
-          this.toastService.error('No se pudo deshabilitar el restaurante');
+          this.toastrService.error('No se pudo deshabilitar el restaurante');
           return EMPTY;
         })
       )
       .subscribe(() => {
-        this.toastService.success('Restaurante deshabilitado correctamente');
+        this.toastrService.success('Restaurante deshabilitado correctamente');
         this.confirming.set(false);
         this.target.set(null);
       });

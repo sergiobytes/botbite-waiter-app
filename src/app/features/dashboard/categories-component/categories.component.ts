@@ -5,6 +5,7 @@ import { catchError, EMPTY, finalize } from 'rxjs';
 import { CategoriesService } from '../../../core/services/categories.service';
 import { Category } from '../../../core/services/types/category.types';
 import { Mode } from '../../../core/services/types/common.types';
+import { TitleComponent } from '../../../shared/components/title/title';
 
 interface CategoryForm {
   readonly id?: number;
@@ -14,13 +15,13 @@ interface CategoryForm {
 
 @Component({
   selector: 'app-categories',
-  imports: [CommonModule],
+  imports: [CommonModule, TitleComponent],
   templateUrl: './categories.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CategoriesComponent {
   private readonly categoriesService = inject(CategoriesService);
-  private readonly toastService = inject(ToastrService);
+  private readonly toastrService = inject(ToastrService);
 
   // State signals
   readonly loading = signal(false);
@@ -46,7 +47,7 @@ export class CategoriesComponent {
       .pipe(
         catchError((error) => {
           console.error('Error loading categories:', error);
-          this.toastService.error('No se pudieron cargar las categorías');
+          this.toastrService.error('No se pudieron cargar las categorías');
           return EMPTY;
         }),
         finalize(() => this.loading.set(false))
@@ -90,13 +91,13 @@ export class CategoriesComponent {
       .pipe(
         catchError((error) => {
           console.error('Error saving category:', error);
-          this.toastService.error('Error al guardar la categoría');
+          this.toastrService.error('Error al guardar la categoría');
           return EMPTY;
         }),
         finalize(() => this.saving.set(false))
       )
       .subscribe(() => {
-        this.toastService.success('Categoría guardada correctamente');
+        this.toastrService.success('Categoría guardada correctamente');
         this.closeModal();
         this.loadCategories();
       });
@@ -111,12 +112,12 @@ export class CategoriesComponent {
       .pipe(
         catchError((error) => {
           console.error('Error disabling category:', error);
-          this.toastService.error('Error al deshabilitar la categoría');
+          this.toastrService.error('Error al deshabilitar la categoría');
           return EMPTY;
         })
       )
       .subscribe(() => {
-        this.toastService.success('Categoría deshabilitada correctamente');
+        this.toastrService.success('Categoría deshabilitada correctamente');
         this.confirming.set(false);
         this.target.set(null);
         this.loadCategories();

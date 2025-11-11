@@ -21,10 +21,10 @@ interface MetricCard {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HomeComponent {
-  protected readonly org = inject(OrgService);
-  private readonly orders = inject(OrdersService);
-  private readonly branches = inject(BranchesService);
-  private readonly toast = inject(ToastrService);
+  protected readonly orgService = inject(OrgService);
+  private readonly ordersService = inject(OrdersService);
+  private readonly branchesService = inject(BranchesService);
+  private readonly toastrService = inject(ToastrService);
 
   protected readonly loadingToday = signal<boolean>(false);
   protected readonly generatingQr = signal<boolean>(false);
@@ -52,7 +52,7 @@ export class HomeComponent {
 
   constructor() {
     effect(() => {
-      const branchId = this.org.selectedBranchId();
+      const branchId = this.orgService.selectedBranchId();
 
       if (!branchId) {
         this.resetMetrics();
@@ -61,8 +61,8 @@ export class HomeComponent {
       }
 
       this.fetchToday(branchId);
-      this.availableMessages.set(this.org.selectedBranch()?.availableMessages ?? 0);
-      this.branchQrUrl.set(this.org.selectedBranch()?.qrUrl ?? '');
+      this.availableMessages.set(this.orgService.selectedBranch()?.availableMessages ?? 0);
+      this.branchQrUrl.set(this.orgService.selectedBranch()?.qrUrl ?? '');
     });
   }
 
@@ -70,7 +70,7 @@ export class HomeComponent {
     this.loadingToday.set(true);
 
     const date = todayYYYYMMDD();
-    this.orders
+    this.ordersService
       .getAll({ branchId, date })
       .pipe(
         catchError(() => {
@@ -110,11 +110,11 @@ export class HomeComponent {
 
     this.generatingQr.set(true);
 
-    this.branches
+    this.branchesService
       .generateQr(restaurantId!, branchId!)
       .pipe(
         catchError(() => {
-          this.toast.error('Error al generar el QR');
+          this.toastrService.error('Error al generar el QR');
           return of({ qrUrl: '' });
         }),
         finalize(() => this.generatingQr.set(false))
@@ -126,19 +126,19 @@ export class HomeComponent {
 
   private getSelectedIds(): { restaurantId: string | null; branchId: string | null } {
     return {
-      restaurantId: this.org.selectedRestaurantId(),
-      branchId: this.org.selectedBranchId(),
+      restaurantId: this.orgService.selectedRestaurantId(),
+      branchId: this.orgService.selectedBranchId(),
     };
   }
 
   private validateSelection(restaurantId: string | null, branchId: string | null): boolean {
     if (!restaurantId) {
-      this.toast.warning('Necesitas tener un restaurante para generar el QR');
+      this.toastrService.warning('Necesitas tener un restaurante para generar el QR');
       return false;
     }
 
     if (!branchId) {
-      this.toast.warning('Necesitas tener una sucursal para generar el QR');
+      this.toastrService.warning('Necesitas tener una sucursal para generar el QR');
       return false;
     }
 
@@ -147,16 +147,16 @@ export class HomeComponent {
 
   private handleQrGenerated(qrUrl: string): void {
     if (qrUrl) {
-      this.org.updateSelectedBranch({ qrUrl });
-      this.toast.success('QR generado correctamente');
+      this.orgService.updateSelectedBranch({ qrUrl });
+      this.toastrService.success('QR generado correctamente');
     } else {
-      this.toast.warning('Se generó el QR pero no se recibió la URL');
+      this.toastrService.warning('Se generó el QR pero no se recibió la URL');
     }
   }
 
   async downloadBranchQr(): Promise<void> {
     const url = this.branchQrUrl();
-    const branch = this.org.selectedBranch();
+    const branch = this.orgService.selectedBranch();
 
     if (!url || !branch) return;
 
@@ -164,7 +164,7 @@ export class HomeComponent {
 
     try {
       await this.downloadQrDirectly(url, branch);
-      this.toast.success('Descarga iniciada');
+      this.toastrService.success('Descarga iniciada');
     } catch {
       this.handleDownloadFallback(url);
     } finally {
@@ -206,7 +206,7 @@ export class HomeComponent {
   }
 
   private handleDownloadFallback(url: string): void {
-    this.toast.info('No se pudo descargar automáticamente. Abriendo en nueva pestaña.');
+    this.toastrService.info('No se pudo descargar automáticamente. Abriendo en nueva pestaña.');
     window.open(url, '_blank');
   }
 }

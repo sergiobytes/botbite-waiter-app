@@ -39,6 +39,13 @@ export const routes: Routes = [
             (m) => m.RestaurantsComponent
           ),
       },
+      {
+        path: 'branches',
+        loadComponent: () =>
+          import('./features/dashboard/branches-component/branches.component').then(
+            (m) => m.BranchesComponent
+          ),
+      },
     ],
   },
   { path: '', pathMatch: 'full', redirectTo: '/login' },

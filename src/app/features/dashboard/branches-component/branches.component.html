@@ -1,0 +1,199 @@
+<div class="space-y-6">
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <shared-title
+      title="Sucursales"
+      description="Administra las sucursales del restaurante seleccionado"
+    />
+
+    <div class="flex item-center gap-2 self-start sm:self-auto">
+      <input
+        #csvInput
+        type="file"
+        accept=".csv,text/csv"
+        class="hidden"
+        (change)="onCsvSelected($event)"
+      />
+      <button
+        class="rounded-xl border border-black/10 px-4 py-2 hover:bg-black/5 disabled:opacity-50"
+        (click)="csvInput.click()"
+        [disabled]="!restaurantId()"
+        aria-label="Carga masiva por CSV"
+      >
+        Cargar masiva (CSV)
+      </button>
+      <button
+        class="rounded-xl bg-black text-white px-4 py-2 hover:opacity-90 disabled:opacity-50"
+        (click)="openCreate()"
+        [disabled]="!restaurantId()"
+        aria-label="Crear nueva sucursal"
+      >
+        Nueva sucursal
+      </button>
+    </div>
+  </div>
+
+  <div class="flex flex-col md:flex-row gap-3 items-stretch md:items-center">
+    <div class="md:ml-auto flex items-center gap-2">
+      <input
+        type="text"
+        placeholder="Buscar..."
+        class="rounded-xl border border-black/10 px-3 py-2 w-64"
+        [value]="filters().search ?? ''"
+        (input)="updateFilterSearch($event)"
+        aria-label="Buscar sucursales"
+      />
+      <select
+        class="rounded-xl border border-black/10 px-3 py-2"
+        [value]="filters().isActive ?? ''"
+        (change)="updateFilterActive($event)"
+        aria-label="Filtrar por estado"
+      >
+        <option value="">Todos</option>
+        <option value="true">Activos</option>
+        <option value="false">Inactivos</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="rounded-2xl border border-black/10 overflow-hidden overflow-x-auto">
+    <table class="w-full text-sm min-w-4xl">
+      <thead class="bg-neutral-50 text-neutral-600">
+        <tr>
+          <th class="text-left font-medium px-4 py-3">Nombre</th>
+          <th class="text-left font-medium px-4 py-3">Dirección</th>
+          <th class="text-left font-medium px-4 py-3">Asistente</th>
+          <th class="text-left font-medium px-4 py-3">Caja</th>
+          <th class="text-left font-medium px-4 py-3">Mensajes</th>
+          <th class="text-left font-medium px-4 py-3">Estado</th>
+          <th class="text-right font-medium px-4 py-3">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for(branch of branches(); track branch.id){
+        <tr class="border-t border-black/10">
+          <td class="px-4 py-3">
+            <div class="flex items-center gap-2">
+              <span>{{ branch.name }}</span>
+              @if(branch.qrUrl){
+              <a
+                [href]="branch.qrUrl"
+                target="_blank"
+                rel="noopener"
+                class="text-xs underline underline-offset-4"
+                >QR</a
+              >
+              }
+            </div>
+          </td>
+          <td class="px-4 py-3">{{ branch.address }}</td>
+          <td class="px-4 py-3">{{ branch.phoneNumberAssistant }}</td>
+          <td class="px-4 py-3">{{ branch.phoneNumberReception }}</td>
+          <td class="px-4 py-3">{{ branch.availableMessages }}</td>
+          <td class="px-4 py-3">
+            <span
+              [class]="
+                branch.isActive
+                  ? 'bg-green-100 text-green-800 border-green-200'
+                  : 'bg-neutral-100 text-neutral-700 border-neutral-200'
+              "
+              class="text-xs border px-2 py-0.5 rounded-full"
+            >
+              {{ branch.isActive ? 'Activa' : 'Inactiva' }}
+            </span>
+          </td>
+          <td class="px-4 py-3">
+            <div class="flex items-center gap-2 justify-end">
+              @if(!branch.qrUrl) {
+              <button
+                class="px-3 py-1 border border-black/10 rounded-lg hover:bg-black/5"
+                (click)="onGenerateQr(branch)"
+                [attr.aria-label]="'Generar QR de ' + branch.name"
+              >
+                {{ generatingQr() === branch.id ? 'Generando...' : 'Generar QR' }}
+              </button>
+              }
+
+              <button
+                class="px-3 py-1 border border-black/10 rounded-lg hover:bg-black/5"
+                (click)="openEdit(branch)"
+                [attr.aria-label]="'Editar sucursal ' + branch.name"
+              >
+                Editar
+              </button>
+
+              @if(branch.isActive) {
+              <button
+                class="px-3 py-1 border border-black/10 rounded-lg hover:bg-black/5"
+                (click)="confirmToggle(branch, false)"
+                [attr.aria-label]="'Desactivar ' + branch.name"
+              >
+                Desactivar
+              </button>
+
+              } @else {
+              <button
+                class="px-3 py-1 border border-black/10 rounded-lg hover:bg-black/5"
+                (click)="confirmToggle(branch, true)"
+                [attr.aria-label]="'Activar ' + branch.name"
+              >
+                Activar
+              </button>
+              }
+            </div>
+          </td>
+        </tr>
+        } @if(!loading() && branches().length === 0) {
+        <tr>
+          <td colspan="7" class="px-4 py-6 text-center text-neutral-600">No hay sucursales</td>
+        </tr>
+        } @if (loading()){
+        <tr>
+          <td colspan="7" class="px-4 py-6">
+            <div class="h-6 w-full rounded bg-black/10 animate-pulse"></div>
+          </td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <div class="flex items-center justify-between">
+    <div class="text-sm text-neutral-600">
+      Mostrando {{ pageFrom() }} - {{ pageTo() }} de {{ total() }}
+    </div>
+
+    <div class="flex items-center gap-2">
+      <button
+        class="px-3 py-1 rounded-xl border border-black/10 hover:bg-black/5 disabled:opacity-50 disabled:cursor-not-allowed"
+        (click)="prevPage()"
+        [disabled]="!canPrev()"
+        aria-label="Página anterior"
+      >
+        Anterior
+      </button>
+      <button
+        class="px-3 py-1 rounded-xl border border-black/10 hover:bg-black/5 disabled:opacity-50 disabled:cursor-not-allowed"
+        (click)="nextPage()"
+        [disabled]="!canNext()"
+        aria-label="Página siguiente"
+      >
+        Siguiente
+      </button>
+
+      <select
+        class="rounded-xl border border-black/10 px-2 py-1 text-sm"
+        [value]="pagination().limit"
+        (change)="changeLimit($event)"
+        aria-label="Cambiar tamaño de página"
+      >
+        <option value="10">10</option>
+        <option value="25">25</option>
+        <option value="50">50</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Crear/Editar -->
+
+  <!-- Activar/Desactivar -->
+</div>

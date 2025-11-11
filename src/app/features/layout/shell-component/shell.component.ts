@@ -39,6 +39,7 @@ export class ShellComponent implements OnInit {
     { label: 'Inicio', to: '/dashboard/home' },
     { label: 'Categorías', to: '/dashboard/categories', requiredRole: 'ADMIN' },
     { label: 'Restaurantes', to: '/dashboard/restaurants' },
+    { label: 'Sucursales', to: '/dashboard/branches' },
   ];
 
   // Items filtrados según el rol del usuario
