@@ -10,6 +10,7 @@ import {
 import { ToastrService } from 'ngx-toastr';
 import { BranchesService } from '../../../core/services/branches.service';
 import { OrgService } from '../../../core/services/org.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { Branch, BranchListResponse } from '../../../core/services/types/branches.types';
 import { Mode, Pagination } from '../../../core/services/types/common.types';
 import { TitleComponent } from '../../../shared/components/title/title';
@@ -33,6 +34,7 @@ interface BranchForm {
 export class BranchesComponent {
   private readonly branchesService = inject(BranchesService);
   protected readonly orgService = inject(OrgService);
+  private readonly authService = inject(AuthService);
   private readonly toastrService = inject(ToastrService);
 
   readonly saving = signal(false);
@@ -54,6 +56,11 @@ export class BranchesComponent {
 
   readonly restaurantId = computed(() => this.orgService.selectedRestaurantId());
   readonly confirmTargetStatus = computed(() => !!this.confirmEnable());
+
+  readonly canAddMessages = computed(() => {
+    const roles = this.authService.user()?.roles || [];
+    return roles.includes('super') || roles.includes('admin');
+  });
 
   readonly generatingQr = signal<string | null>(null);
 
