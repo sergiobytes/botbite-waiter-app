@@ -12,7 +12,7 @@ import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth.service';
 import { OrgService } from '../../../core/services/org.service';
 import { hasRole } from '../../../core/guards/roles.guard';
-import { catchError, switchMap, EMPTY } from 'rxjs';
+import { catchError, concatMap, EMPTY } from 'rxjs';
 import type { UserRole } from '../../../core/services/types/common.types';
 
 type NavItem = {
@@ -81,7 +81,7 @@ export class ShellComponent implements OnInit {
             this.auth.logout();
             return EMPTY;
           }),
-          switchMap(() => this.loadOrganizationData()),
+          concatMap(() => this.loadOrganizationData()),
           catchError(() => EMPTY)
         )
         .subscribe();
@@ -92,17 +92,8 @@ export class ShellComponent implements OnInit {
   }
 
   private loadOrganizationData() {
-    return this.org.loadRestaurants().pipe(
-      catchError(() => EMPTY),
-      switchMap(() => {
-        const restaurantId = this.selectedRestaurantId();
-        if (restaurantId) {
-          return this.org.loadBranches(restaurantId);
-        }
-        return EMPTY;
-      }),
-      catchError(() => EMPTY)
-    );
+    // Solo cargar restaurantes, el effect en OrgService cargará los branches automáticamente
+    return this.org.loadRestaurants().pipe(catchError(() => EMPTY));
   }
 
   displayUser(): string {
@@ -162,7 +153,7 @@ export class ShellComponent implements OnInit {
 
   onSelectRestaurant(id: string): void {
     this.org.selectRestaurant(id);
-    // El effect _watchRestaurant se encargará de cargar las sucursales automáticamente
+    // El effect en OrgService cargará las branches automáticamente
   }
 
   onSelectBranch(id: string): void {
