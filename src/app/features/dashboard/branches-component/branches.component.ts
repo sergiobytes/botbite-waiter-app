@@ -14,7 +14,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { Branch, BranchListResponse } from '../../../core/services/types/branches.types';
 import { Mode, Pagination } from '../../../core/services/types/common.types';
 import { TitleComponent } from '../../../shared/components/title/title';
-import { catchError, EMPTY, finalize, tap } from 'rxjs';
+import { catchError, EMPTY, finalize, Subject, debounceTime, tap } from 'rxjs';
 
 interface BranchForm {
   readonly id?: string;
@@ -75,6 +75,7 @@ export class BranchesComponent {
   readonly trackById = (_: number, b: Branch) => b.id;
 
   private previousRestaurantId: string | null = null;
+  private searchSubject = new Subject<string>();
 
   constructor() {
     // Effect para recargar branches cuando cambia el restaurante
@@ -88,6 +89,13 @@ export class BranchesComponent {
         this.filters.set({}); // Reset filtros
         this.reload();
       }
+    });
+
+    // Setup search debouncing
+    this.searchSubject.pipe(debounceTime(300)).subscribe((searchTerm) => {
+      this.filters.update((f) => ({ ...f, search: searchTerm || undefined }));
+      this.pagination.update((p) => ({ ...p, offset: 0 }));
+      this.reload();
     });
   }
 
@@ -136,13 +144,17 @@ export class BranchesComponent {
 
   nextPage() {
     if (!this.canNext()) return;
-    this.pagination.update((p) => ({ ...p, offset: p.offset! + p.limit! }));
+    const offset = this.pagination().offset ?? 0;
+    const limit = this.pagination().limit ?? 10;
+    this.pagination.update((p) => ({ ...p, offset: offset + limit }));
     this.reload();
   }
 
   prevPage() {
     if (!this.canPrev()) return;
-    this.pagination.update((p) => ({ ...p, offset: Math.max(0, p.offset! - p.limit!) }));
+    const offset = this.pagination().offset ?? 0;
+    const limit = this.pagination().limit ?? 10;
+    this.pagination.update((p) => ({ ...p, offset: Math.max(0, offset - limit) }));
     this.reload();
   }
 
@@ -155,10 +167,7 @@ export class BranchesComponent {
 
   updateFilterSearch(event: Event) {
     const input = event.target as HTMLInputElement;
-    this.filters.update((f) => ({ ...f, search: input.value || undefined }));
-    this.pagination.update((p) => ({ ...p, offset: 0 }));
-    clearTimeout((this as any)._searchTimeout);
-    (this as any)._searchTimeout = setTimeout(() => this.reload(), 300);
+    this.searchSubject.next(input.value);
   }
 
   updateFilterActive(event: Event) {
@@ -235,14 +244,9 @@ export class BranchesComponent {
     const op =
       this.mode() === 'create'
         ? this.branchesService.create(dto)
-        : this.branchesService.update(id!, { ...dto });
+        : this.branchesService.update(id!, dto);
 
     op.pipe(
-      tap((response: BranchListResponse | never[]) => {
-        // Actualizar el estado local sin recargar
-        if (Array.isArray(response)) return;
-        this.orgService.branches.set(response.branches);
-      }),
       catchError((e) => {
         console.error('Error saving branch:', e);
         this.toastrService.error('Error al guardar la sucursal');
@@ -270,10 +274,6 @@ export class BranchesComponent {
     const op = enable ? this.branchesService.activate(b.id) : this.branchesService.deactivate(b.id);
 
     op.pipe(
-      tap((response: BranchListResponse | never[]) => {
-        if (Array.isArray(response)) return;
-        this.orgService.branches.set(response.branches);
-      }),
       catchError((e) => {
         console.error('Error toggling branch status:', e);
         this.toastrService.error('Error al cambiar el estado de la sucursal');
@@ -312,10 +312,6 @@ export class BranchesComponent {
         availableMessages: amount,
       })
       .pipe(
-        tap((response: BranchListResponse | never[]) => {
-          if (Array.isArray(response)) return;
-          this.orgService.branches.set(response.branches);
-        }),
         catchError((e) => {
           console.error('Error adding messages:', e);
           this.toastrService.error('Error al agregar mensajes');
@@ -338,18 +334,6 @@ export class BranchesComponent {
     this.branchesService
       .generateQr(rid, branch.id)
       .pipe(
-        tap((res) => {
-          // Actualizar el QR en el branch actual
-          const updated = this.orgService
-            .branches()
-            .map((b) => (b.id === branch.id ? { ...b, qrUrl: res.qrUrl } : b));
-          this.orgService.branches.set(updated);
-
-          // Si es el branch seleccionado, actualizar también
-          if (branch.id === this.orgService.selectedBranch()?.id) {
-            this.orgService.updateSelectedBranch({ qrUrl: res.qrUrl });
-          }
-        }),
         catchError((e) => {
           console.error('Error generating QR code:', e);
           this.toastrService.error('Error al generar el código QR');
@@ -357,7 +341,13 @@ export class BranchesComponent {
         }),
         finalize(() => this.generatingQr.set(null))
       )
-      .subscribe(() => {
+      .subscribe((res) => {
+        // Actualizar el QR en el branch actual
+        const updated = this.orgService
+          .branches()
+          .map((b) => (b.id === branch.id ? { ...b, qrUrl: res.qrUrl } : b));
+        this.orgService.branches.set(updated);
+
         this.toastrService.success('Código QR generado correctamente');
       });
   }
@@ -371,10 +361,6 @@ export class BranchesComponent {
     this.branchesService
       .bulkUploadByCsv(file)
       .pipe(
-        tap((response: BranchListResponse | never[]) => {
-          if (Array.isArray(response)) return;
-          this.orgService.branches.set(response.branches);
-        }),
         catchError((e) => {
           console.error('Error uploading CSV:', e);
           this.toastrService.error('Error al subir el archivo CSV');

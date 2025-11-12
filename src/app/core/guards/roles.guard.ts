@@ -1,23 +1,25 @@
 import { inject } from '@angular/core';
 import { Router, UrlTree, type CanActivateFn } from '@angular/router';
 import { AuthService } from '../services/auth.service';
-
-export type UserRole = 'SUPER' | 'ADMIN' | 'USER' | 'CLIENT';
+import { UserRole } from '../services/types/common.types';
 
 const ROLE_HIERARCHY: Record<UserRole, number> = {
-  SUPER: 4,
-  ADMIN: 3,
-  CLIENT: 2,
-  USER: 1,
+  super: 4,
+  admin: 3,
+  client: 2,
+  user: 1,
 };
 
-function hasRequiredRole(userRoles: string[] | null | undefined, requiredRole: UserRole): boolean {
+function hasRequiredRole(
+  userRoles: UserRole[] | null | undefined,
+  requiredRole: UserRole
+): boolean {
   if (!userRoles?.length) return false;
 
   const requiredLevel = ROLE_HIERARCHY[requiredRole];
 
   return userRoles.some((role) => {
-    const normalizedRole = role.toUpperCase() as UserRole;
+    const normalizedRole = role.toLowerCase() as UserRole;
     const userLevel = ROLE_HIERARCHY[normalizedRole];
     return userLevel >= requiredLevel;
   });
@@ -50,12 +52,12 @@ export function createRolesGuard(requiredRole: UserRole): CanActivateFn {
 }
 
 // Guards predefinidos para cada rol
-export const superGuard = createRolesGuard('SUPER');
-export const adminGuard = createRolesGuard('ADMIN');
-export const userGuard = createRolesGuard('USER');
-export const clientGuard = createRolesGuard('CLIENT');
+export const superGuard = createRolesGuard('super');
+export const adminGuard = createRolesGuard('admin');
+export const userGuard = createRolesGuard('user');
+export const clientGuard = createRolesGuard('client');
 
 // Función helper para verificar roles específicos (uso en componentes)
-export function hasRole(userRoles: string[], role: UserRole): boolean {
+export function hasRole(userRoles: UserRole[], role: UserRole): boolean {
   return hasRequiredRole(userRoles, role);
 }

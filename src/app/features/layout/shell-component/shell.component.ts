@@ -11,8 +11,9 @@ import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/rou
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth.service';
 import { OrgService } from '../../../core/services/org.service';
-import { hasRole, type UserRole } from '../../../core/guards/roles.guard';
+import { hasRole } from '../../../core/guards/roles.guard';
 import { catchError, switchMap, EMPTY } from 'rxjs';
+import type { UserRole } from '../../../core/services/types/common.types';
 
 type NavItem = {
   label: string;
@@ -37,7 +38,8 @@ export class ShellComponent implements OnInit {
   // Todos los items posibles con sus roles requeridos
   private allItems: NavItem[] = [
     { label: 'Inicio', to: '/dashboard/home' },
-    { label: 'Categorías', to: '/dashboard/categories', requiredRole: 'ADMIN' },
+    { label: 'Usuarios', to: '/dashboard/users', requiredRole: 'admin' },
+    { label: 'Categorías', to: '/dashboard/categories', requiredRole: 'admin' },
     { label: 'Restaurantes', to: '/dashboard/restaurants' },
     { label: 'Sucursales', to: '/dashboard/branches' },
   ];

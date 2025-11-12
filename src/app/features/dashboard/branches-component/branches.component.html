@@ -221,7 +221,7 @@
 
       <form (submit)="$event.preventDefault(); handleSave()" class="grid md:grid-cols-2 gap-4">
         <div class="md:col-span-2">
-          <label class="text-sm font-medium">Nombre</label>
+          <label for="bname" class="text-sm font-medium">Nombre</label>
           <input
             id="bname"
             type="text"
@@ -234,7 +234,7 @@
         </div>
 
         <div class="md:col-span-2">
-          <label class="text-sm font-medium">Dirección</label>
+          <label for="baddress" class="text-sm font-medium">Dirección</label>
           <input
             id="baddress"
             type="text"
@@ -246,7 +246,7 @@
           />
         </div>
         <div class="md:col-span-2">
-          <label class="text-sm font-medium">Tel. Asistente</label>
+          <label for="bassistant" class="text-sm font-medium">Tel. Asistente</label>
           <input
             id="bassistant"
             type="text"
@@ -257,7 +257,7 @@
           />
         </div>
         <div class="md:col-span-2">
-          <label class="text-sm font-medium">Tel. Caja</label>
+          <label for="breception" class="text-sm font-medium">Tel. Caja</label>
           <input
             id="breception"
             type="text"
@@ -367,8 +367,9 @@
       </p>
 
       <div class="mb-4">
-        <label class="text-sm font-medium block mb-2">Cantidad a agregar</label>
+        <label for="messagesToAdd" class="text-sm font-medium block mb-2">Cantidad a agregar</label>
         <input
+          id="messagesToAdd"
           type="number"
           min="1"
           step="1"

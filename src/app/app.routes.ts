@@ -46,6 +46,14 @@ export const routes: Routes = [
             (m) => m.BranchesComponent
           ),
       },
+      {
+        path: 'users',
+        canActivate: [adminGuard],
+        loadComponent: () =>
+          import('./features/dashboard/users-component/users.component').then(
+            (m) => m.UsersComponent
+          ),
+      },
     ],
   },
   { path: '', pathMatch: 'full', redirectTo: '/login' },
