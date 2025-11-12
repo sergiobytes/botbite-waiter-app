@@ -44,7 +44,7 @@
       />
       <select
         class="rounded-xl border border-black/10 px-3 py-2"
-        [value]="filters().isActive ?? ''"
+        [value]="activeFilterValue()"
         (change)="updateFilterActive($event)"
         aria-label="Filtrar por estado"
       >

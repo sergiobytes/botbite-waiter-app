@@ -14,7 +14,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { Branch, BranchListResponse } from '../../../core/services/types/branches.types';
 import { Mode, Pagination } from '../../../core/services/types/common.types';
 import { TitleComponent } from '../../../shared/components/title/title';
-import { catchError, EMPTY, finalize, Subject, debounceTime, tap } from 'rxjs';
+import { catchError, EMPTY, finalize, Subject, debounceTime } from 'rxjs';
 
 interface BranchForm {
   readonly id?: string;
@@ -52,10 +52,16 @@ export class BranchesComponent {
   readonly pagination = signal<Partial<Pagination>>({ limit: 10, offset: 0 });
 
   readonly branches = computed(() => this.orgService.branches());
-  readonly total = computed(() => this.branches().length);
+  readonly total = computed(() => this.orgService.totalBranches());
 
   readonly restaurantId = computed(() => this.orgService.selectedRestaurantId());
   readonly confirmTargetStatus = computed(() => !!this.confirmEnable());
+
+  readonly activeFilterValue = computed(() => {
+    const isActive = this.filters().isActive;
+    if (isActive === undefined) return '';
+    return isActive ? 'true' : 'false';
+  });
 
   readonly canAddMessages = computed(() => {
     const roles = this.authService.user()?.roles || [];
@@ -174,9 +180,19 @@ export class BranchesComponent {
     const select = event.target as HTMLSelectElement;
     const value = select.value;
 
+    let isActive: boolean | undefined;
+
+    if (value === '') {
+      isActive = undefined; // Todos
+    } else if (value === 'true') {
+      isActive = true; // Activos
+    } else if (value === 'false') {
+      isActive = false; // Inactivos
+    }
+
     this.filters.update((f) => ({
       ...f,
-      isActive: value === '' ? undefined : value === 'true',
+      isActive,
     }));
 
     this.goFirst();

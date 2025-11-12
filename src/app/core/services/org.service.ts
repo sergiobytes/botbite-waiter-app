@@ -21,6 +21,7 @@ export class OrgService {
   );
 
   readonly branches = signal<Branch[]>([]);
+  readonly totalBranches = signal<number>(0);
   readonly selectedBranchId = signal<string | null>(null);
   readonly selectedBranch = computed(
     () => this.branches().find((b) => b.id === this.selectedBranchId()) ?? null
@@ -38,6 +39,7 @@ export class OrgService {
 
       if (!rid) {
         this.branches.set([]);
+        this.totalBranches.set(0);
         this.selectedBranchId.set(null);
         return;
       }
@@ -138,6 +140,7 @@ export class OrgService {
       .pipe(
         tap((list) => {
           this.branches.set(Array.isArray(list.branches) ? list.branches : []);
+          this.totalBranches.set(list.total || 0);
 
           // Mantener la selección actual si existe en la nueva lista
           const currentSelection = this.selectedBranchId();
@@ -162,6 +165,7 @@ export class OrgService {
         catchError((error) => {
           console.error('Error loading branches:', error);
           this.branches.set([]);
+          this.totalBranches.set(0);
           this.selectedBranchId.set(null);
           return of({ branches: [], total: 0 });
         }),
