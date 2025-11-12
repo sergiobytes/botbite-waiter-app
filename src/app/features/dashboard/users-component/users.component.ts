@@ -54,4 +54,6 @@ export class UsersComponent {
     email: '',
     isActive: true,
   });
+
+  readonly trackById = (_: number, u: UserRow) => u.id;
 }
