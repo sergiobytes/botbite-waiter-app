@@ -19,12 +19,14 @@ export interface LoginRes {
 export interface ValidateTokenRes {
   valid: boolean;
   user: {
+    id: string;
     email: string;
     roles: UserRole[];
   };
 }
 
 export interface UserProfile {
+  id: string;
   email: string;
   name?: string;
   roles: UserRole[];

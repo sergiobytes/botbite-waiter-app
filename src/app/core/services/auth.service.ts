@@ -24,6 +24,7 @@ export class AuthService {
       map(
         (res) =>
           ({
+            id: res.user.id,
             email: res.user.email,
             roles: res.user.roles,
           } as UserProfile)
