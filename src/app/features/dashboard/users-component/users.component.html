@@ -21,17 +21,21 @@
   <div class="flex flex-col md:flex-row gap-3 items-stretch md:items-center">
     <div class="md:ml-auto flex items-center gap-2">
       <input
+        id="searchInput"
         type="text"
         placeholder="Buscar por email..."
         class="rounded-xl border border-black/10 px-3 py-2 w-64"
         [value]="search()"
         (input)="updateSearch($event)"
+        aria-label="Buscar por email"
       />
 
       <select
+        id="roleFilter"
         class="rounded-xl border border-black/10 px-3 py-2"
         [value]="roleFilter()"
         (change)="updateRole($event)"
+        aria-label="Filtrar por rol"
       >
         <option value="">Todos</option>
         <option value="user">Usuarios</option>
@@ -83,20 +87,142 @@
           <td class="px-4 py-3">
             <div class="flex items-center gap-2 justify-end">
               <button
-                class="px-3 py-1 border border-black/10 rounded-lg hover:bg-black/5"
+                class="px-3 py-1 border border-black/10 rounded-lg hover:bg-black/5 disabled:opacity-50 disabled:cursor-not-allowed"
                 (click)="user.isActive ? deactivate(user) : activate(user)"
+                [disabled]="!canActOn(user)"
+                [attr.aria-label]="(user.isActive ? 'Desactivar' : 'Activar') + ' usuario ' + user.email"
               >
                 {{ user.isActive ? 'Desactivar' : 'Activar' }}
               </button>
 
               @if(!hasRole(user, 'admin')){
-              <button>Hacer Admin</button>
+              <button
+                class="px-3 py-1 border border-black/10 rounded-lg hover:bg-black/5 disabled:opacity-50 disabled:cursor-not-allowed"
+                (click)="addAdmin(user)"
+                [disabled]="!canActOn(user)"
+                [attr.aria-label]="'Hacer administrador a ' + user.email"
+              >
+                Hacer Admin
+              </button>
+              } @else {
+              <button
+                class="px-3 py-1 border border-black/10 rounded-lg hover:bg-black/5 disabled:opacity-50 disabled:cursor-not-allowed"
+                (click)="removeAdmin(user)"
+                [disabled]="!canActOn(user)"
+                [attr.aria-label]="'Quitar rol de administrador a ' + user.email"
+              >
+                Quitar Admin
+              </button>
               }
             </div>
+          </td>
+        </tr>
+        } @if (!loading() && usersService.users().length === 0) {
+        <tr>
+          <td colspan="5" class="px-4 py-6 text-center text-neutral-600">No hay usuarios.</td>
+        </tr>
+
+        } @if (loading()) {
+        <tr>
+          <td colspan="5" class="px-4 py-6">
+            <div class="h-6 w-full rounded bg-black/10 animate-pulse"></div>
           </td>
         </tr>
         }
       </tbody>
     </table>
   </div>
+
+  <div class="flex items-center justify-between">
+    <div class="text-sm text-neutral-600">
+      Mostrando {{ pageFrom() }} - {{ pageTo() }} de {{ total() }}
+    </div>
+
+    <div class="flex items-center gap-2">
+      <button
+        class="px-3 py-1 rounded-xl border border-black/10 hover:bg-black/5 disabled:opacity-50 disabled:cursor-not-allowed"
+        (click)="prevPage()"
+        [disabled]="!canPrev()"
+        aria-label="Página anterior"
+      >
+        Anterior
+      </button>
+      <button
+        class="px-3 py-1 rounded-xl border border-black/10 hover:bg-black/5 disabled:opacity-50 disabled:cursor-not-allowed"
+        (click)="nextPage()"
+        [disabled]="!canNext()"
+        aria-label="Página siguiente"
+      >
+        Siguiente
+      </button>
+
+      <select
+        class="rounded-xl border border-black/10 px-2 py-1 text-sm"
+        [value]="pagination().limit"
+        (change)="changeLimit($event)"
+        aria-label="Cambiar tamaño de página"
+      >
+        <option value="10">10</option>
+        <option value="25">25</option>
+        <option value="50">50</option>
+      </select>
+    </div>
+  </div>
+
+  @if (mode()) {
+  <div
+    class="fixed inset-0 z-50 flex items-center justify-center p-4"
+    role="dialog"
+    aria-modal="true"
+  >
+    <div class="absolute inset-0 bg-black/40" (click)="closeModal()" aria-hidden="true"></div>
+    <div class="relative bg-white w-full max-w-md rounded-2xl border border-black/10 p-6 shadow-xl">
+      <h2 class="text-lg font-semibold mb-4">
+        {{ mode() === 'create-client' ? 'Registrar cliente' : 'Registrar usuario' }}
+      </h2>
+      <form (submit)="$event.preventDefault(); save()" class="space-y-4">
+        <div>
+          <label for="userEmail" class="text-sm font-medium">Email</label>
+          <input
+            id="userEmail"
+            type="email"
+            class="w-full rounded-xl border border-black/10 px-3 py-2"
+            [value]="form().email"
+            (input)="updateFormEmail($event)"
+            required
+          />
+        </div>
+        <div>
+          <label for="userPassword" class="text-sm font-medium">Contraseña</label>
+          <input
+            id="userPassword"
+            type="password"
+            class="w-full rounded-xl border border-black/10 px-3 py-2"
+            [value]="form().password"
+            (input)="updateFormPassword($event)"
+            required
+            minlength="6"
+          />
+        </div>
+
+        <div class="flex items-center justify-end gap-3 pt-2">
+          <button
+            type="button"
+            class="px-4 py-2 rounded-xl border border-black/10 hover:bg-black/5"
+            (click)="closeModal()"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            class="px-4 py-2 rounded-xl bg-black text-white hover:opacity-90 disabled:opacity-50"
+            [disabled]="saving()"
+          >
+            {{ saving() ? 'Guardando…' : 'Guardar' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+  }
 </div>

@@ -7,7 +7,7 @@ import { ToastrService } from 'ngx-toastr';
 import { Mode, Pagination, UserRole } from '../../../core/services/types/common.types';
 import { UserRow } from '../../../core/services/types/users.types';
 import { catchError, debounceTime, EMPTY, finalize, Subject } from 'rxjs';
-import { getRoleBadgeClass } from './../../../shared/utils/role-bagde-class.util';
+import { getRoleBadgeClass } from '../../../shared/utils/role-bagde-class.util';
 
 @Component({
   selector: 'app-users.component',
@@ -36,8 +36,17 @@ export class UsersComponent {
   isSuper = computed(() => (this.me()?.roles || []).map((r) => r.toLowerCase()).includes('super'));
   isAdmin = computed(() => (this.me()?.roles || []).map((r) => r.toLowerCase()).includes('admin'));
 
+  private searchSubject = new Subject<string>();
+
   constructor() {
     this.reload();
+
+    // Setup search debouncing
+    this.searchSubject.pipe(debounceTime(300)).subscribe((searchTerm) => {
+      this.search.set(searchTerm);
+      this.pagination.update((p) => ({ ...p, offset: 0 }));
+      this.reload();
+    });
   }
 
   reload() {
@@ -109,12 +118,7 @@ export class UsersComponent {
 
   updateSearch(e: Event) {
     const v = (e.target as HTMLInputElement).value;
-    this.search.set(v);
-    clearTimeout((this as any)._t);
-    (this as any)._t = setTimeout(() => {
-      this.pagination.update((p) => ({ ...p, offset: 0 }));
-      this.reload();
-    }, 250);
+    this.searchSubject.next(v);
   }
 
   updateRole(e: Event) {
@@ -169,7 +173,8 @@ export class UsersComponent {
   }
 
   canActOn(row: UserRow) {
-    const meEmail = this.me()?.email.toLowerCase();
+    const meEmail = this.me()?.email?.toLowerCase();
+    if (!meEmail) return false;
     return row.email.toLowerCase() !== meEmail;
   }
 
@@ -219,7 +224,64 @@ export class UsersComponent {
     return (row.roles || []).map((r) => r.toLowerCase()).includes(role);
   }
 
+  addAdmin(row: UserRow) {
+    if (!this.canActOn(row)) {
+      this.toastrService.warning('No puedes modificar tu propio usuario');
+      return;
+    }
+
+    this.usersService
+      .addAdminRole(row.id)
+      .pipe(
+        catchError((e) => {
+          console.error(e);
+          this.toastrService.error('Error al añadir el rol de administrador');
+          return EMPTY;
+        })
+      )
+      .subscribe(() => {
+        this.toastrService.success('Rol de administrador añadido');
+        this.reload();
+      });
+  }
+
+  removeAdmin(row: UserRow) {
+    if (!this.isSuper()) {
+      this.toastrService.warning('Solo un superusuario puede modificar roles de administrador');
+      return;
+    }
+
+    if (!this.canActOn(row)) {
+      this.toastrService.warning('No puedes modificar tu propio usuario');
+      return;
+    }
+
+    this.usersService
+      .removeAdminRole(row.id)
+      .pipe(
+        catchError((e) => {
+          console.error(e);
+          this.toastrService.error('Error al eliminar el rol de administrador');
+          return EMPTY;
+        })
+      )
+      .subscribe(() => {
+        this.toastrService.success('Rol de administrador eliminado');
+        this.reload();
+      });
+  }
+
   roleBadgeClass(role?: string) {
     return getRoleBadgeClass(role);
+  }
+
+  updateFormEmail(e: Event) {
+    const value = (e.target as HTMLInputElement).value;
+    this.form.update((f) => ({ ...f, email: value }));
+  }
+
+  updateFormPassword(e: Event) {
+    const value = (e.target as HTMLInputElement).value;
+    this.form.update((f) => ({ ...f, password: value }));
   }
 }
