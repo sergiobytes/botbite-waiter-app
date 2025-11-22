@@ -1,1 +1,75 @@
-<p>users.component works!</p>,
+<div class="space-y-6">
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <shared-title title="Usuarios" description="Administra los usuarios del sistema" />
+
+    <div class="flex items-center gap-2 self-start sm:self-auto">
+      <button
+        class="rounded-xl border border-black/10 px-4 py-2 hover:bg-black/5"
+        (click)="openCreateUser()"
+      >
+        Nuevo usuario
+      </button>
+      <button
+        class="rounded-xl bg-black text-white px-4 py-2 hover:opacity-90"
+        (click)="openCreateClient()"
+      >
+        Nuevo cliente
+      </button>
+    </div>
+  </div>
+
+  <div class="flex flex-col md:flex-row gap-3 items-stretch md:items-center">
+    <div class="md:ml-auto flex items-center gap-2">
+      <input
+        type="text"
+        placeholder="Buscar por email..."
+        class="rounded-xl border border-black/10 px-3 py-2 w-64"
+        [value]="search()"
+        (input)="updateSearch($event)"
+      />
+
+      <select
+        class="rounded-xl border border-black/10 px-3 py-2"
+        [value]="roleFilter()"
+        (change)="updateRole($event)"
+      >
+        <option value="">Todos</option>
+        <option value="user">Usuarios</option>
+        <option value="client">Cliente</option>
+        <option value="admin">Administrador</option>
+        <option value="super">Superusuario</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="rounded-2xl border border-black/10 overflow-hidden overflow-x-auto">
+    <table class="w-full text-sm min-w-4xl">
+      <thead class="bg-neutral-50 text-neutral-600">
+        <tr>
+          <th class="text-left font-medium px-4 py-3">Email</th>
+          <th class="text-left font-medium px-4 py-3">Roles</th>
+          <th class="text-left font-medium px-4 py-3">Estado</th>
+          <th class="text-right font-medium px-4 py-3">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for(user of usersService.users(); track user.id){
+        <tr class="border-t border-black/10">
+          <td class="px-4 py-3">{{ user.email }}</td>
+          <td class="px-4 py-3">
+            <div class="flex flex-wrap gap-1">
+              @for(role of user.roles; track role){
+              <span
+                class="text-sm border px-2 py-0.5 rounded-full"
+                [class]="roleBadgeClass(role.toUpperCase())"
+                >{{ role.toUpperCase() }}</span
+              >
+              }
+            </div>
+          </td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>

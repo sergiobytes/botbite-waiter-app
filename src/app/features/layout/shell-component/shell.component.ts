@@ -14,6 +14,7 @@ import { OrgService } from '../../../core/services/org.service';
 import { hasRole } from '../../../core/guards/roles.guard';
 import { catchError, concatMap, EMPTY } from 'rxjs';
 import type { UserRole } from '../../../core/services/types/common.types';
+import { getRoleBadgeClass } from '../../../shared/utils/role-bagde-class.util';
 
 type NavItem = {
   label: string;
@@ -138,17 +139,8 @@ export class ShellComponent implements OnInit {
     return roles[0].toUpperCase();
   }
 
-  getRoleBadgeClass(role?: string): string {
-    const roleClasses = {
-      SUPER: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-      ADMIN: 'bg-blue-100 text-blue-800 border-blue-200',
-      USER: 'bg-green-100 text-green-800 border-green-200',
-    } as const;
-
-    return (
-      roleClasses[role as keyof typeof roleClasses] ??
-      'bg-neutral-100 text-neutral-700 border-neutral-200'
-    );
+  roleBadgeClass(role?: string): string {
+    return getRoleBadgeClass(role);
   }
 
   onSelectRestaurant(id: string): void {

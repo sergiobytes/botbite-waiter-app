@@ -136,7 +136,7 @@
             <!-- Badge del rol -->
             @if (getBestRole(auth.user()?.roles); as userRole) {
             <span
-              [class]="getRoleBadgeClass(userRole)"
+              [class]="roleBadgeClass(userRole)"
               class="border text-xs font-medium px-2 py-0.5 rounded-full whitespace-nowrap transition-colors"
               [attr.aria-label]="'Rol: ' + userRole"
             >
