@@ -1,0 +1,16 @@
+@if(loading()) {
+<tr>
+  <td [attr.colspan]="colspan()" class="px-4 py-8 text-center">
+    <div class="animate-pulse space-y-2">
+      <div class="h-4 bg-neutral-200 rounded w-3/4 mx-auto"></div>
+      <div class="h-4 bg-neutral-200 rounded w-1/2 mx-auto"></div>
+    </div>
+  </td>
+</tr>
+} @else if(isEmpty()) {
+<tr>
+  <td [attr.colspan]="colspan()" class="px-4 py-8 text-center text-neutral-500">
+    {{ message() }}
+  </td>
+</tr>
+}
