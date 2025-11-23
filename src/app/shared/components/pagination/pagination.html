@@ -1,0 +1,44 @@
+<div class="flex items-center justify-between">
+  <div class="text-sm text-neutral-600">
+    Mostrando {{ pageFrom() }} - {{ pageTo() }} de {{ total() }}
+  </div>
+
+  <div class="flex items-center gap-2">
+    <button
+      type="button"
+      [disabled]="!canPrev()"
+      (click)="previousPage.emit()"
+      class="rounded-xl border border-black/10 px-4 py-2 hover:bg-black/5 transition"
+      [class.opacity-50]="!canPrev()"
+      [class.cursor-not-allowed]="!canPrev()"
+      aria-label="Página anterior"
+    >
+      Anterior
+    </button>
+    <button
+      type="button"
+      [disabled]="!canNext()"
+      (click)="nextPage.emit()"
+      class="rounded-xl border border-black/10 px-4 py-2 hover:bg-black/5 transition"
+      [class.opacity-50]="!canNext()"
+      [class.cursor-not-allowed]="!canNext()"
+      aria-label="Página siguiente"
+    >
+      Siguiente
+    </button>
+
+    @if (showLimitSelector()) {
+    <select
+      [value]="currentLimit()"
+      (change)="limitChange.emit($event)"
+      class="rounded-xl border border-black/10 px-3 py-2"
+      aria-label="Elementos por página"
+    >
+      <option value="10">10</option>
+      <option value="25">25</option>
+      <option value="50">50</option>
+      <option value="100">100</option>
+    </select>
+    }
+  </div>
+</div>

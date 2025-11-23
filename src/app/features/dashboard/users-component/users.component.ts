@@ -6,12 +6,15 @@ import { AuthService } from '../../../core/services/auth.service';
 import { ToastrService } from 'ngx-toastr';
 import { Mode, Pagination, UserRole } from '../../../core/services/types/common.types';
 import { UserRow } from '../../../core/services/types/users.types';
-import { catchError, debounceTime, EMPTY, finalize, Subject } from 'rxjs';
+import { catchError, debounceTime, EMPTY, Subject } from 'rxjs';
 import { getRoleBadgeClass } from '../../../shared/utils/role-bagde-class.util';
+import { PaginationComponent } from '../../../shared/components/pagination/pagination';
+import { createPaginationState } from '../../../shared/utils/pagination.util';
+import { createSearchState } from '../../../shared/utils/search.util';
 
 @Component({
   selector: 'app-users.component',
-  imports: [CommonModule, TitleComponent],
+  imports: [CommonModule, TitleComponent, PaginationComponent],
   templateUrl: './users.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -20,106 +23,72 @@ export class UsersComponent {
   private readonly authService = inject(AuthService);
   private readonly toastrService = inject(ToastrService);
 
-  loading = signal<boolean>(false);
-  total = signal<number>(0);
-  pagination = signal<Partial<Pagination>>({ limit: 10, offset: 0 });
+  readonly loading = signal(false);
+  readonly total = signal(0);
+  readonly roleFilter = signal<UserRole | ''>('');
+  readonly mode = signal<Mode>(null);
+  readonly saving = signal(false);
+  readonly form = signal<{ email: string; password: string }>({ email: '', password: '' });
 
-  search = signal<string>('');
-  roleFilter = signal<UserRole | ''>('');
+  readonly me = computed(() => this.authService.user());
+  readonly myId = computed(() => this.me()?.id);
+  readonly isSuper = computed(() =>
+    (this.me()?.roles || []).map((r) => r.toLowerCase()).includes('super')
+  );
+  readonly isAdmin = computed(() =>
+    (this.me()?.roles || []).map((r) => r.toLowerCase()).includes('admin')
+  );
 
-  mode = signal<Mode>(null);
-  saving = signal<boolean>(false);
-  form = signal<{ email: string; password: string }>({ email: '', password: '' });
+  private readonly paginationState = createPaginationState(this.total, {
+    onChange: () => this.reload(),
+  });
 
-  me = computed(() => this.authService.user());
-  myId = computed(() => this.me()?.id);
-  isSuper = computed(() => (this.me()?.roles || []).map((r) => r.toLowerCase()).includes('super'));
-  isAdmin = computed(() => (this.me()?.roles || []).map((r) => r.toLowerCase()).includes('admin'));
+  readonly pagination = this.paginationState.pagination;
+  readonly pageFrom = this.paginationState.pageFrom;
+  readonly pageTo = this.paginationState.pageTo;
+  readonly canPrev = this.paginationState.canPrev;
+  readonly canNext = this.paginationState.canNext;
 
-  private searchSubject = new Subject<string>();
+  private readonly searchState = createSearchState({
+    onSearch: () => {
+      this.paginationState.resetToFirstPage();
+      this.reload();
+    },
+  });
+
+  readonly search = this.searchState.searchTerm;
 
   constructor() {
     this.reload();
-
-    // Setup search debouncing
-    this.searchSubject.pipe(debounceTime(300)).subscribe((searchTerm) => {
-      this.search.set(searchTerm);
-      this.pagination.update((p) => ({ ...p, offset: 0 }));
-      this.reload();
-    });
   }
 
   reload() {
     this.loading.set(true);
+    const { limit, offset } = this.pagination();
+
     this.usersService
       .list({
         search: this.search() || undefined,
         role: this.roleFilter() || undefined,
-        limit: this.pagination().limit,
-        offset: this.pagination().offset,
+        limit,
+        offset,
       })
-      .pipe(
-        catchError((e) => {
-          console.error(e);
+      .subscribe({
+        next: (res) => {
+          this.total.set(res.total);
+          this.loading.set(false);
+        },
+        error: () => {
+          this.loading.set(false);
           this.toastrService.error('Error al cargar los usuarios');
-          return EMPTY;
-        }),
-        finalize(() => this.loading.set(false))
-      )
-      .subscribe((res) => {
-        this.total.set(res.total);
+        },
       });
   }
 
-  pageFrom = computed(() => {
-    const offset = this.pagination().offset ?? 0;
-    return this.total() === 0 ? 0 : offset + 1;
-  });
-
-  pageTo = computed(() => {
-    const offset = this.pagination().offset ?? 0;
-    const limit = this.pagination().limit ?? 10;
-    return Math.min(offset + limit, this.total());
-  });
-
-  canPrev = computed(() => {
-    const offset = this.pagination().offset ?? 0;
-    return offset > 0;
-  });
-
-  canNext = computed(() => {
-    const offset = this.pagination().offset ?? 0;
-    const limit = this.pagination().limit ?? 10;
-    return offset + limit < this.total();
-  });
-
-  nextPage() {
-    if (!this.canNext()) return;
-    const offset = this.pagination().offset ?? 0;
-    const limit = this.pagination().limit ?? 10;
-    this.pagination.update((p) => ({ ...p, offset: offset + limit }));
-    this.reload();
-  }
-
-  prevPage() {
-    if (!this.canPrev()) return;
-    const offset = this.pagination().offset ?? 0;
-    const limit = this.pagination().limit ?? 10;
-    this.pagination.update((p) => ({ ...p, offset: Math.max(0, offset - limit) }));
-    this.reload();
-  }
-
-  changeLimit(event: Event) {
-    const select = event.target as HTMLSelectElement;
-    const limit = Number(select.value) || 10;
-    this.pagination.set({ limit, offset: 0 });
-    this.reload();
-  }
-
-  updateSearch(e: Event) {
-    const v = (e.target as HTMLInputElement).value;
-    this.searchSubject.next(v);
-  }
+  nextPage = () => this.paginationState.nextPage();
+  prevPage = () => this.paginationState.prevPage();
+  changeLimit = (e: Event) => this.paginationState.changeLimit(e);
+  updateSearch = (e: Event) => this.searchState.updateSearch(e);
 
   updateRole(e: Event) {
     const v = (e.target as HTMLSelectElement).value as UserRole | '';
@@ -140,42 +109,41 @@ export class UsersComponent {
 
   closeModal() {
     this.mode.set(null);
+    this.form.set({ email: '', password: '' });
   }
 
   save() {
     const { email, password } = this.form();
-    if (!email?.trim() || !password?.trim()) return;
+    if (!email || !password) {
+      this.toastrService.warning('Email y contraseña son obligatorios');
+      return;
+    }
+
     this.saving.set(true);
 
-    const op =
-      this.mode() === 'create-client'
-        ? this.usersService.registerUserOrClient(
-            { email: email.trim(), password: password.trim() },
-            'register-client'
-          )
-        : this.usersService.registerUserOrClient(
-            { email: email.trim(), password: password.trim() },
-            'register-user'
-          );
+    const role = this.mode() === 'create-client' ? 'client' : 'user';
 
-    op.pipe(
-      catchError((e) => {
-        console.error(e);
-        this.toastrService.error('No se pudo registrar');
-        return EMPTY;
-      }),
-      finalize(() => this.saving.set(false))
-    ).subscribe(() => {
-      this.toastrService.success('Usuario registrado');
-      this.mode.set(null);
-      this.reload();
+    this.usersService.registerUserOrClient({ email, password }, `register-${role}`).subscribe({
+      next: () => {
+        this.toastrService.success('Usuario registrado');
+        this.closeModal();
+        this.saving.set(false);
+        this.reload();
+      },
+      error: () => {
+        this.toastrService.error('No se pudo registrar al usuario');
+        this.saving.set(false);
+      },
     });
   }
 
   canActOn(row: UserRow) {
-    const meEmail = this.me()?.email?.toLowerCase();
-    if (!meEmail) return false;
-    return row.email.toLowerCase() !== meEmail;
+    if (row.id === this.myId()) return false;
+    const userRoles = (row.roles || []).map((r) => r.toLowerCase());
+    if (userRoles.includes('super')) return false;
+    if (this.isSuper()) return true;
+    if (this.isAdmin() && !userRoles.includes('admin')) return true;
+    return false;
   }
 
   activate(row: UserRow) {
