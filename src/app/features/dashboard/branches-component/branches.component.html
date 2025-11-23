@@ -38,7 +38,7 @@
         type="text"
         placeholder="Buscar..."
         class="rounded-xl border border-black/10 px-3 py-2 w-64"
-        [value]="filters().search ?? ''"
+        [value]="searchTerm()"
         (input)="updateFilterSearch($event)"
         aria-label="Buscar sucursales"
       />
@@ -111,9 +111,7 @@
               >
                 + Mensajes
               </button>
-              }
-
-              @if(!branch.qrUrl) {
+              } @if(!branch.qrUrl) {
               <button
                 class="px-3 py-1 border border-black/10 rounded-lg hover:bg-black/5"
                 (click)="onGenerateQr(branch)"
@@ -167,41 +165,16 @@
     </table>
   </div>
 
-  <div class="flex items-center justify-between">
-    <div class="text-sm text-neutral-600">
-      Mostrando {{ pageFrom() }} - {{ pageTo() }} de {{ total() }}
-    </div>
-
-    <div class="flex items-center gap-2">
-      <button
-        class="px-3 py-1 rounded-xl border border-black/10 hover:bg-black/5 disabled:opacity-50 disabled:cursor-not-allowed"
-        (click)="prevPage()"
-        [disabled]="!canPrev()"
-        aria-label="Página anterior"
-      >
-        Anterior
-      </button>
-      <button
-        class="px-3 py-1 rounded-xl border border-black/10 hover:bg-black/5 disabled:opacity-50 disabled:cursor-not-allowed"
-        (click)="nextPage()"
-        [disabled]="!canNext()"
-        aria-label="Página siguiente"
-      >
-        Siguiente
-      </button>
-
-      <select
-        class="rounded-xl border border-black/10 px-2 py-1 text-sm"
-        [value]="pagination().limit"
-        (change)="changeLimit($event)"
-        aria-label="Cambiar tamaño de página"
-      >
-        <option value="10">10</option>
-        <option value="25">25</option>
-        <option value="50">50</option>
-      </select>
-    </div>
-  </div>
+  <app-pagination
+    [total]="total()"
+    [pageFrom]="pageFrom()"
+    [pageTo]="pageTo()"
+    [canPrev]="canPrev()"
+    [canNext]="canNext()"
+    (previousPage)="prevPage()"
+    (nextPage)="nextPage()"
+    (limitChange)="changeLimit($event)"
+  />
 
   <!-- Crear/Editar -->
   @if(mode()){
@@ -358,11 +331,10 @@
       aria-hidden="true"
     ></div>
     <div class="relative bg-white w-full max-w-md rounded-2xl border border-black/10 p-6 shadow-xl">
-      <h3 id="addMessagesDialogTitle" class="text-lg font-semibold mb-2">
-        Agregar mensajes
-      </h3>
+      <h3 id="addMessagesDialogTitle" class="text-lg font-semibold mb-2">Agregar mensajes</h3>
       <p class="text-sm text-neutral-600 mb-4">
-        Sucursal: <strong>{{ targetForMessages()?.name }}</strong><br>
+        Sucursal: <strong>{{ targetForMessages()?.name }}</strong
+        ><br />
         Mensajes actuales: <strong>{{ targetForMessages()?.availableMessages }}</strong>
       </p>
 
@@ -375,7 +347,7 @@
           step="1"
           class="w-full rounded-xl border border-black/10 px-3 py-2"
           [value]="messagesToAdd()"
-          (input)="messagesToAdd.set(+($any($event.target).value))"
+          (input)="messagesToAdd.set(+$any($event.target).value)"
           placeholder="Ej: 100"
         />
       </div>

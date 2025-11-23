@@ -11,10 +11,13 @@ import { ToastrService } from 'ngx-toastr';
 import { BranchesService } from '../../../core/services/branches.service';
 import { OrgService } from '../../../core/services/org.service';
 import { AuthService } from '../../../core/services/auth.service';
-import { Branch, BranchListResponse } from '../../../core/services/types/branches.types';
+import { Branch } from '../../../core/services/types/branches.types';
 import { Mode, Pagination } from '../../../core/services/types/common.types';
 import { TitleComponent } from '../../../shared/components/title/title';
 import { catchError, EMPTY, finalize, Subject, debounceTime } from 'rxjs';
+import { PaginationComponent } from '../../../shared/components/pagination/pagination';
+import { createPaginationState } from '../../../shared/utils/pagination.util';
+import { createSearchState } from '../../../shared/utils/search.util';
 
 interface BranchForm {
   readonly id?: string;
@@ -27,7 +30,7 @@ interface BranchForm {
 
 @Component({
   selector: 'app-branches.component',
-  imports: [CommonModule, TitleComponent],
+  imports: [CommonModule, TitleComponent, PaginationComponent],
   templateUrl: './branches.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -39,21 +42,25 @@ export class BranchesComponent {
 
   readonly saving = signal(false);
   readonly mode = signal<Mode>(null);
-
   readonly confirming = signal(false);
   private confirmEnable = signal<boolean | null>(null);
   readonly target = signal<Branch | null>(null);
-
   readonly addingMessages = signal(false);
   readonly messagesToAdd = signal(0);
   readonly targetForMessages = signal<Branch | null>(null);
+  readonly generatingQr = signal<string | null>(null);
+  readonly filters = signal<{ isActive?: boolean }>({});
 
-  readonly filters = signal<{ search?: string; isActive?: boolean }>({});
-  readonly pagination = signal<Partial<Pagination>>({ limit: 10, offset: 0 });
+  readonly form = signal<BranchForm>({
+    name: '',
+    address: '',
+    phoneNumberAssistant: '',
+    phoneNumberReception: '',
+    isActive: true,
+  });
 
   readonly branches = computed(() => this.orgService.branches());
   readonly total = computed(() => this.orgService.totalBranches());
-
   readonly restaurantId = computed(() => this.orgService.selectedRestaurantId());
   readonly confirmTargetStatus = computed(() => !!this.confirmEnable());
 
@@ -68,40 +75,40 @@ export class BranchesComponent {
     return roles.includes('super') || roles.includes('admin');
   });
 
-  readonly generatingQr = signal<string | null>(null);
-
-  readonly form = signal<BranchForm>({
-    name: '',
-    address: '',
-    phoneNumberAssistant: '',
-    phoneNumberReception: '',
-    isActive: true,
+  private readonly paginationState = createPaginationState(this.total, {
+    onChange: () => this.fetch(),
   });
+
+  readonly pagination = this.paginationState.pagination;
+  readonly pageFrom = this.paginationState.pageFrom;
+  readonly pageTo = this.paginationState.pageTo;
+  readonly canPrev = this.paginationState.canPrev;
+  readonly canNext = this.paginationState.canNext;
+
+  private readonly searchState = createSearchState({
+    onSearch: () => {
+      this.paginationState.resetToFirstPage();
+      this.fetch();
+    },
+  });
+
+  readonly searchTerm = this.searchState.searchTerm;
 
   readonly trackById = (_: number, b: Branch) => b.id;
 
   private previousRestaurantId: string | null = null;
-  private searchSubject = new Subject<string>();
 
   constructor() {
-    // Effect para recargar branches cuando cambia el restaurante
     effect(() => {
       const rid = this.restaurantId();
 
-      // Solo resetear y recargar si cambió el restaurante
       if (rid && rid !== this.previousRestaurantId) {
         this.previousRestaurantId = rid;
-        this.pagination.set({ limit: 10, offset: 0 }); // Reset paginación
-        this.filters.set({}); // Reset filtros
-        this.reload();
+        this.paginationState.resetToFirstPage();
+        this.filters.set({});
+        this.searchState.searchTerm.set('');
+        this.fetch();
       }
-    });
-
-    // Setup search debouncing
-    this.searchSubject.pipe(debounceTime(300)).subscribe((searchTerm) => {
-      this.filters.update((f) => ({ ...f, search: searchTerm || undefined }));
-      this.pagination.update((p) => ({ ...p, offset: 0 }));
-      this.reload();
     });
   }
 
@@ -109,12 +116,11 @@ export class BranchesComponent {
     const rid = this.restaurantId();
     if (!rid) return;
 
-    const limit = this.pagination().limit ?? 10;
-    const offset = this.pagination().offset ?? 0;
+    const { limit, offset } = this.pagination();
 
     this.branchesService
       .listByRestaurant({
-        search: this.filters().search,
+        search: this.searchTerm() || undefined,
         isActive: this.filters().isActive,
         limit,
         offset,
@@ -126,55 +132,10 @@ export class BranchesComponent {
     this.fetch();
   }
 
-  pageFrom = computed(() => {
-    const offset = this.pagination().offset ?? 0;
-    return this.total() === 0 ? 0 : offset + 1;
-  });
-
-  pageTo = computed(() => {
-    const offset = this.pagination().offset ?? 0;
-    const limit = this.pagination().limit ?? 10;
-    return Math.min(offset + limit, this.total());
-  });
-
-  canPrev = computed(() => {
-    const offset = this.pagination().offset ?? 0;
-    return offset > 0;
-  });
-
-  canNext = computed(() => {
-    const offset = this.pagination().offset ?? 0;
-    const limit = this.pagination().limit ?? 10;
-    return offset + limit < this.total();
-  });
-
-  nextPage() {
-    if (!this.canNext()) return;
-    const offset = this.pagination().offset ?? 0;
-    const limit = this.pagination().limit ?? 10;
-    this.pagination.update((p) => ({ ...p, offset: offset + limit }));
-    this.reload();
-  }
-
-  prevPage() {
-    if (!this.canPrev()) return;
-    const offset = this.pagination().offset ?? 0;
-    const limit = this.pagination().limit ?? 10;
-    this.pagination.update((p) => ({ ...p, offset: Math.max(0, offset - limit) }));
-    this.reload();
-  }
-
-  changeLimit(event: Event) {
-    const select = event.target as HTMLSelectElement;
-    const limit = Number(select.value) || 10;
-    this.pagination.set({ limit, offset: 0 });
-    this.reload();
-  }
-
-  updateFilterSearch(event: Event) {
-    const input = event.target as HTMLInputElement;
-    this.searchSubject.next(input.value);
-  }
+  nextPage = () => this.paginationState.nextPage();
+  prevPage = () => this.paginationState.prevPage();
+  changeLimit = (e: Event) => this.paginationState.changeLimit(e);
+  updateFilterSearch = (e: Event) => this.searchState.updateSearch(e);
 
   updateFilterActive(event: Event) {
     const select = event.target as HTMLSelectElement;
