@@ -1,11 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { catchError, EMPTY, finalize } from 'rxjs';
 import { CategoriesService } from '../../../core/services/categories.service';
 import { Category } from '../../../core/services/types/category.types';
 import { Mode } from '../../../core/services/types/common.types';
 import { TitleComponent } from '../../../shared/components/title/title';
+import { ModalComponent } from '../../../shared/components/modal/modal';
 
 interface CategoryForm {
   readonly id?: number;
@@ -15,7 +16,7 @@ interface CategoryForm {
 
 @Component({
   selector: 'app-categories',
-  imports: [CommonModule, TitleComponent],
+  imports: [CommonModule, TitleComponent, ModalComponent],
   templateUrl: './categories.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -23,16 +24,26 @@ export class CategoriesComponent {
   private readonly categoriesService = inject(CategoriesService);
   private readonly toastrService = inject(ToastrService);
 
-  // State signals
-  readonly loading = signal(false);
   readonly saving = signal(false);
   readonly mode = signal<Mode>(null);
-  readonly target = signal<Category | null>(null);
   readonly confirming = signal(false);
-  readonly categoriesList = signal<Category[]>([]);
+  readonly target = signal<Category | null>(null);
+
   readonly form = signal<CategoryForm>({
     name: '',
     isActive: true,
+  });
+
+  readonly loading = signal(false);
+  readonly categoriesList = signal<Category[]>([]);
+
+  readonly modalTitle = computed(() => {
+    return this.mode() === 'create' ? 'Nueva categoría' : 'Editar categoría';
+  });
+
+  readonly isFormValid = computed(() => {
+    const f = this.form();
+    return f.name.trim() !== '';
   });
 
   constructor() {
@@ -71,9 +82,17 @@ export class CategoriesComponent {
     });
   }
 
+  closeModal(): void {
+    this.mode.set(null);
+    this.form.set({ name: '', isActive: true });
+  }
+
   save(): void {
     const formValue = this.form();
-    if (!formValue.name.trim()) return;
+    if (!formValue.name.trim()) {
+      this.toastrService.warning('El nombre de la categoría es obligatorio');
+      return;
+    }
 
     this.saving.set(true);
 
@@ -103,6 +122,16 @@ export class CategoriesComponent {
       });
   }
 
+  confirmDisable(category: Category): void {
+    this.target.set(category);
+    this.confirming.set(true);
+  }
+
+  closeConfirmation(): void {
+    this.confirming.set(false);
+    this.target.set(null);
+  }
+
   disable(): void {
     const targetCategory = this.target();
     if (!targetCategory?.id) return;
@@ -122,16 +151,6 @@ export class CategoriesComponent {
         this.target.set(null);
         this.loadCategories();
       });
-  }
-
-  closeModal(): void {
-    this.mode.set(null);
-    this.form.set({ name: '', isActive: true });
-  }
-
-  confirmDisable(category: Category): void {
-    this.target.set(category);
-    this.confirming.set(true);
   }
 
   updateFormName(event: Event): void {

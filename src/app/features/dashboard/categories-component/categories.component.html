@@ -72,97 +72,59 @@
     </table>
   </div>
 
-  @if (mode()) {
-  <div
-    class="fixed inset-0 z-50 flex items-center justify-center p-4"
-    role="dialog"
-    aria-modal="true"
-    [attr.aria-label]="mode() === 'create' ? 'Crear nueva categoría' : 'Editar categoría'"
+  <app-modal
+    [isOpen]="mode() !== null"
+    [title]="modalTitle()"
+    [maxWidth]="'max-w-lg'"
+    [showActions]="true"
+    [loading]="saving()"
+    [confirmDisabled]="!isFormValid()"
+    confirmText="Guardar"
+    (close)="closeModal()"
+    (cancel)="closeModal()"
+    (confirm)="save()"
   >
-    <div class="absolute inset-0 bg-black/40" (click)="closeModal()" aria-hidden="true"></div>
-    <div class="relative bg-white w-full max-w-lg rounded-2xl border border-black/10 p-6 shadow-xl">
-      <h2 class="text-lg font-semibold mb-4">
-        {{ mode() === 'create' ? 'Nueva categoría' : 'Editar categoría' }}
-      </h2>
-      <form (submit)="$event.preventDefault(); handleSave()" class="space-y-4">
-        <div class="space-y-1">
-          <label for="categoryName" class="text-sm font-medium">Nombre</label>
-          <input
-            id="categoryName"
-            type="text"
-            class="w-full rounded-xl border border-black/10 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black/20"
-            [value]="form().name"
-            (input)="updateFormName($event)"
-            required
-            maxlength="80"
-            aria-required="true"
-          />
-        </div>
-        <div class="flex items-center gap-2">
-          <input
-            id="activeCategory"
-            type="checkbox"
-            [checked]="form().isActive"
-            (change)="updateFormActive($event)"
-            class="rounded"
-          />
-          <label for="activeCategory" class="text-sm">Activa</label>
-        </div>
-        <div class="flex items-center justify-end gap-3 pt-2">
-          <button
-            type="button"
-            class="px-4 py-2 rounded-xl border border-black/10 hover:bg-black/5"
-            (click)="closeModal()"
-            aria-label="Cancelar"
-          >
-            Cancelar
-          </button>
-          <button
-            type="submit"
-            class="px-4 py-2 rounded-xl bg-black text-white hover:opacity-90 disabled:opacity-50"
-            [disabled]="saving()"
-            [attr.aria-label]="saving() ? 'Guardando' : 'Guardar categoría'"
-          >
-            {{ saving() ? 'Guardando...' : 'Guardar' }}
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-  } @if (confirming()) {
-  <div
-    class="fixed inset-0 z-50 flex items-center justify-center p-4"
-    role="dialog"
-    aria-modal="true"
-    aria-labelledby="confirmDialogTitle"
-  >
-    <div
-      class="absolute inset-0 bg-black/40"
-      (click)="confirming.set(false)"
-      aria-hidden="true"
-    ></div>
-    <div class="relative bg-white w-full max-w-sm rounded-2xl border border-black/10 p-6 shadow-xl">
-      <h3 id="confirmDialogTitle" class="text-lg font-semibold mb-2">Deshabilitar categoría</h3>
-      <p class="text-sm text-neutral-600 mb-4">
-        ¿Seguro que quieres deshabilitar "{{ target()?.name }}"?
-      </p>
-      <div class="flex items-center justify-end gap-3">
-        <button
-          class="px-4 py-2 rounded-xl border border-black/10 hover:bg-black/5"
-          (click)="confirming.set(false)"
-          aria-label="Cancelar"
-        >
-          Cancelar
-        </button>
-        <button
-          class="px-4 py-2 rounded-xl bg-black text-white hover:opacity-90"
-          (click)="disable()"
-          aria-label="Confirmar deshabilitar"
-        >
-          Deshabilitar
-        </button>
+    <form (submit)="$event.preventDefault(); handleSave()" class="space-y-4">
+      <div class="space-y-1">
+        <label for="categoryName" class="text-sm font-medium">Nombre</label>
+        <input
+          id="categoryName"
+          type="text"
+          class="w-full rounded-xl border border-black/10 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black/20"
+          [value]="form().name"
+          (input)="updateFormName($event)"
+          required
+          maxlength="80"
+          aria-required="true"
+        />
       </div>
-    </div>
-  </div>
-  }
+      <div class="flex items-center gap-2">
+        <input
+          id="activeCategory"
+          type="checkbox"
+          [checked]="form().isActive"
+          (change)="updateFormActive($event)"
+          class="rounded"
+        />
+        <label for="activeCategory" class="text-sm">Activa</label>
+      </div>
+
+      @if (!isFormValid() && form().name) {
+      <p class="text-sm text-red-600">El nombre es obligatorio</p>
+      }
+    </form>
+  </app-modal>
+
+  <app-modal
+    [isOpen]="confirming()"
+    title="Deshabilitar categoría"
+    [maxWidth]="'max-w-sm'"
+    [showActions]="true"
+    confirmText="Deshabilitar"
+    (close)="closeConfirmation()"
+    (cancel)="closeConfirmation()"
+    (confirm)="disable()"
+  >
+    <p class="text-sm text-neutral-600">¿Seguro que quieres deshabilitar "{{ target()?.name }}"?</p>
+  </app-modal>
 </div>
