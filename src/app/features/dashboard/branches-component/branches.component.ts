@@ -14,6 +14,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { Branch } from '../../../core/services/types/branches.types';
 import { Mode } from '../../../core/services/types/common.types';
 import { TitleComponent } from '../../../shared/components/title/title';
+import { ModalComponent } from '../../../shared/components/modal/modal';
 import { catchError, EMPTY, finalize } from 'rxjs';
 import { PaginationComponent } from '../../../shared/components/pagination/pagination';
 import { createPaginationState } from '../../../shared/utils/pagination.util';
@@ -30,7 +31,7 @@ interface BranchForm {
 
 @Component({
   selector: 'app-branches.component',
-  imports: [CommonModule, TitleComponent, PaginationComponent],
+  imports: [CommonModule, TitleComponent, PaginationComponent, ModalComponent],
   templateUrl: './branches.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -74,6 +75,26 @@ export class BranchesComponent {
     const roles = this.authService.user()?.roles || [];
     return roles.includes('super') || roles.includes('admin');
   });
+
+  readonly modalTitle = computed(() => {
+    return this.mode() === 'create' ? 'Nueva sucursal' : 'Editar sucursal';
+  });
+
+  readonly isFormValid = computed(() => {
+    const f = this.form();
+    return f.name.trim() !== '' && f.address.trim() !== '';
+  });
+
+  readonly confirmTitle = computed(() =>
+    this.confirmTargetStatus() ? 'Activar sucursal' : 'Desactivar sucursal'
+  );
+
+  readonly confirmMessage = computed(() => {
+    const action = this.confirmTargetStatus() ? 'activar' : 'desactivar';
+    return `¿Seguro que quieres ${action} "${this.target()?.name}"?`;
+  });
+
+  readonly addMessagesDisabled = computed(() => this.messagesToAdd() <= 0);
 
   private readonly paginationState = createPaginationState(this.total, {
     onChange: () => this.fetch(),
@@ -151,17 +172,9 @@ export class BranchesComponent {
       isActive = false; // Inactivos
     }
 
-    this.filters.update((f) => ({
-      ...f,
-      isActive,
-    }));
-
-    this.goFirst();
-  }
-
-  goFirst() {
-    this.pagination.update((p) => ({ ...p, offset: 0 }));
-    this.reload();
+    this.filters.update((f) => ({ ...f, isActive }));
+    this.paginationState.resetToFirstPage();
+    this.fetch();
   }
 
   openCreate() {
@@ -198,13 +211,12 @@ export class BranchesComponent {
     });
   }
 
-  handleSave() {
-    this.save();
-  }
-
-  save() {
+  save(): void {
     const f = this.form();
-    if (!f.name.trim() || !f.address.trim()) return;
+    if (!f.name.trim() || !f.address.trim()) {
+      this.toastrService.warning('El nombre y la dirección son obligatorios');
+      return;
+    }
 
     this.saving.set(true);
 
@@ -236,13 +248,19 @@ export class BranchesComponent {
     });
   }
 
-  confirmToggle(branch: Branch, enable: boolean) {
+  confirmToggle(branch: Branch, enable: boolean): void {
     this.target.set(branch);
     this.confirmEnable.set(enable);
     this.confirming.set(true);
   }
 
-  toggleActive() {
+  closeConfirmation(): void {
+    this.confirming.set(false);
+    this.target.set(null);
+    this.confirmEnable.set(null);
+  }
+
+  toggleActive(): void {
     const b = this.target();
     const enable = this.confirmEnable();
     this.confirming.set(false);
@@ -258,6 +276,7 @@ export class BranchesComponent {
       })
     ).subscribe(() => {
       this.toastrService.success(`Sucursal ${enable ? 'activada' : 'desactivada'} correctamente`);
+      this.closeConfirmation();
     });
   }
 
@@ -347,7 +366,8 @@ export class BranchesComponent {
       .subscribe(() => {
         input.value = '';
         this.toastrService.success('Sucursales cargadas correctamente');
-        this.goFirst();
+        this.paginationState.resetToFirstPage();
+        this.fetch();
       });
   }
 
@@ -359,5 +379,10 @@ export class BranchesComponent {
   updateFormChecked<K extends keyof BranchForm>(key: K, ev: Event) {
     const el = ev.target as HTMLInputElement;
     this.form.update((f) => ({ ...f, [key]: el.checked as any }));
+  }
+
+  updateMessagesToAdd(ev: Event): void {
+    const input = ev.target as HTMLInputElement;
+    this.messagesToAdd.set(Number(input.value));
   }
 }
