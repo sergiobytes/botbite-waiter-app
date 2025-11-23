@@ -24,7 +24,7 @@ export class ModalComponent {
   confirm = output<void>();
 
   protected containerClasses(): string {
-    return `relative bg-white w-full rounded-2xl border border-black/10 p-6 shadow-xl ${this.maxWidth}`;
+    return `relative bg-white w-full rounded-2xl border border-black/10 p-6 shadow-xl ${this.maxWidth()}`;
   }
 
   protected handleOverlayClick(): void {

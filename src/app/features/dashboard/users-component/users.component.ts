@@ -11,10 +11,11 @@ import { getRoleBadgeClass } from '../../../shared/utils/role-bagde-class.util';
 import { PaginationComponent } from '../../../shared/components/pagination/pagination';
 import { createPaginationState } from '../../../shared/utils/pagination.util';
 import { createSearchState } from '../../../shared/utils/search.util';
+import { ModalComponent } from '../../../shared/components/modal/modal';
 
 @Component({
   selector: 'app-users.component',
-  imports: [CommonModule, TitleComponent, PaginationComponent],
+  imports: [CommonModule, TitleComponent, PaginationComponent, ModalComponent],
   templateUrl: './users.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -38,6 +39,18 @@ export class UsersComponent {
   readonly isAdmin = computed(() =>
     (this.me()?.roles || []).map((r) => r.toLowerCase()).includes('admin')
   );
+
+  readonly modalTitle = computed(() => {
+    const currentMode = this.mode();
+    if (currentMode === 'create-user') return 'Crear Usuario';
+    if (currentMode === 'create-client') return 'Crear Cliente';
+    return '';
+  });
+
+  readonly isFormValid = computed(() => {
+    const f = this.form();
+    return f.email.trim() !== '' && f.password.trim().length >= 6;
+  });
 
   private readonly paginationState = createPaginationState(this.total, {
     onChange: () => this.reload(),
