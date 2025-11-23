@@ -1,0 +1,39 @@
+@if (isOpen()){
+<div
+  class="fixed inset-0 z-50 flex items-center justify-center p-4"
+  role="dialog"
+  aria-modal="true"
+  [attr.aria-labelledby]="ariaLabelId()"
+>
+  <div class="absolute inset-0 bg-black/40" (click)="handleOverlayClick()" aria-hidden="true"></div>
+
+  <div [class]="containerClasses()">
+    <h2 [id]="ariaLabelId()" class="text-lg font-semibold mb-4">{{ title() }}</h2>
+
+    <ng-content />
+
+    @if (showActions()) {
+    <div class="flex gap-2 mt-6">
+      <button
+        type="button"
+        (click)="cancel.emit()"
+        [disabled]="loading()"
+        class="flex-1 rounded-xl border border-black/10 px-4 py-2 hover:bg-black/5"
+        [class.opacity-50]="loading()"
+      >
+        {{ cancelText() }}
+      </button>
+      <button
+        type="button"
+        (click)="confirm.emit()"
+        [disabled]="loading() || confirmDisabled()"
+        class="flex-1 rounded-xl bg-black text-white px-4 py-2 hover:opacity-90"
+        [class.opacity-50]="loading() || confirmDisabled()"
+      >
+        {{ loading() ? loadingText() : confirmText() }}
+      </button>
+    </div>
+    }
+  </div>
+</div>
+}
