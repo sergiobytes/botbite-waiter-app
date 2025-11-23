@@ -5,8 +5,9 @@ import { RestaurantsService } from '../../../core/services/restaurants.service';
 import { OrgService } from '../../../core/services/org.service';
 import { Mode } from '../../../core/services/types/common.types';
 import { Restaurant } from '../../../core/services/types/restaurants.types';
-import { catchError, EMPTY, finalize, tap } from 'rxjs';
+import { catchError, EMPTY, finalize } from 'rxjs';
 import { TitleComponent } from '../../../shared/components/title/title';
+import { ModalComponent } from '../../../shared/components/modal/modal';
 
 interface RestaurantForm {
   readonly id?: string;
@@ -16,7 +17,7 @@ interface RestaurantForm {
 
 @Component({
   selector: 'app-restaurants.component',
-  imports: [CommonModule, TitleComponent],
+  imports: [CommonModule, TitleComponent, ModalComponent],
   templateUrl: './restaurants.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -38,8 +39,16 @@ export class RestaurantsComponent {
 
   readonly trackById = (_: string, restaurant: Restaurant) => restaurant.id;
 
-  // Computed signal reactivo en lugar de getter
   readonly restaurants = computed(() => this.orgService.restaurants());
+
+  readonly modalTitle = computed(() => {
+    return this.mode() === 'create' ? 'Nuevo restaurante' : 'Editar restaurante';
+  });
+
+  readonly isFormValid = computed(() => {
+    const f = this.form();
+    return f.name.trim() !== '';
+  });
 
   openCreate(): void {
     this.mode.set('create');
@@ -53,6 +62,11 @@ export class RestaurantsComponent {
       name: restaurant.name,
       isActive: restaurant.isActive,
     });
+  }
+
+  closeModal(): void {
+    this.mode.set(null);
+    this.form.set({ name: '', isActive: true });
   }
 
   save(): void {
@@ -87,6 +101,16 @@ export class RestaurantsComponent {
       });
   }
 
+  confirmDisable(restaurant: Restaurant): void {
+    this.target.set(restaurant);
+    this.confirming.set(true);
+  }
+
+  closeConfirmation(): void {
+    this.confirming.set(false);
+    this.target.set(null);
+  }
+
   disable(): void {
     const targetRestaurant = this.target();
     if (!targetRestaurant?.id) return;
@@ -107,16 +131,6 @@ export class RestaurantsComponent {
       });
   }
 
-  closeModal(): void {
-    this.mode.set(null);
-    this.form.set({ name: '', isActive: true });
-  }
-
-  confirmDisable(restaurant: Restaurant): void {
-    this.target.set(restaurant);
-    this.confirming.set(true);
-  }
-
   updateFormName(event: Event): void {
     const input = event.target as HTMLInputElement;
     this.form.update((form) => ({ ...form, name: input.value }));
@@ -125,9 +139,5 @@ export class RestaurantsComponent {
   updateFormActive(event: Event): void {
     const input = event.target as HTMLInputElement;
     this.form.update((form) => ({ ...form, isActive: input.checked }));
-  }
-
-  handleSave(): void {
-    this.save();
   }
 }
