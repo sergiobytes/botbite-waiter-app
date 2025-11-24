@@ -7,9 +7,11 @@ import {
   inject,
   signal,
 } from '@angular/core';
+import { LucideAngularModule, LucideIconData } from 'lucide-angular';
 import { ToastrService } from 'ngx-toastr';
 import { catchError, finalize, of } from 'rxjs';
 import { BranchesService } from '../../../core/services/branches.service';
+import { IconsService } from '../../../core/services/icons.service';
 import { OrdersService } from '../../../core/services/orders.service';
 import { OrgService } from '../../../core/services/org.service';
 import { Branch } from '../../../core/services/types/branches.types';
@@ -19,11 +21,12 @@ import { todayYYYYMMDD } from '../../../shared/utils/date.utils';
 interface MetricCard {
   label: string;
   value: string | number;
+  icon?: LucideIconData;
 }
 
 @Component({
   selector: 'app-home',
-  imports: [CommonModule],
+  imports: [CommonModule, LucideAngularModule],
   templateUrl: './home.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -32,6 +35,7 @@ export class HomeComponent {
   private readonly ordersService = inject(OrdersService);
   private readonly branchesService = inject(BranchesService);
   private readonly toastrService = inject(ToastrService);
+  protected readonly iconsService = inject(IconsService);
 
   protected readonly loadingToday = signal<boolean>(false);
   protected readonly generatingQr = signal<boolean>(false);
@@ -46,14 +50,17 @@ export class HomeComponent {
     {
       label: 'Órdenes totales',
       value: this.todayCount(),
+      icon: this.iconsService.orders,
     },
     {
       label: 'Mensajes disponibles',
       value: this.availableMessages(),
+      icon: this.iconsService.message,
     },
     {
       label: 'Interacciones promedio con el asistente',
       value: this.avgInteractions(),
+      icon: this.iconsService.assistant,
     },
   ]);
 
