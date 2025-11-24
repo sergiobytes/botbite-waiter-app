@@ -1,4 +1,4 @@
 export const environment = {
   production: false,
-  apiBaseUrl: 'https://api.botbite.com.mx/v1',
+  apiBaseUrl: 'http://localhost:3000/v1',
 };

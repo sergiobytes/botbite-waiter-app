@@ -9,17 +9,18 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { LucideAngularModule, LucideIconData } from 'lucide-angular';
 import { catchError, concatMap, EMPTY } from 'rxjs';
 import { hasRole } from '../../../core/guards/roles.guard';
 import { AuthService } from '../../../core/services/auth.service';
+import { IconsService } from '../../../core/services/icons.service';
 import { OrgService } from '../../../core/services/org.service';
 import type { UserRole } from '../../../core/services/types/common.types';
 import { RoleBadgeComponent } from '../../../shared/components/role-badge/role-badge';
-import { getRoleBadgeClass } from '../../../shared/utils/role-bagde-class.util';
 
 type NavItem = {
   label: string;
-  icon?: string;
+  icon?: LucideIconData;
   to: string;
   requiredRole?: UserRole;
 };
@@ -33,28 +34,45 @@ type NavItem = {
     RouterLink,
     RouterLinkActive,
     RoleBadgeComponent,
+    LucideAngularModule,
   ],
   templateUrl: './shell.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ShellComponent implements OnInit {
   private router = inject(Router);
-  protected auth = inject(AuthService);
-  protected org = inject(OrgService);
+  protected authService = inject(AuthService);
+  protected orgService = inject(OrgService);
+  protected readonly iconsService = inject(IconsService);
 
   open = signal(false);
 
   private allItems: NavItem[] = [
-    { label: 'Inicio', to: '/dashboard/home' },
-    { label: 'Usuarios', to: '/dashboard/users', requiredRole: 'admin' },
-    { label: 'Categorías', to: '/dashboard/categories', requiredRole: 'admin' },
-    { label: 'Restaurantes', to: '/dashboard/restaurants' },
-    { label: 'Sucursales', to: '/dashboard/branches' },
-    { label: 'Productos', to: '/dashboard/products', requiredRole: 'client' },
+    { label: 'Inicio', to: '/dashboard/home', icon: this.iconsService.house },
+    {
+      label: 'Usuarios',
+      to: '/dashboard/users',
+      requiredRole: 'admin',
+      icon: this.iconsService.users,
+    },
+    {
+      label: 'Categorías',
+      to: '/dashboard/categories',
+      requiredRole: 'admin',
+      icon: this.iconsService.categories,
+    },
+    { label: 'Restaurantes', to: '/dashboard/restaurants', icon: this.iconsService.restaurants },
+    { label: 'Sucursales', to: '/dashboard/branches', icon: this.iconsService.branches },
+    {
+      label: 'Productos',
+      to: '/dashboard/products',
+      requiredRole: 'client',
+      icon: this.iconsService.products,
+    },
   ];
 
   items = computed(() => {
-    const user = this.auth.user();
+    const user = this.authService.user();
     if (!user?.roles) return [this.allItems[0]];
 
     return this.allItems.filter((item) => {
@@ -63,29 +81,29 @@ export class ShellComponent implements OnInit {
     });
   });
 
-  restaurants = this.org.restaurants;
-  selectedRestaurantId = this.org.selectedRestaurantId;
-  selectedRestaurant = this.org.selectedRestaurant;
+  restaurants = this.orgService.restaurants;
+  selectedRestaurantId = this.orgService.selectedRestaurantId;
+  selectedRestaurant = this.orgService.selectedRestaurant;
 
-  branches = this.org.branches;
-  selectedBranchId = this.org.selectedBranchId;
-  selectedBranch = this.org.selectedBranch;
+  branches = this.orgService.branches;
+  selectedBranchId = this.orgService.selectedBranchId;
+  selectedBranch = this.orgService.selectedBranch;
 
   ngOnInit(): void {
     this.initializeUserData();
   }
 
   private initializeUserData(): void {
-    if (!this.auth.isAuthenticated()) {
+    if (!this.authService.isAuthenticated()) {
       return;
     }
 
-    if (!this.auth.user()) {
-      this.auth
+    if (!this.authService.user()) {
+      this.authService
         .loadProfile()
         .pipe(
           catchError(() => {
-            this.auth.logout();
+            this.authService.logout();
             return EMPTY;
           }),
           concatMap(() => this.loadOrganizationData()),
@@ -98,11 +116,11 @@ export class ShellComponent implements OnInit {
   }
 
   private loadOrganizationData() {
-    return this.org.loadRestaurants().pipe(catchError(() => EMPTY));
+    return this.orgService.loadRestaurants().pipe(catchError(() => EMPTY));
   }
 
   displayUser(): string {
-    const user = this.auth.user();
+    const user = this.authService.user();
     if (!user?.email) return '';
 
     const role = this.getBestRole(user.roles);
@@ -120,7 +138,7 @@ export class ShellComponent implements OnInit {
   }
 
   logout(): void {
-    this.auth.logout();
+    this.authService.logout();
     this.router.navigateByUrl('/login');
   }
 
@@ -144,10 +162,10 @@ export class ShellComponent implements OnInit {
   }
 
   onSelectRestaurant(id: string): void {
-    this.org.selectRestaurant(id);
+    this.orgService.selectRestaurant(id);
   }
 
   onSelectBranch(id: string): void {
-    this.org.selectBranch(id);
+    this.orgService.selectBranch(id);
   }
 }
