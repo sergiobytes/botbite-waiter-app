@@ -8,18 +8,18 @@ import {
   signal,
 } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
+import { catchError, EMPTY, finalize } from 'rxjs';
+import { AuthService } from '../../../core/services/auth.service';
 import { BranchesService } from '../../../core/services/branches.service';
 import { OrgService } from '../../../core/services/org.service';
-import { AuthService } from '../../../core/services/auth.service';
 import { Branch } from '../../../core/services/types/branches.types';
 import { Mode } from '../../../core/services/types/common.types';
-import { TitleComponent } from '../../../shared/components/title/title';
+import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state';
 import { ModalComponent } from '../../../shared/components/modal/modal';
-import { catchError, EMPTY, finalize } from 'rxjs';
 import { PaginationComponent } from '../../../shared/components/pagination/pagination';
+import { TitleComponent } from '../../../shared/components/title/title';
 import { createPaginationState } from '../../../shared/utils/pagination.util';
 import { createSearchState } from '../../../shared/utils/search.util';
-
 interface BranchForm {
   readonly id?: string;
   name: string;
@@ -28,10 +28,9 @@ interface BranchForm {
   phoneNumberReception?: string;
   isActive: boolean;
 }
-
 @Component({
   selector: 'app-branches.component',
-  imports: [CommonModule, TitleComponent, PaginationComponent, ModalComponent],
+  imports: [CommonModule, TitleComponent, PaginationComponent, ModalComponent, EmptyStateComponent],
   templateUrl: './branches.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
