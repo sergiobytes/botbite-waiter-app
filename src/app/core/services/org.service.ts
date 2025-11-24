@@ -20,7 +20,6 @@ export class OrgService {
     () => this.restaurants()?.find((r) => r.id === this.selectedRestaurantId()) ?? null
   );
 
-  // ✅ Estado global: TODAS las sucursales activas (para Shell Component)
   readonly branches = signal<Branch[]>([]);
   readonly selectedBranchId = signal<string | null>(null);
   readonly selectedBranch = computed(
@@ -42,7 +41,6 @@ export class OrgService {
         return;
       }
 
-      // ✅ Cargar TODAS las sucursales activas (sin filtros, para Shell)
       this.loadAllActiveBranches(rid).subscribe();
     });
   }

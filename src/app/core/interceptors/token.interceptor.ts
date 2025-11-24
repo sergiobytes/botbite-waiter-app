@@ -20,8 +20,6 @@ export const tokenInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(withAuth).pipe(
     catchError((err: HttpErrorResponse) => {
-      // Solo intentar refresh si: 401, tenemos refresh token, no estamos refrescando ya,
-      // y no es la petición de refresh en sí misma
       if (
         err.status === 401 &&
         auth.refreshToken &&
@@ -41,14 +39,12 @@ export const tokenInterceptor: HttpInterceptorFn = (req, next) => {
               if (res?.accessToken) {
                 localStorage.setItem('botbite.access', res.accessToken);
 
-                // Reintentar la petición original con el nuevo token
                 const retried = req.clone({
                   setHeaders: { Authorization: `Bearer ${res.accessToken}` },
                 });
                 return next(retried);
               }
 
-              // Si no hay token en la respuesta, hacer logout
               auth.logout();
               return throwError(() => err);
             }),

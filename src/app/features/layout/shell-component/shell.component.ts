@@ -21,7 +21,7 @@ type NavItem = {
   label: string;
   icon?: string;
   to: string;
-  requiredRole?: UserRole; // Rol mínimo requerido para mostrar el item
+  requiredRole?: UserRole;
 };
 
 @Component({
@@ -50,7 +50,7 @@ export class ShellComponent implements OnInit {
     { label: 'Categorías', to: '/dashboard/categories', requiredRole: 'admin' },
     { label: 'Restaurantes', to: '/dashboard/restaurants' },
     { label: 'Sucursales', to: '/dashboard/branches' },
-    { label: 'Productos', to: '/dashboard/products', requiredRole: 'client'},
+    { label: 'Productos', to: '/dashboard/products', requiredRole: 'client' },
   ];
 
   items = computed(() => {
