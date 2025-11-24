@@ -7,13 +7,14 @@ import {
   OnInit,
   signal,
 } from '@angular/core';
-import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { catchError, concatMap, EMPTY } from 'rxjs';
+import { hasRole } from '../../../core/guards/roles.guard';
 import { AuthService } from '../../../core/services/auth.service';
 import { OrgService } from '../../../core/services/org.service';
-import { hasRole } from '../../../core/guards/roles.guard';
-import { catchError, concatMap, EMPTY } from 'rxjs';
 import type { UserRole } from '../../../core/services/types/common.types';
+import { RoleBadgeComponent } from '../../../shared/components/role-badge/role-badge';
 import { getRoleBadgeClass } from '../../../shared/utils/role-bagde-class.util';
 
 type NavItem = {
@@ -25,7 +26,14 @@ type NavItem = {
 
 @Component({
   selector: 'app-shell-component',
-  imports: [CommonModule, FormsModule, RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [
+    CommonModule,
+    FormsModule,
+    RouterOutlet,
+    RouterLink,
+    RouterLinkActive,
+    RoleBadgeComponent,
+  ],
   templateUrl: './shell.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -36,7 +44,6 @@ export class ShellComponent implements OnInit {
 
   open = signal(false);
 
-  // Todos los items posibles con sus roles requeridos
   private allItems: NavItem[] = [
     { label: 'Inicio', to: '/dashboard/home' },
     { label: 'Usuarios', to: '/dashboard/users', requiredRole: 'admin' },
@@ -45,13 +52,12 @@ export class ShellComponent implements OnInit {
     { label: 'Sucursales', to: '/dashboard/branches' },
   ];
 
-  // Items filtrados según el rol del usuario
   items = computed(() => {
     const user = this.auth.user();
-    if (!user?.roles) return [this.allItems[0]]; // Solo Inicio si no hay roles
+    if (!user?.roles) return [this.allItems[0]];
 
     return this.allItems.filter((item) => {
-      if (!item.requiredRole) return true; // Sin restricción
+      if (!item.requiredRole) return true;
       return hasRole(user.roles, item.requiredRole);
     });
   });
@@ -73,7 +79,6 @@ export class ShellComponent implements OnInit {
       return;
     }
 
-    // Si no tenemos usuario, cargar perfil primero
     if (!this.auth.user()) {
       this.auth
         .loadProfile()
@@ -87,13 +92,11 @@ export class ShellComponent implements OnInit {
         )
         .subscribe();
     } else {
-      // Si ya tenemos usuario, solo cargar datos de organización
       this.loadOrganizationData().subscribe();
     }
   }
 
   private loadOrganizationData() {
-    // Solo cargar restaurantes, el effect en OrgService cargará los branches automáticamente
     return this.org.loadRestaurants().pipe(catchError(() => EMPTY));
   }
 
@@ -139,13 +142,8 @@ export class ShellComponent implements OnInit {
     return roles[0].toUpperCase();
   }
 
-  roleBadgeClass(role?: string): string {
-    return getRoleBadgeClass(role);
-  }
-
   onSelectRestaurant(id: string): void {
     this.org.selectRestaurant(id);
-    // El effect en OrgService cargará las branches automáticamente
   }
 
   onSelectBranch(id: string): void {

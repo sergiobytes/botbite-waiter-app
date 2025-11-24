@@ -1,21 +1,22 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
-import { TitleComponent } from '../../../shared/components/title/title';
-import { UsersService } from '../../../core/services/users.service';
-import { AuthService } from '../../../core/services/auth.service';
 import { ToastrService } from 'ngx-toastr';
+import { catchError, EMPTY } from 'rxjs';
+import { AuthService } from '../../../core/services/auth.service';
 import { Mode, UserRole } from '../../../core/services/types/common.types';
 import { UserRow } from '../../../core/services/types/users.types';
-import { catchError, EMPTY } from 'rxjs';
-import { getRoleBadgeClass } from '../../../shared/utils/role-bagde-class.util';
-import { PaginationComponent } from '../../../shared/components/pagination/pagination';
-import { createPaginationState } from '../../../shared/utils/pagination.util';
-import { createSearchState } from '../../../shared/utils/search.util';
+import { UsersService } from '../../../core/services/users.service';
 import { ModalComponent } from '../../../shared/components/modal/modal';
+import { PaginationComponent } from '../../../shared/components/pagination/pagination';
+import { RoleBadgeComponent } from '../../../shared/components/role-badge/role-badge';
+import { TitleComponent } from '../../../shared/components/title/title';
+import { createPaginationState } from '../../../shared/utils/pagination.util';
+import { getRoleBadgeClass } from '../../../shared/utils/role-bagde-class.util';
+import { createSearchState } from '../../../shared/utils/search.util';
 
 @Component({
   selector: 'app-users.component',
-  imports: [CommonModule, TitleComponent, PaginationComponent, ModalComponent],
+  imports: [CommonModule, TitleComponent, PaginationComponent, ModalComponent, RoleBadgeComponent],
   templateUrl: './users.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -321,10 +322,6 @@ export class UsersComponent {
         this.toastrService.success('Rol de administrador eliminado');
         this.reload();
       });
-  }
-
-  roleBadgeClass(role?: string) {
-    return getRoleBadgeClass(role);
   }
 
   updateFormEmail(e: Event) {

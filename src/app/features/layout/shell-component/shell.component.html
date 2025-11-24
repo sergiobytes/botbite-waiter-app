@@ -66,59 +66,59 @@
           </button>
 
           <!-- Selector de restaurantes -->
-          @if (restaurants().length > 0) {
-            @if (restaurants().length > 1) {
-              <div class="flex items-center gap-2 shrink-0">
-                <label class="text-sm font-medium text-neutral-700 hidden sm:inline" for="restaurantSelect">
-                  Restaurante:
-                </label>
-                <select
-                  id="restaurantSelect"
-                  [ngModel]="selectedRestaurantId()"
-                  (ngModelChange)="onSelectRestaurant($event)"
-                  class="text-sm rounded-lg border border-black/10 px-3 py-2 bg-white text-black focus:outline-none focus:ring-2 focus:ring-black/20 max-w-40 sm:max-w-50 md:max-w-70"
-                  aria-label="Seleccionar restaurante"
-                >
-                  @for (restaurant of restaurants(); track restaurant.id) {
-                  <option [value]="restaurant.id">{{ restaurant.name }}</option>
-                  }
-                </select>
-              </div>
-            } @else {
-              <div class="text-sm text-neutral-700 truncate">
-                <span class="font-medium hidden sm:inline">Restaurante: </span>
-                <span class="text-neutral-900">{{ selectedRestaurant()?.name }}</span>
-              </div>
-            }
-          }
+          @if (restaurants().length > 0) { @if (restaurants().length > 1) {
+          <div class="flex items-center gap-2 shrink-0">
+            <label
+              class="text-sm font-medium text-neutral-700 hidden sm:inline"
+              for="restaurantSelect"
+            >
+              Restaurante:
+            </label>
+            <select
+              id="restaurantSelect"
+              [ngModel]="selectedRestaurantId()"
+              (ngModelChange)="onSelectRestaurant($event)"
+              class="text-sm rounded-lg border border-black/10 px-3 py-2 bg-white text-black focus:outline-none focus:ring-2 focus:ring-black/20 max-w-40 sm:max-w-50 md:max-w-70"
+              aria-label="Seleccionar restaurante"
+            >
+              @for (restaurant of restaurants(); track restaurant.id) {
+              <option [value]="restaurant.id">{{ restaurant.name }}</option>
+              }
+            </select>
+          </div>
+          } @else {
+          <div class="text-sm text-neutral-700 truncate">
+            <span class="font-medium hidden sm:inline">Restaurante: </span>
+            <span class="text-neutral-900">{{ selectedRestaurant()?.name }}</span>
+          </div>
+          } }
 
           <!-- Selector de sucursales -->
           @if (branches().length > 0) {
-            <span class="text-neutral-300 select-none hidden sm:inline">|</span>
-            @if (branches().length > 1) {
-              <div class="flex items-center gap-2 shrink-0">
-                <label class="text-sm font-medium text-neutral-700 hidden sm:inline" for="branchSelect">
-                  Sucursal:
-                </label>
-                <select
-                  id="branchSelect"
-                  [ngModel]="selectedBranchId()"
-                  (ngModelChange)="onSelectBranch($event)"
-                  class="text-sm rounded-lg border border-black/10 px-3 py-2 bg-white text-black focus:outline-none focus:ring-2 focus:ring-black/20 max-w-40 sm:max-w-50 md:max-w-70"
-                  aria-label="Seleccionar sucursal"
-                >
-                  @for (branch of branches(); track branch.id) {
-                  <option [value]="branch.id">{{ branch.name }}</option>
-                  }
-                </select>
-              </div>
-            } @else {
-              <div class="text-sm text-neutral-700 truncate">
-                <span class="font-medium hidden sm:inline">Sucursal: </span>
-                <span class="text-neutral-900">{{ selectedBranch()?.name }}</span>
-              </div>
-            }
-          }
+          <span class="text-neutral-300 select-none hidden sm:inline">|</span>
+          @if (branches().length > 1) {
+          <div class="flex items-center gap-2 shrink-0">
+            <label class="text-sm font-medium text-neutral-700 hidden sm:inline" for="branchSelect">
+              Sucursal:
+            </label>
+            <select
+              id="branchSelect"
+              [ngModel]="selectedBranchId()"
+              (ngModelChange)="onSelectBranch($event)"
+              class="text-sm rounded-lg border border-black/10 px-3 py-2 bg-white text-black focus:outline-none focus:ring-2 focus:ring-black/20 max-w-40 sm:max-w-50 md:max-w-70"
+              aria-label="Seleccionar sucursal"
+            >
+              @for (branch of branches(); track branch.id) {
+              <option [value]="branch.id">{{ branch.name }}</option>
+              }
+            </select>
+          </div>
+          } @else {
+          <div class="text-sm text-neutral-700 truncate">
+            <span class="font-medium hidden sm:inline">Sucursal: </span>
+            <span class="text-neutral-900">{{ selectedBranch()?.name }}</span>
+          </div>
+          } }
         </div>
 
         <!-- USUARIO ACTIVO -->
@@ -135,13 +135,7 @@
 
             <!-- Badge del rol -->
             @if (getBestRole(auth.user()?.roles); as userRole) {
-            <span
-              [class]="roleBadgeClass(userRole)"
-              class="border text-xs font-medium px-2 py-0.5 rounded-full whitespace-nowrap transition-colors"
-              [attr.aria-label]="'Rol: ' + userRole"
-            >
-              {{ userRole }}
-            </span>
+            <app-role-badge [role]="userRole" />
             }
           </div>
 

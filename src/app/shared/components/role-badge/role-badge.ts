@@ -13,10 +13,10 @@ export class RoleBadgeComponent {
 
   protected displayRole = computed(() => {
     const roleLabels: Record<UserRole, string> = {
-      super: 'Super',
-      admin: 'Administrador',
-      client: 'Cliente',
-      user: 'Usuario',
+      super: 'SUPER',
+      admin: 'ADMINISTRADOR',
+      client: 'CLIENTE',
+      user: 'USUARIO',
     };
 
     const normalizedRole = this.role().toLowerCase() as UserRole;
@@ -24,6 +24,6 @@ export class RoleBadgeComponent {
   });
 
   protected badgeClasses = computed(
-    () => `px-2 py-1 rounded-lg text-xs font-medium ${getRoleBadgeClass(this.role())}`
+    () => `px-2 py-1 rounded-lg text-xs font-medium ${getRoleBadgeClass(this.role().toUpperCase())}`
   );
 }

@@ -80,12 +80,7 @@
           <td class="px-4 py-3">
             <div class="flex gap-1 flex-wrap">
               @for (r of row.roles; track r) {
-              <span
-                [class]="roleBadgeClass(r.toUpperCase())"
-                class="px-2 py-1 rounded-lg text-xs font-medium"
-              >
-                {{ r.toUpperCase() }}
-              </span>
+              <app-role-badge [role]="r" />
               }
             </div>
           </td>
