@@ -242,7 +242,6 @@ export class BranchesComponent {
       address: data.address.trim(),
       phoneNumberAssistant: data.phoneNumberAssistant?.trim() || null,
       phoneNumberReception: data.phoneNumberReception?.trim() || null,
-      isActive: !!data.isActive,
     };
 
     const op =
@@ -339,13 +338,10 @@ export class BranchesComponent {
   }
 
   onGenerateQr(branch: Branch): void {
-    const rid = this.restaurantId();
-    if (!rid) return;
-
     this.generatingQr.set(branch.id);
 
     this.branchesService
-      .generateQr(rid, branch.id)
+      .generateQr(branch.id)
       .pipe(
         catchError((e) => {
           console.error('Error generating QR code:', e);

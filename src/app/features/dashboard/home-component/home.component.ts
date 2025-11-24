@@ -1,5 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  inject,
+  signal,
+} from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { catchError, finalize, of } from 'rxjs';
 import { BranchesService } from '../../../core/services/branches.service';
@@ -111,7 +118,7 @@ export class HomeComponent {
     this.generatingQr.set(true);
 
     this.branchesService
-      .generateQr(restaurantId!, branchId!)
+      .generateQr(branchId!)
       .pipe(
         catchError(() => {
           this.toastrService.error('Error al generar el QR');

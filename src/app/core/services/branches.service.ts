@@ -13,9 +13,11 @@ export class BranchesService {
   private readonly orgService = inject(OrgService);
   private readonly apiUrl = environment.apiBaseUrl;
 
-  generateQr(restaurantId: string, branchId: string): Observable<{ qrUrl: string }> {
+  generateQr(branchId: string): Observable<{ qrUrl: string }> {
+    const restaurantId = this.orgService.selectedRestaurantId();
+
     const url = `${this.apiUrl}/branches/generate-qr/${restaurantId}/${branchId}`;
-    return this.http.post<{ qrUrl: string }>(url, {});
+    return this.http.get<{ qrUrl: string }>(url, {});
   }
 
   listByRestaurant(params: {
