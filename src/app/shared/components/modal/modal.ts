@@ -1,3 +1,4 @@
+import { animate, state, style, transition, trigger } from '@angular/animations';
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 
 @Component({
@@ -5,6 +6,26 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
   imports: [],
   templateUrl: './modal.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  animations: [
+    trigger('fadeIn', [
+      transition(':enter', [
+        style({ opacity: 0 }),
+        animate('150ms ease-out', style({ opacity: 1 }))
+      ]),
+      transition(':leave', [
+        animate('150ms ease-in', style({ opacity: 0 }))
+      ])
+    ]),
+    trigger('scaleIn', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'scale(0.95)' }),
+        animate('200ms ease-out', style({ opacity: 1, transform: 'scale(1)' }))
+      ]),
+      transition(':leave', [
+        animate('150ms ease-in', style({ opacity: 0, transform: 'scale(0.95)' }))
+      ])
+    ])
+  ]
 })
 export class ModalComponent {
   isOpen = input.required<boolean>();
