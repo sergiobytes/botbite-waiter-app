@@ -9,11 +9,10 @@ import {
 } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { catchError, EMPTY, finalize } from 'rxjs';
-import { AuthService } from '../../../core/services/auth.service';
-import { BranchesService } from '../../../core/services/branches.service';
 import { OrgService } from '../../../core/services/org.service';
-import { Branch } from '../../../core/services/types/branches.types';
+import { ProductsService } from '../../../core/services/products.service';
 import { Mode } from '../../../core/services/types/common.types';
+import { Product } from '../../../core/services/types/products.types';
 import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state';
 import { ModalComponent } from '../../../shared/components/modal/modal';
 import { PaginationComponent } from '../../../shared/components/pagination/pagination';
@@ -21,25 +20,22 @@ import { TitleComponent } from '../../../shared/components/title/title';
 import { createPaginationState } from '../../../shared/utils/pagination.util';
 import { createSearchState } from '../../../shared/utils/search.util';
 
-interface BranchForm {
+interface ProductForm {
   readonly id?: string;
   name: string;
-  address: string;
-  phoneNumberAssistant?: string;
-  phoneNumberReception?: string;
+  description?: string;
   isActive: boolean;
 }
 
 @Component({
-  selector: 'app-branches',
+  selector: 'app-products.component',
   imports: [CommonModule, TitleComponent, PaginationComponent, ModalComponent, EmptyStateComponent],
-  templateUrl: './branches.component.html',
+  templateUrl: './products.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class BranchesComponent {
-  private readonly branchesService = inject(BranchesService);
-  protected readonly orgService = inject(OrgService);
-  private readonly authService = inject(AuthService);
+export class ProductsComponent {
+  protected readonly productsService = inject(ProductsService);
+  private readonly orgService = inject(OrgService);
   private readonly toastrService = inject(ToastrService);
 
   readonly saving = signal(false);
@@ -47,26 +43,15 @@ export class BranchesComponent {
   readonly mode = signal<Mode>(null);
   readonly confirming = signal(false);
   private confirmEnable = signal<boolean | null>(null);
-  readonly target = signal<Branch | null>(null);
-  readonly addingMessages = signal(false);
-  readonly messagesToAdd = signal(0);
-  readonly targetForMessages = signal<Branch | null>(null);
-  readonly generatingQr = signal<string | null>(null);
+  readonly target = signal<Product | null>(null);
   readonly filters = signal<{ isActive?: boolean }>({});
 
-  private readonly filteredBranches = signal<Branch[]>([]);
-  private readonly filteredTotal = signal(0);
-
-  readonly form = signal<BranchForm>({
+  readonly form = signal<ProductForm>({
     name: '',
-    address: '',
-    phoneNumberAssistant: '',
-    phoneNumberReception: '',
+    description: '',
     isActive: true,
   });
 
-  readonly branches = computed(() => this.filteredBranches());
-  readonly total = computed(() => this.filteredTotal());
   readonly restaurantId = computed(() => this.orgService.selectedRestaurantId());
   readonly confirmTargetStatus = computed(() => !!this.confirmEnable());
 
@@ -76,22 +61,17 @@ export class BranchesComponent {
     return isActive ? 'true' : 'false';
   });
 
-  readonly canAddMessages = computed(() => {
-    const roles = this.authService.user()?.roles || [];
-    return roles.includes('super') || roles.includes('admin');
-  });
-
   readonly modalTitle = computed(() =>
-    this.mode() === 'create' ? 'Nueva sucursal' : 'Editar sucursal'
+    this.mode() === 'create' ? 'Crear Producto' : 'Editar Producto'
   );
 
   readonly isFormValid = computed(() => {
     const f = this.form();
-    return f.name.trim() !== '' && f.address.trim() !== '';
+    return f.name.trim() !== '';
   });
 
   readonly confirmTitle = computed(() =>
-    this.confirmTargetStatus() ? 'Activar sucursal' : 'Desactivar sucursal'
+    this.confirmTargetStatus() ? 'Activar producto' : 'Desactivar producto'
   );
 
   readonly confirmMessage = computed(() => {
@@ -99,9 +79,7 @@ export class BranchesComponent {
     return `¿Seguro que quieres ${action} "${this.target()?.name}"?`;
   });
 
-  readonly addMessagesDisabled = computed(() => this.messagesToAdd() <= 0);
-
-  private readonly paginationState = createPaginationState(this.total, {
+  private readonly paginationState = createPaginationState(this.productsService.totalProducts, {
     onChange: () => this.fetch(),
   });
 
@@ -125,8 +103,7 @@ export class BranchesComponent {
   constructor() {
     effect(() => {
       const rid = this.restaurantId();
-
-      if (rid && rid !== this.previousRestaurantId) {
+      if (rid && this.previousRestaurantId !== rid) {
         this.previousRestaurantId = rid;
         this.paginationState.resetToFirstPage();
         this.filters.set({});
@@ -144,8 +121,8 @@ export class BranchesComponent {
 
     const { limit, offset } = this.pagination();
 
-    this.branchesService
-      .listByRestaurant({
+    this.productsService
+      .findAllProductsByRestaurant(rid, {
         search: this.searchTerm() || undefined,
         isActive: this.filters().isActive,
         limit,
@@ -153,13 +130,9 @@ export class BranchesComponent {
       })
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
-        next: (response) => {
-          this.filteredBranches.set(response.branches);
-          this.filteredTotal.set(response.total);
-        },
         error: (error) => {
-          console.error('Error loading filtered branches:', error);
-          this.toastrService.error('Error al cargar las sucursales');
+          this.toastrService.error('Error al cargar los productos');
+          console.error('Error loading products:', error);
         },
       });
   }
@@ -196,22 +169,18 @@ export class BranchesComponent {
     this.mode.set('create');
     this.form.set({
       name: '',
-      address: '',
-      phoneNumberAssistant: '',
-      phoneNumberReception: '',
+      description: '',
       isActive: true,
     });
   }
 
-  openEdit(branch: Branch): void {
+  openEdit(product: Product): void {
     this.mode.set('edit');
     this.form.set({
-      id: branch.id,
-      name: branch.name,
-      address: branch.address,
-      phoneNumberAssistant: branch.phoneNumberAssistant ?? '',
-      phoneNumberReception: branch.phoneNumberReception ?? '',
-      isActive: branch.isActive,
+      id: product.id,
+      name: product.name,
+      description: product.description ?? '',
+      isActive: product.isActive,
     });
   }
 
@@ -219,17 +188,15 @@ export class BranchesComponent {
     this.mode.set(null);
     this.form.set({
       name: '',
-      address: '',
-      phoneNumberAssistant: '',
-      phoneNumberReception: '',
+      description: '',
       isActive: true,
     });
   }
 
   save(): void {
     const f = this.form();
-    if (!f.name.trim() || !f.address.trim()) {
-      this.toastrService.warning('El nombre y la dirección son obligatorios');
+    if (!f.name.trim()) {
+      this.toastrService.warning('El nombre es obligatorio');
       return;
     }
 
@@ -237,35 +204,33 @@ export class BranchesComponent {
 
     const { id, ...data } = f;
 
-    const dto: Partial<Branch> = {
+    const dto: Partial<Product> = {
       name: data.name.trim(),
-      address: data.address.trim(),
-      phoneNumberAssistant: data.phoneNumberAssistant?.trim() || null,
-      phoneNumberReception: data.phoneNumberReception?.trim() || null,
+      description: data.description?.trim(),
       isActive: !!data.isActive,
     };
 
     const op =
       this.mode() === 'create'
-        ? this.branchesService.create(dto)
-        : this.branchesService.update(id!, dto);
+        ? this.productsService.createProduct(this.restaurantId()!, dto)
+        : this.productsService.updateProduct(this.restaurantId()!, id!, dto);
 
     op.pipe(
       catchError((e) => {
-        console.error('Error saving branch:', e);
-        this.toastrService.error('Error al guardar la sucursal');
+        console.error('Error saving product:', e);
+        this.toastrService.error('Error al guardar el producto');
         return EMPTY;
       }),
       finalize(() => this.saving.set(false))
     ).subscribe(() => {
-      this.toastrService.success('Sucursal guardada correctamente');
+      this.toastrService.success('Producto guardado correctamente');
       this.closeModal();
       this.reload();
     });
   }
 
-  confirmToggle(branch: Branch, enable: boolean): void {
-    this.target.set(branch);
+  confirmToggle(product: Product, enable: boolean): void {
+    this.target.set(product);
     this.confirmEnable.set(enable);
     this.confirming.set(true);
   }
@@ -281,7 +246,9 @@ export class BranchesComponent {
     const enable = this.confirmEnable();
     if (!b || enable === null) return;
 
-    const op = enable ? this.branchesService.activate(b.id) : this.branchesService.deactivate(b.id);
+    const op = enable
+      ? this.productsService.activateProduct(this.restaurantId()!, b.id)
+      : this.productsService.deactivateProduct(this.restaurantId()!, b.id);
 
     op.pipe(
       catchError((e) => {
@@ -296,87 +263,14 @@ export class BranchesComponent {
     });
   }
 
-  openAddMessages(branch: Branch): void {
-    this.targetForMessages.set(branch);
-    this.messagesToAdd.set(0);
-    this.addingMessages.set(true);
-  }
-
-  closeAddMessagesModal(): void {
-    this.addingMessages.set(false);
-    this.targetForMessages.set(null);
-    this.messagesToAdd.set(0);
-  }
-
-  handleAddMessages(): void {
-    const branch = this.targetForMessages();
-    const amount = this.messagesToAdd();
-
-    if (!branch || amount <= 0) {
-      this.toastrService.warning('Ingresa una cantidad válida de mensajes');
-      return;
-    }
-
-    this.saving.set(true);
-
-    this.branchesService
-      .update(branch.id, {
-        availableMessages: amount,
-      })
-      .pipe(
-        catchError((e) => {
-          console.error('Error adding messages:', e);
-          this.toastrService.error('Error al agregar mensajes');
-          return EMPTY;
-        }),
-        finalize(() => this.saving.set(false))
-      )
-      .subscribe(() => {
-        this.toastrService.success(`${amount} mensajes agregados correctamente`);
-        this.closeAddMessagesModal();
-        this.reload();
-      });
-  }
-
-  onGenerateQr(branch: Branch): void {
-    const rid = this.restaurantId();
-    if (!rid) return;
-
-    this.generatingQr.set(branch.id);
-
-    this.branchesService
-      .generateQr(rid, branch.id)
-      .pipe(
-        catchError((e) => {
-          console.error('Error generating QR code:', e);
-          this.toastrService.error('Error al generar el código QR');
-          return EMPTY;
-        }),
-        finalize(() => this.generatingQr.set(null))
-      )
-      .subscribe((res) => {
-        const updatedGlobal = this.orgService
-          .branches()
-          .map((b) => (b.id === branch.id ? { ...b, qrUrl: res.qrUrl } : b));
-        this.orgService.branches.set(updatedGlobal);
-
-        const updatedLocal = this.filteredBranches().map((b) =>
-          b.id === branch.id ? { ...b, qrUrl: res.qrUrl } : b
-        );
-        this.filteredBranches.set(updatedLocal);
-
-        this.toastrService.success('Código QR generado correctamente');
-      });
-  }
-
   onCsvSelected(ev: Event): void {
     const input = ev.target as HTMLInputElement;
     const file = input.files?.[0];
 
     if (!file) return;
 
-    this.branchesService
-      .bulkUploadByCsv(file)
+    this.productsService
+      .bulkCreateProducts(this.restaurantId()!, file)
       .pipe(
         catchError((e) => {
           console.error('Error uploading CSV:', e);
@@ -392,18 +286,13 @@ export class BranchesComponent {
       });
   }
 
-  updateForm<K extends keyof BranchForm>(key: K, ev: Event): void {
+  updateForm<K extends keyof ProductForm>(key: K, ev: Event): void {
     const el = ev.target as HTMLInputElement;
     this.form.update((f) => ({ ...f, [key]: el.value }));
   }
 
-  updateFormChecked<K extends keyof BranchForm>(key: K, ev: Event): void {
+  updateFormChecked<K extends keyof ProductForm>(key: K, ev: Event): void {
     const el = ev.target as HTMLInputElement;
     this.form.update((f) => ({ ...f, [key]: el.checked }));
-  }
-
-  updateMessagesToAdd(ev: Event): void {
-    const input = ev.target as HTMLInputElement;
-    this.messagesToAdd.set(Number(input.value));
   }
 }

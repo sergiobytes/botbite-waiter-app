@@ -51,13 +51,11 @@ export function createRolesGuard(requiredRole: UserRole): CanActivateFn {
   };
 }
 
-// Guards predefinidos para cada rol
 export const superGuard = createRolesGuard('super');
 export const adminGuard = createRolesGuard('admin');
 export const userGuard = createRolesGuard('user');
 export const clientGuard = createRolesGuard('client');
 
-// Función helper para verificar roles específicos (uso en componentes)
 export function hasRole(userRoles: UserRole[], role: UserRole): boolean {
   return hasRequiredRole(userRoles, role);
 }

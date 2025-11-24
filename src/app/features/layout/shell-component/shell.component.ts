@@ -50,6 +50,7 @@ export class ShellComponent implements OnInit {
     { label: 'Categorías', to: '/dashboard/categories', requiredRole: 'admin' },
     { label: 'Restaurantes', to: '/dashboard/restaurants' },
     { label: 'Sucursales', to: '/dashboard/branches' },
+    { label: 'Productos', to: '/dashboard/products', requiredRole: 'client'},
   ];
 
   items = computed(() => {

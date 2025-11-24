@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
-import { adminGuard, superGuard, userGuard } from './core/guards/roles.guard';
+import { adminGuard, clientGuard, superGuard, userGuard } from './core/guards/roles.guard';
 
 export const routes: Routes = [
   {
@@ -52,6 +52,14 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/dashboard/users-component/users.component').then(
             (m) => m.UsersComponent
+          ),
+      },
+      {
+        path: 'products',
+        canActivate: [clientGuard],
+        loadComponent: () =>
+          import('./features/dashboard/products-component/products.component').then(
+            (m) => m.ProductsComponent
           ),
       },
     ],

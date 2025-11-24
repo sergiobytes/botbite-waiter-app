@@ -1,4 +1,5 @@
 import { Category } from './category.types';
+import { Product } from './products.types';
 
 export interface Order {
   id: string;
@@ -27,15 +28,6 @@ export interface MenuItem {
   price: number;
   category: Category;
   product: Product;
-  isActive: boolean;
-  createdAt: Date | string;
-  updatedAt: Date | string;
-}
-
-export interface Product {
-  id: string;
-  name: string;
-  description?: string | null;
   isActive: boolean;
   createdAt: Date | string;
   updatedAt: Date | string;

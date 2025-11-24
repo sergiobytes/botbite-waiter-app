@@ -1,0 +1,207 @@
+<div class="space-y-6">
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <shared-title
+      title="Productos"
+      description="Administra los productos del restaurante seleccionado"
+    />
+
+    <div class="flex items-center gap-2 self-start sm:self-auto">
+      <input
+        #csvInput
+        type="file"
+        accept=".csv,text/csv"
+        class="hidden"
+        (change)="onCsvSelected($event)"
+      />
+      <button
+        class="rounded-xl border border-black/10 px-4 py-2 hover:bg-black/5 disabled:opacity-50"
+        (click)="csvInput.click()"
+        [disabled]="!restaurantId()"
+        aria-label="Carga masiva por CSV"
+      >
+        Carga masiva (CSV)
+      </button>
+      <button
+        class="rounded-xl bg-black text-white px-4 py-2 hover:opacity-90 disabled:opacity-50"
+        (click)="openCreate()"
+        [disabled]="!restaurantId()"
+        aria-label="Nuevo producto"
+      >
+        Nuevo producto
+      </button>
+    </div>
+  </div>
+
+  <div class="flex flex-col md:flex-row gap-3 items-stretch md:items-center">
+    <div class="md:ml-auto flex items-center gap-2">
+      <input
+        type="text"
+        placeholder="Buscar"
+        class="rounded-xl border border-black/10 px-3 py-2 w-64"
+        [value]="searchTerm()"
+        (input)="updateFilterSearch($event)"
+        aria-label="Buscar productos"
+      />
+      <select
+        class="rounded-xl border border-black/10 px-3 py-2"
+        [value]="activeFilterValue()"
+        (change)="updateFilterActive($event)"
+        aria-label="Filtrar por estado"
+      >
+        <option value="">Todos</option>
+        <option value="true">Activos</option>
+        <option value="false">Inactivos</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="rounded-2xl border border-black/10 overflow-hidden overflow-x-auto">
+    <table class="w-full text-sm min-w-4xl">
+      <thead class="bg-neutral-50 text-neutral-600">
+        <tr>
+          <th class="text-left font-medium px-4 py-3">Nombre</th>
+          <th class="text-left font-medium px-4 py-3">Descripción</th>
+          <th class="text-left font-medium px-4 py-3">Estado</th>
+          <th class="text-right font-medium px-4 py-3">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for(product of productsService.products(); track product.id){
+        <tr class="border-t border-black/10">
+          <td class="px-4 py-3">{{ product.name }}</td>
+          <td class="px-4 py-3">{{ product.description }}</td>
+          <td class="px-4 py-3">
+            <span
+              [class]="
+                product.isActive
+                  ? 'bg-green-100 text-green-800 border-green-200'
+                  : 'bg-neutral-100 text-neutral-700 border-neutral-200'
+              "
+              class="text-xs border px-2 py-0.5 rounded-full"
+            >
+              {{ product.isActive ? 'Activa' : 'Inactiva' }}
+            </span>
+          </td>
+          <td class="px-4 py-3">
+            <div class="flex items-center gap-2 justify-end">
+              <button
+                class="px-3 py-1 border border-black/10 rounded-lg hover:bg-black/5"
+                (click)="openEdit(product)"
+                [attr.aria-label]="'Editar producto ' + product.name"
+              >
+                Editar
+              </button>
+
+              @if(product.isActive) {
+              <button
+                class="px-3 py-1 border border-black/10 rounded-lg hover:bg-black/5"
+                (click)="confirmToggle(product, false)"
+                [attr.aria-label]="'Desactivar ' + product.name"
+              >
+                Desactivar
+              </button>
+
+              } @else {
+              <button
+                class="px-3 py-1 border border-black/10 rounded-lg hover:bg-black/5"
+                (click)="confirmToggle(product, true)"
+                [attr.aria-label]="'Activar ' + product.name"
+              >
+                Activar
+              </button>
+              }
+            </div>
+          </td>
+        </tr>
+        }
+
+        <app-empty-state
+          [loading]="loading()"
+          [isEmpty]="productsService.products().length === 0"
+          [colspan]="4"
+          message="No hay productos para mostrar."
+        />
+      </tbody>
+    </table>
+  </div>
+
+  <app-pagination
+    [total]="productsService.totalProducts()"
+    [pageFrom]="pageFrom()"
+    [pageTo]="pageTo()"
+    [canPrev]="canPrev()"
+    [canNext]="canNext()"
+    (previousPage)="prevPage()"
+    (nextPage)="nextPage()"
+    (limitChange)="changeLimit($event)"
+  />
+
+  <app-modal
+    [isOpen]="mode() !== null"
+    [title]="modalTitle()"
+    [maxWidth]="'max-w-lg'"
+    [showActions]="true"
+    [loading]="saving()"
+    [confirmDisabled]="!isFormValid()"
+    confirmText="Guardar"
+    (close)="closeModal()"
+    (cancel)="closeModal()"
+    (confirm)="save()"
+  >
+    <form (submit)="$event.preventDefault(); save()" class="grid md:grid-cols-2 gap-4">
+      <div class="md:col-span-2">
+        <label for="productName" class="text-sm font-medium">Nombre</label>
+        <input
+          id="productName"
+          type="text"
+          class="w-full rounded-xl border border-black/10 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black/20"
+          [value]="form().name"
+          (input)="updateForm('name', $event)"
+          required
+          maxlength="80"
+          aria-required="true"
+        />
+      </div>
+      <div class="md:col-span-2">
+        <label for="productDescription" class="text-sm font-medium">Descripción</label>
+        <input
+          id="productDescription"
+          type="text"
+          class="w-full rounded-xl border border-black/10 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black/20"
+          [value]="form().description"
+          (input)="updateForm('description', $event)"
+          required
+          maxlength="80"
+          aria-required="true"
+        />
+      </div>
+      <div class="md:col-span-2 flex items-center gap-2">
+        <input
+          id="activeProduct"
+          type="checkbox"
+          [checked]="form().isActive"
+          (change)="updateFormChecked('isActive', $event)"
+          class="rounded"
+        />
+        <label for="activeCategory" class="text-sm">Activa</label>
+      </div>
+
+      @if (!isFormValid() && form().name) {
+      <p class="text-sm text-red-600">El nombre es obligatorio</p>
+      }
+    </form>
+  </app-modal>
+
+  <app-modal
+    [isOpen]="confirming()"
+    [title]="confirmTitle()"
+    [maxWidth]="'max-w-sm'"
+    [showActions]="true"
+    confirmText="Confirmar"
+    (close)="closeConfirmation()"
+    (cancel)="closeConfirmation()"
+    (confirm)="toggleActive()"
+  >
+    <p class="text-sm text-neutral-600">{{ confirmMessage() }}</p>
+  </app-modal>
+</div>
