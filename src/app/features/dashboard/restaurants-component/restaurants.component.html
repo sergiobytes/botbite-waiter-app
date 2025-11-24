@@ -3,7 +3,7 @@
     <shared-title title="Restaurantes" description="Administra tus restaurantes aquí" />
 
     <button
-      class="rounded-xl bg-black text-white px-4 py-2 hover:opacity-90 disabled:opacity-50 self-start sm:self-auto"
+      class="rounded-xl bg-black text-white px-4 py-2 hover:opacity-90 disabled:opacity-50 self-start sm:self-auto transition-all hover:animate-scale"
       (click)="openCreate()"
       aria-label="Crear nuevo restaurante"
     >
@@ -22,7 +22,7 @@
       </thead>
       <tbody>
         @for(restaurant of restaurants(); track restaurant.id) {
-        <tr class="border-t border-black/10">
+        <tr class="border-t border-black/10 animate-fade-in animate-duration-300">
           <td class="px-4 py-3">{{ restaurant.name }}</td>
           <td class="px-4 py-3">
             <span
@@ -31,7 +31,7 @@
                   ? 'bg-green-100 text-green-800 border-green-200'
                   : 'bg-neutral-100 text-neutral-700 border-neutral-200'
               "
-              class="text-xs border px-2 py-0.5 rounded-full"
+              class="text-xs border px-2 py-0.5 rounded-full animate-fade-in animate-duration-200"
             >
               {{ restaurant.isActive ? 'Activa' : 'Inactiva' }}
             </span>
@@ -39,7 +39,7 @@
           <td class="px-4 py-3">
             <div class="flex items-center gap-2 justify-end">
               <button
-                class="px-3 py-1 border border-black/10 rounded-lg hover:bg-black/5"
+                class="px-3 py-1 border border-black/10 rounded-lg hover:bg-black/5 transition-all hover:animate-scale"
                 (click)="openEdit(restaurant)"
                 [attr.aria-label]="'Editar restaurante ' + restaurant.name"
               >
@@ -47,7 +47,7 @@
               </button>
               @if (restaurant.isActive) {
               <button
-                class="px-3 py-1 border border-black/10 rounded-lg hover:bg-black/5"
+                class="px-3 py-1 border border-black/10 rounded-lg hover:bg-black/5 transition-all hover:animate-scale"
                 (click)="confirmDisable(restaurant)"
                 [attr.aria-label]="'Deshabilitar restaurante ' + restaurant.name"
               >

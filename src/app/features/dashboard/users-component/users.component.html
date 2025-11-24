@@ -5,14 +5,14 @@
     <div class="flex items-center gap-2 self-start sm:self-auto">
       <button
         (click)="openCreateUser()"
-        class="rounded-xl border border-black/10 px-4 py-2 hover:bg-black/5 transition"
+        class="rounded-xl border border-black/10 px-4 py-2 hover:bg-black/5 transition-all hover:animate-scale"
         aria-label="Crear usuario"
       >
         Crear usuario
       </button>
       <button
         (click)="openCreateClient()"
-        class="rounded-xl bg-black text-white px-4 py-2 hover:opacity-90 transition"
+        class="rounded-xl bg-black text-white px-4 py-2 hover:opacity-90 transition-all hover:animate-scale"
         aria-label="Crear cliente"
       >
         Crear cliente
@@ -60,7 +60,7 @@
       </thead>
       <tbody>
         @for (row of usersService.users(); track row.id) {
-        <tr class="border-t border-black/5 hover:bg-neutral-50">
+        <tr class="border-t border-black/5 hover:bg-neutral-50 animate-fade-in animate-duration-300">
           <td class="px-4 py-3">{{ row.email }}</td>
           <td class="px-4 py-3">
             <div class="flex gap-1 flex-wrap">

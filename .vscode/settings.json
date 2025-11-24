@@ -4,5 +4,6 @@
             "externalTemplate": true,
             "skipStyle": true
         }
-    }
+    },
+    "angular.enable-strict-mode-prompt": false
 }

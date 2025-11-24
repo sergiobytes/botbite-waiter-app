@@ -12,7 +12,7 @@
   </div>
 
   <div class="bg-white text-black flex items-center justify-center p-6">
-    <div class="w-full max-w-sm">
+    <div class="w-full max-w-sm animate-fade-in animate-duration-500">
       <h2 class="text-2xl font-semibold mb-6">Iniciar sesión</h2>
 
       <form [formGroup]="form" (ngSubmit)="submit()" class="space-y-4">
@@ -45,7 +45,7 @@
         <button
           type="submit"
           [disabled]="form.invalid || loading()"
-          class="w-full rounded-xl bg-black text-white py-3 disabled:opacity-50 transition hover:opacity-90"
+          class="w-full rounded-xl bg-black text-white py-3 disabled:opacity-50 transition-all hover:opacity-90 hover:animate-scale"
         >
           @if (!loading()) {
           <span>Entrar</span>

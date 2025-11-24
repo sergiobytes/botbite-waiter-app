@@ -14,7 +14,7 @@
         (change)="onCsvSelected($event)"
       />
       <button
-        class="rounded-xl border border-black/10 px-4 py-2 hover:bg-black/5 disabled:opacity-50"
+        class="rounded-xl border border-black/10 px-4 py-2 hover:bg-black/5 disabled:opacity-50 transition-all hover:animate-scale"
         (click)="csvInput.click()"
         [disabled]="!restaurantId()"
         aria-label="Carga masiva por CSV"
@@ -22,7 +22,7 @@
         Cargar masiva (CSV)
       </button>
       <button
-        class="rounded-xl bg-black text-white px-4 py-2 hover:opacity-90 disabled:opacity-50"
+        class="rounded-xl bg-black text-white px-4 py-2 hover:opacity-90 disabled:opacity-50 transition-all hover:animate-scale"
         (click)="openCreate()"
         [disabled]="!restaurantId()"
         aria-label="Crear nueva sucursal"
@@ -70,7 +70,7 @@
       </thead>
       <tbody>
         @for(branch of branches(); track branch.id){
-        <tr class="border-t border-black/10">
+        <tr class="border-t border-black/10 animate-fade-in animate-duration-300">
           <td class="px-4 py-3">
             <div class="flex items-center gap-2">
               <span>{{ branch.name }}</span>

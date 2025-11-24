@@ -1,13 +1,13 @@
 @if (isOpen()){
 <div
-  class="fixed inset-0 z-50 flex items-center justify-center p-4"
+  class="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in animate-duration-200"
   role="dialog"
   aria-modal="true"
   [attr.aria-labelledby]="ariaLabelId()"
 >
   <div class="absolute inset-0 bg-black/40" (click)="handleOverlayClick()" aria-hidden="true"></div>
 
-  <div [class]="containerClasses()">
+  <div [class]="containerClasses()" class="animate-zoom-in animate-duration-300">
     <h2 [id]="ariaLabelId()" class="text-lg font-semibold mb-4">{{ title() }}</h2>
 
     <ng-content />
@@ -18,7 +18,7 @@
         type="button"
         (click)="cancel.emit()"
         [disabled]="loading()"
-        class="flex-1 rounded-xl border border-black/10 px-4 py-2 hover:bg-black/5"
+        class="flex-1 rounded-xl border border-black/10 px-4 py-2 hover:bg-black/5 transition-all hover:animate-scale"
         [class.opacity-50]="loading()"
       >
         {{ cancelText() }}
@@ -27,7 +27,7 @@
         type="button"
         (click)="confirm.emit()"
         [disabled]="loading() || confirmDisabled()"
-        class="flex-1 rounded-xl bg-black text-white px-4 py-2 hover:opacity-90"
+        class="flex-1 rounded-xl bg-black text-white px-4 py-2 hover:opacity-90 transition-all hover:animate-scale"
         [class.opacity-50]="loading() || confirmDisabled()"
       >
         {{ loading() ? loadingText() : confirmText() }}
