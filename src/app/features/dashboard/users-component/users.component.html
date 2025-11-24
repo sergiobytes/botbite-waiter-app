@@ -59,22 +59,7 @@
         </tr>
       </thead>
       <tbody>
-        @if (loading()) {
-        <tr>
-          <td colspan="4" class="px-4 py-8 text-center">
-            <div class="animate-pulse space-y-2">
-              <div class="h-4 bg-neutral-200 rounded w-3/4 mx-auto"></div>
-              <div class="h-4 bg-neutral-200 rounded w-1/2 mx-auto"></div>
-            </div>
-          </td>
-        </tr>
-        } @else if (usersService.users().length === 0) {
-        <tr>
-          <td colspan="4" class="px-4 py-8 text-center text-neutral-500">
-            No hay usuarios para mostrar
-          </td>
-        </tr>
-        } @else { @for (row of usersService.users(); track row.id) {
+        @for (row of usersService.users(); track row.id) {
         <tr class="border-t border-black/5 hover:bg-neutral-50">
           <td class="px-4 py-3">{{ row.email }}</td>
           <td class="px-4 py-3">
@@ -128,7 +113,14 @@
             </div>
           </td>
         </tr>
-        } }
+        }
+
+        <app-empty-state
+          [loading]="loading()"
+          [isEmpty]="usersService.users().length === 0"
+          [colspan]="4"
+          message="No hay usuarios para mostrar"
+        />
       </tbody>
     </table>
   </div>
