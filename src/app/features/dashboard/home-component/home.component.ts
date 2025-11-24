@@ -1,13 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
-import { OrgService } from '../../../core/services/org.service';
-import { OrdersService } from '../../../core/services/orders.service';
-import { todayYYYYMMDD } from '../../../shared/utils/date.utils';
-import { BranchesService } from '../../../core/services/branches.service';
 import { ToastrService } from 'ngx-toastr';
-import { Order } from '../../../core/services/types/orders.type';
-import { Branch } from '../../../core/services/types/branches.types';
 import { catchError, finalize, of } from 'rxjs';
+import { BranchesService } from '../../../core/services/branches.service';
+import { OrdersService } from '../../../core/services/orders.service';
+import { OrgService } from '../../../core/services/org.service';
+import { Branch } from '../../../core/services/types/branches.types';
+import { Order } from '../../../core/services/types/orders.type';
+import { todayYYYYMMDD } from '../../../shared/utils/date.utils';
 
 interface MetricCard {
   label: string;
