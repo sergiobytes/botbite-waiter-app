@@ -8,14 +8,14 @@
         class="rounded-xl border border-black/10 px-4 py-2 hover:bg-black/5 transition"
         aria-label="Crear usuario"
       >
-        Nuevo usuario
+        Crear usuario
       </button>
       <button
         (click)="openCreateClient()"
         class="rounded-xl bg-black text-white px-4 py-2 hover:opacity-90 transition"
         aria-label="Crear cliente"
       >
-        Nuevo cliente
+        Crear cliente
       </button>
     </div>
   </div>
@@ -39,11 +39,11 @@
         class="rounded-xl border border-black/10 px-3 py-2"
         aria-label="Filtrar por rol"
       >
-        <option value="">Todos</option>
-        <option value="super">Superusuario</option>
+        <option value="">Todos los roles</option>
+        <option value="super">Super Admin</option>
         <option value="admin">Administrador</option>
         <option value="client">Cliente</option>
-        <option value="user">Usuarios</option>
+        <option value="user">Usuario</option>
       </select>
     </div>
   </div>
@@ -59,80 +59,81 @@
         </tr>
       </thead>
       <tbody>
-        @for(user of usersService.users(); track user.id){
-        <tr class="border-t border-black/10">
-          <td class="px-4 py-3">{{ user.email }}</td>
+        @if (loading()) {
+        <tr>
+          <td colspan="4" class="px-4 py-8 text-center">
+            <div class="animate-pulse space-y-2">
+              <div class="h-4 bg-neutral-200 rounded w-3/4 mx-auto"></div>
+              <div class="h-4 bg-neutral-200 rounded w-1/2 mx-auto"></div>
+            </div>
+          </td>
+        </tr>
+        } @else if (usersService.users().length === 0) {
+        <tr>
+          <td colspan="4" class="px-4 py-8 text-center text-neutral-500">
+            No hay usuarios para mostrar
+          </td>
+        </tr>
+        } @else { @for (row of usersService.users(); track row.id) {
+        <tr class="border-t border-black/5 hover:bg-neutral-50">
+          <td class="px-4 py-3">{{ row.email }}</td>
           <td class="px-4 py-3">
-            <div class="flex flex-wrap gap-1">
-              @for(role of user.roles; track role){
+            <div class="flex gap-1 flex-wrap">
+              @for (r of row.roles; track r) {
               <span
-                class="text-sm border px-2 py-0.5 rounded-full"
-                [class]="roleBadgeClass(role.toUpperCase())"
-                >{{ role.toUpperCase() }}</span
+                [class]="roleBadgeClass(r.toUpperCase())"
+                class="px-2 py-1 rounded-lg text-xs font-medium"
               >
+                {{ r.toUpperCase() }}
+              </span>
               }
             </div>
           </td>
           <td class="px-4 py-3">
             <span
-              class="text-xs border px-2 py-0.5 rounded-full"
               [class]="
-                user.isActive
+                row.isActive
                   ? 'bg-green-100 text-green-800 border-green-200'
                   : 'bg-neutral-100 text-neutral-700 border-neutral-200'
               "
+              class="text-xs border px-2 py-0.5 rounded-full"
             >
-              {{ user.isActive ? 'Activo' : 'Inactivo' }}
+              {{ row.isActive ? 'Activo' : 'Inactivo' }}
             </span>
           </td>
-
           <td class="px-4 py-3">
             <div class="flex items-center gap-2 justify-end">
+              @if (canActOn(row)) {
               <button
                 class="px-3 py-1 border border-black/10 rounded-lg hover:bg-black/5 disabled:opacity-50 disabled:cursor-not-allowed"
-                (click)="user.isActive ? deactivate(user) : activate(user)"
-                [disabled]="!canActOn(user)"
+                (click)="confirmToggleUser(row, row.isActive ? 'deactivate' : 'activate')"
                 [attr.aria-label]="
-                  (user.isActive ? 'Desactivar' : 'Activar') + ' usuario ' + user.email
+                  (row.isActive ? 'Desactivar' : 'Activar') + ' usuario ' + row.email
                 "
               >
-                {{ user.isActive ? 'Desactivar' : 'Activar' }}
+                {{ row.isActive ? 'Desactivar' : 'Activar' }}
               </button>
-
-              @if(!hasRole(user, 'admin')){
+              @if (isSuper()) { @if (!hasRole(row, 'admin')) {
               <button
                 class="px-3 py-1 border border-black/10 rounded-lg hover:bg-black/5 disabled:opacity-50 disabled:cursor-not-allowed"
-                (click)="addAdmin(user)"
-                [disabled]="!canActOn(user)"
-                [attr.aria-label]="'Hacer administrador a ' + user.email"
+                (click)="confirmAdminRoleChange(row, 'add')"
+                [attr.aria-label]="'Hacer administrador a ' + row.email"
               >
                 Hacer Admin
               </button>
               } @else {
               <button
                 class="px-3 py-1 border border-black/10 rounded-lg hover:bg-black/5 disabled:opacity-50 disabled:cursor-not-allowed"
-                (click)="removeAdmin(user)"
-                [disabled]="!canActOn(user)"
-                [attr.aria-label]="'Quitar rol de administrador a ' + user.email"
+                (click)="confirmAdminRoleChange(row, 'remove')"
+                [attr.aria-label]="'Quitar rol de administrador a ' + row.email"
               >
                 Quitar Admin
               </button>
-              }
+              } } }
             </div>
           </td>
         </tr>
-        } @if (!loading() && usersService.users().length === 0) {
-        <tr>
-          <td colspan="5" class="px-4 py-6 text-center text-neutral-600">No hay usuarios.</td>
-        </tr>
-
-        } @if (loading()) {
-        <tr>
-          <td colspan="5" class="px-4 py-6">
-            <div class="h-6 w-full rounded bg-black/10 animate-pulse"></div>
-          </td>
-        </tr>
-        }
+        } }
       </tbody>
     </table>
   </div>
@@ -143,6 +144,7 @@
     [pageTo]="pageTo()"
     [canPrev]="canPrev()"
     [canNext]="canNext()"
+    [currentLimit]="pagination().limit"
     (previousPage)="prevPage()"
     (nextPage)="nextPage()"
     (limitChange)="changeLimit($event)"
@@ -160,7 +162,7 @@
     (cancel)="closeModal()"
     (confirm)="save()"
   >
-    <form (submit)="$event.preventDefault(); save()" class="space-y-4">
+    <form class="space-y-4" (submit)="$event.preventDefault()">
       <div>
         <label for="user-email" class="text-sm font-medium block mb-2">Email</label>
         <input
@@ -169,10 +171,12 @@
           class="w-full rounded-xl border border-black/10 px-3 py-2"
           [value]="form().email"
           (input)="updateFormEmail($event)"
+          placeholder="usuario@ejemplo.com"
           required
           autocomplete="email"
         />
       </div>
+
       <div>
         <label for="user-password" class="text-sm font-medium block mb-2">Contraseña</label>
         <input
@@ -181,18 +185,45 @@
           class="w-full rounded-xl border border-black/10 px-3 py-2"
           [value]="form().password"
           (input)="updateFormPassword($event)"
+          placeholder="Mínimo 6 caracteres"
           required
           minlength="6"
           autocomplete="new-password"
         />
       </div>
 
-      @if(!isFormValid() && (form().email || form().password)) {
+      @if (!isFormValid() && (form().email || form().password)) {
       <p class="text-sm text-red-600">
-        @if(form().email.trim() === ''){ El email es obligatorio. } @else if (form().password.length
-        < 6){ La contraseña debe tener al menos 6 caracteres. }
+        @if (form().email.trim() === '') { El email es obligatorio } @else if
+        (form().password.length < 6) { La contraseña debe tener al menos 6 caracteres }
       </p>
       }
     </form>
+  </app-modal>
+
+  <app-modal
+    [isOpen]="confirmingToggle()"
+    [title]="toggleConfirmTitle()"
+    [maxWidth]="'max-w-md'"
+    [showActions]="true"
+    confirmText="Confirmar"
+    (close)="closeToggleConfirmation()"
+    (cancel)="closeToggleConfirmation()"
+    (confirm)="executeToggle()"
+  >
+    <p class="text-sm text-neutral-600">{{ toggleConfirmMessage() }}</p>
+  </app-modal>
+
+  <app-modal
+    [isOpen]="confirmingAdminRole()"
+    [title]="adminRoleConfirmTitle()"
+    [maxWidth]="'max-w-md'"
+    [showActions]="true"
+    confirmText="Confirmar"
+    (close)="closeAdminRoleConfirmation()"
+    (cancel)="closeAdminRoleConfirmation()"
+    (confirm)="executeAdminRoleChange()"
+  >
+    <p class="text-sm text-neutral-600">{{ adminRoleConfirmMessage() }}</p>
   </app-modal>
 </div>

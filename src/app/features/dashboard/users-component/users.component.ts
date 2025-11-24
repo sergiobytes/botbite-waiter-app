@@ -31,6 +31,14 @@ export class UsersComponent {
   readonly saving = signal(false);
   readonly form = signal<{ email: string; password: string }>({ email: '', password: '' });
 
+  readonly confirmingToggle = signal(false);
+  readonly targetUser = signal<UserRow | null>(null);
+  readonly targetAction = signal<'activate' | 'deactivate' | null>(null);
+
+  readonly confirmingAdminRole = signal(false);
+  readonly targetUserRole = signal<UserRow | null>(null);
+  readonly targetRoleAction = signal<'add' | 'remove' | null>(null);
+
   readonly me = computed(() => this.authService.user());
   readonly myId = computed(() => this.me()?.id);
   readonly isSuper = computed(() =>
@@ -50,6 +58,26 @@ export class UsersComponent {
   readonly isFormValid = computed(() => {
     const f = this.form();
     return f.email.trim() !== '' && f.password.trim().length >= 6;
+  });
+
+  readonly toggleConfirmTitle = computed(() =>
+    this.targetAction() === 'activate' ? 'Activar usuario' : 'Desactivar usuario'
+  );
+
+  readonly toggleConfirmMessage = computed(() => {
+    const action = this.targetAction() === 'activate' ? 'activar' : 'desactivar';
+    return `¿Seguro que quieres ${action} a "${this.targetUser()?.email}"?`;
+  });
+
+  readonly adminRoleConfirmTitle = computed(() =>
+    this.targetRoleAction() === 'add' ? 'Agregar rol de Admin' : 'Quitar rol de Admin'
+  );
+
+  readonly adminRoleConfirmMessage = computed(() => {
+    const action = this.targetRoleAction() === 'add' ? 'agregar' : 'quitar';
+    return `¿Seguro que quieres ${action} el rol de administrador a "${
+      this.targetUserRole()?.email
+    }"?`;
   });
 
   private readonly paginationState = createPaginationState(this.total, {
@@ -159,12 +187,38 @@ export class UsersComponent {
     return false;
   }
 
-  activate(row: UserRow) {
-    if (!this.canActOn(row)) {
-      this.toastrService.warning('No puedes activar tu propio usuario');
+  confirmToggleUser(user: UserRow, action: 'activate' | 'deactivate') {
+    if (!this.canActOn(user)) {
+      this.toastrService.warning(
+        `No puedes ${action === 'activate' ? 'activar' : 'desactivar'} este usuario`
+      );
       return;
     }
 
+    this.targetUser.set(user);
+    this.targetAction.set(action);
+    this.confirmingToggle.set(true);
+  }
+
+  closeToggleConfirmation(): void {
+    this.confirmingToggle.set(false);
+    this.targetUser.set(null);
+    this.targetAction.set(null);
+  }
+
+  executeToggle(): void {
+    const user = this.targetUser();
+    const action = this.targetAction();
+
+    if (!user || !action) return;
+
+    if (action === 'activate') this.activate(user);
+    else this.deactivate(user);
+
+    this.closeToggleConfirmation();
+  }
+
+  activate(row: UserRow) {
     this.usersService
       .activateUser(row.id)
       .pipe(
@@ -181,11 +235,6 @@ export class UsersComponent {
   }
 
   deactivate(row: UserRow) {
-    if (!this.canActOn(row)) {
-      this.toastrService.warning('No puedes desactivar tu propio usuario');
-      return;
-    }
-
     this.usersService
       .deactivateUser(row.id)
       .pipe(
@@ -201,16 +250,48 @@ export class UsersComponent {
       });
   }
 
+  confirmAdminRoleChange(user: UserRow, action: 'add' | 'remove'): void {
+    if (!this.canActOn(user)) {
+      this.toastrService.warning('No puedes modificar este usuario');
+      return;
+    }
+
+    if (action === 'remove' && !this.isSuper()) {
+      this.toastrService.warning('Solo un superusuario puede quitar roles de administrador');
+      return;
+    }
+
+    this.targetUserRole.set(user);
+    this.targetRoleAction.set(action);
+    this.confirmingAdminRole.set(true);
+  }
+
+  closeAdminRoleConfirmation(): void {
+    this.confirmingAdminRole.set(false);
+    this.targetUserRole.set(null);
+    this.targetRoleAction.set(null);
+  }
+
+  executeAdminRoleChange(): void {
+    const user = this.targetUserRole();
+    const action = this.targetRoleAction();
+
+    if (!user || !action) return;
+
+    if (action === 'add') {
+      this.addAdmin(user);
+    } else {
+      this.removeAdmin(user);
+    }
+
+    this.closeAdminRoleConfirmation();
+  }
+
   hasRole(row: UserRow, role: UserRole) {
     return (row.roles || []).map((r) => r.toLowerCase()).includes(role);
   }
 
   addAdmin(row: UserRow) {
-    if (!this.canActOn(row)) {
-      this.toastrService.warning('No puedes modificar tu propio usuario');
-      return;
-    }
-
     this.usersService
       .addAdminRole(row.id)
       .pipe(
@@ -227,16 +308,6 @@ export class UsersComponent {
   }
 
   removeAdmin(row: UserRow) {
-    if (!this.isSuper()) {
-      this.toastrService.warning('Solo un superusuario puede modificar roles de administrador');
-      return;
-    }
-
-    if (!this.canActOn(row)) {
-      this.toastrService.warning('No puedes modificar tu propio usuario');
-      return;
-    }
-
     this.usersService
       .removeAdminRole(row.id)
       .pipe(
