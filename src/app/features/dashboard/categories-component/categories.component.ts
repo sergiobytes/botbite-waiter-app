@@ -5,8 +5,9 @@ import { catchError, EMPTY, finalize } from 'rxjs';
 import { CategoriesService } from '../../../core/services/categories.service';
 import { Category } from '../../../core/services/types/category.types';
 import { Mode } from '../../../core/services/types/common.types';
-import { TitleComponent } from '../../../shared/components/title/title';
+import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state';
 import { ModalComponent } from '../../../shared/components/modal/modal';
+import { TitleComponent } from '../../../shared/components/title/title';
 
 interface CategoryForm {
   readonly id?: number;
@@ -16,7 +17,7 @@ interface CategoryForm {
 
 @Component({
   selector: 'app-categories',
-  imports: [CommonModule, TitleComponent, ModalComponent],
+  imports: [CommonModule, TitleComponent, ModalComponent, EmptyStateComponent],
   templateUrl: './categories.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
