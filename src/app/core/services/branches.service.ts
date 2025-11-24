@@ -1,7 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { environment } from '../../../environments/environment';
-import { Observable, switchMap } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 import { Branch, BranchListResponse } from './types/branches.types';
 import { OrgService } from './org.service';
 
@@ -30,22 +30,39 @@ export class BranchesService {
       throw new Error('No restaurant selected');
     }
 
-    return this.orgService.loadBranches(restaurantId, params);
+    let httpParams = new HttpParams();
+
+    if (params.search) {
+      httpParams = httpParams.set('search', params.search);
+    }
+    if (params.isActive !== undefined) {
+      httpParams = httpParams.set('isActive', params.isActive.toString());
+    }
+    if (params.limit !== undefined) {
+      httpParams = httpParams.set('limit', params.limit.toString());
+    }
+    if (params.offset !== undefined) {
+      httpParams = httpParams.set('offset', params.offset.toString());
+    }
+
+    return this.http.get<BranchListResponse>(`${this.apiUrl}/branches/restaurant/${restaurantId}`, {
+      params: httpParams,
+    });
   }
 
-  create(newBranch: Partial<Branch>): Observable<BranchListResponse> {
+  create(newBranch: Partial<Branch>): Observable<Branch> {
     const restaurantId = this.orgService.selectedRestaurantId();
 
     if (!restaurantId) {
       throw new Error('No restaurant selected');
     }
 
-    return this.http.post<Branch>(`${this.apiUrl}/branches/${restaurantId}`, newBranch).pipe(
-      switchMap(() => this.orgService.loadBranches(restaurantId))
-    );
+    return this.http
+      .post<Branch>(`${this.apiUrl}/branches/${restaurantId}`, newBranch)
+      .pipe(tap(() => this.orgService.refreshGlobalBranches()));
   }
 
-  update(branchId: string, updatedBranch: Partial<Branch>): Observable<BranchListResponse> {
+  update(branchId: string, updatedBranch: Partial<Branch>): Observable<Branch> {
     const restaurantId = this.orgService.selectedRestaurantId();
 
     if (!restaurantId) {
@@ -56,10 +73,10 @@ export class BranchesService {
       .patch<Branch>(`${this.apiUrl}/branches/restaurant/${restaurantId}/${branchId}`, {
         ...updatedBranch,
       })
-      .pipe(switchMap(() => this.orgService.loadBranches(restaurantId)));
+      .pipe(tap(() => this.orgService.refreshGlobalBranches()));
   }
 
-  activate(branchId: string): Observable<BranchListResponse> {
+  activate(branchId: string): Observable<Branch> {
     const restaurantId = this.orgService.selectedRestaurantId();
 
     if (!restaurantId) {
@@ -68,10 +85,10 @@ export class BranchesService {
 
     return this.http
       .patch<Branch>(`${this.apiUrl}/branches/activate/${restaurantId}/${branchId}`, {})
-      .pipe(switchMap(() => this.orgService.loadBranches(restaurantId)));
+      .pipe(tap(() => this.orgService.refreshGlobalBranches()));
   }
 
-  deactivate(branchId: string): Observable<BranchListResponse> {
+  deactivate(branchId: string): Observable<Branch> {
     const restaurantId = this.orgService.selectedRestaurantId();
 
     if (!restaurantId) {
@@ -79,11 +96,11 @@ export class BranchesService {
     }
 
     return this.http
-      .delete<void>(`${this.apiUrl}/branches/${restaurantId}/${branchId}`)
-      .pipe(switchMap(() => this.orgService.loadBranches(restaurantId)));
+      .delete<Branch>(`${this.apiUrl}/branches/${restaurantId}/${branchId}`)
+      .pipe(tap(() => this.orgService.refreshGlobalBranches()));
   }
 
-  bulkUploadByCsv(file: File): Observable<BranchListResponse> {
+  bulkUploadByCsv(file: File): Observable<void> {
     const restaurantId = this.orgService.selectedRestaurantId();
 
     if (!restaurantId) {
@@ -95,6 +112,6 @@ export class BranchesService {
 
     return this.http
       .post<void>(`${this.apiUrl}/branches/bulk-upload/${restaurantId}`, form)
-      .pipe(switchMap(() => this.orgService.loadBranches(restaurantId)));
+      .pipe(tap(() => this.orgService.refreshGlobalBranches()));
   }
 }

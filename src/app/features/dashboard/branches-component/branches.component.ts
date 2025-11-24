@@ -20,6 +20,7 @@ import { PaginationComponent } from '../../../shared/components/pagination/pagin
 import { TitleComponent } from '../../../shared/components/title/title';
 import { createPaginationState } from '../../../shared/utils/pagination.util';
 import { createSearchState } from '../../../shared/utils/search.util';
+
 interface BranchForm {
   readonly id?: string;
   name: string;
@@ -28,8 +29,9 @@ interface BranchForm {
   phoneNumberReception?: string;
   isActive: boolean;
 }
+
 @Component({
-  selector: 'app-branches.component',
+  selector: 'app-branches',
   imports: [CommonModule, TitleComponent, PaginationComponent, ModalComponent, EmptyStateComponent],
   templateUrl: './branches.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -41,6 +43,7 @@ export class BranchesComponent {
   private readonly toastrService = inject(ToastrService);
 
   readonly saving = signal(false);
+  readonly loading = signal(false);
   readonly mode = signal<Mode>(null);
   readonly confirming = signal(false);
   private confirmEnable = signal<boolean | null>(null);
@@ -51,6 +54,9 @@ export class BranchesComponent {
   readonly generatingQr = signal<string | null>(null);
   readonly filters = signal<{ isActive?: boolean }>({});
 
+  private readonly filteredBranches = signal<Branch[]>([]);
+  private readonly filteredTotal = signal(0);
+
   readonly form = signal<BranchForm>({
     name: '',
     address: '',
@@ -59,8 +65,8 @@ export class BranchesComponent {
     isActive: true,
   });
 
-  readonly branches = computed(() => this.orgService.branches());
-  readonly total = computed(() => this.orgService.totalBranches());
+  readonly branches = computed(() => this.filteredBranches());
+  readonly total = computed(() => this.filteredTotal());
   readonly restaurantId = computed(() => this.orgService.selectedRestaurantId());
   readonly confirmTargetStatus = computed(() => !!this.confirmEnable());
 
@@ -75,9 +81,9 @@ export class BranchesComponent {
     return roles.includes('super') || roles.includes('admin');
   });
 
-  readonly modalTitle = computed(() => {
-    return this.mode() === 'create' ? 'Nueva sucursal' : 'Editar sucursal';
-  });
+  readonly modalTitle = computed(() =>
+    this.mode() === 'create' ? 'Nueva sucursal' : 'Editar sucursal'
+  );
 
   readonly isFormValid = computed(() => {
     const f = this.form();
@@ -114,8 +120,6 @@ export class BranchesComponent {
 
   readonly searchTerm = this.searchState.searchTerm;
 
-  readonly trackById = (_: number, b: Branch) => b.id;
-
   private previousRestaurantId: string | null = null;
 
   constructor() {
@@ -132,9 +136,11 @@ export class BranchesComponent {
     });
   }
 
-  private fetch() {
+  private fetch(): void {
     const rid = this.restaurantId();
     if (!rid) return;
+
+    this.loading.set(true);
 
     const { limit, offset } = this.pagination();
 
@@ -145,10 +151,20 @@ export class BranchesComponent {
         limit,
         offset,
       })
-      .subscribe();
+      .pipe(finalize(() => this.loading.set(false)))
+      .subscribe({
+        next: (response) => {
+          this.filteredBranches.set(response.branches);
+          this.filteredTotal.set(response.total);
+        },
+        error: (error) => {
+          console.error('Error loading filtered branches:', error);
+          this.toastrService.error('Error al cargar las sucursales');
+        },
+      });
   }
 
-  reload() {
+  reload(): void {
     this.fetch();
   }
 
@@ -157,18 +173,18 @@ export class BranchesComponent {
   changeLimit = (e: Event) => this.paginationState.changeLimit(e);
   updateFilterSearch = (e: Event) => this.searchState.updateSearch(e);
 
-  updateFilterActive(event: Event) {
+  updateFilterActive(event: Event): void {
     const select = event.target as HTMLSelectElement;
     const value = select.value;
 
     let isActive: boolean | undefined;
 
     if (value === '') {
-      isActive = undefined; // Todos
+      isActive = undefined;
     } else if (value === 'true') {
-      isActive = true; // Activos
+      isActive = true;
     } else if (value === 'false') {
-      isActive = false; // Inactivos
+      isActive = false;
     }
 
     this.filters.update((f) => ({ ...f, isActive }));
@@ -176,7 +192,7 @@ export class BranchesComponent {
     this.fetch();
   }
 
-  openCreate() {
+  openCreate(): void {
     this.mode.set('create');
     this.form.set({
       name: '',
@@ -187,7 +203,7 @@ export class BranchesComponent {
     });
   }
 
-  openEdit(branch: Branch) {
+  openEdit(branch: Branch): void {
     this.mode.set('edit');
     this.form.set({
       id: branch.id,
@@ -199,7 +215,7 @@ export class BranchesComponent {
     });
   }
 
-  closeModal() {
+  closeModal(): void {
     this.mode.set(null);
     this.form.set({
       name: '',
@@ -243,7 +259,8 @@ export class BranchesComponent {
       finalize(() => this.saving.set(false))
     ).subscribe(() => {
       this.toastrService.success('Sucursal guardada correctamente');
-      this.mode.set(null);
+      this.closeModal();
+      this.reload(); // ✅ Recargar vista filtrada
     });
   }
 
@@ -262,7 +279,6 @@ export class BranchesComponent {
   toggleActive(): void {
     const b = this.target();
     const enable = this.confirmEnable();
-    this.confirming.set(false);
     if (!b || enable === null) return;
 
     const op = enable ? this.branchesService.activate(b.id) : this.branchesService.deactivate(b.id);
@@ -272,26 +288,27 @@ export class BranchesComponent {
         console.error('Error toggling branch status:', e);
         this.toastrService.error('Error al cambiar el estado de la sucursal');
         return EMPTY;
-      })
+      }),
+      finalize(() => this.closeConfirmation())
     ).subscribe(() => {
       this.toastrService.success(`Sucursal ${enable ? 'activada' : 'desactivada'} correctamente`);
-      this.closeConfirmation();
+      this.reload();
     });
   }
 
-  openAddMessages(branch: Branch) {
+  openAddMessages(branch: Branch): void {
     this.targetForMessages.set(branch);
     this.messagesToAdd.set(0);
     this.addingMessages.set(true);
   }
 
-  closeAddMessagesModal() {
+  closeAddMessagesModal(): void {
     this.addingMessages.set(false);
     this.targetForMessages.set(null);
     this.messagesToAdd.set(0);
   }
 
-  handleAddMessages() {
+  handleAddMessages(): void {
     const branch = this.targetForMessages();
     const amount = this.messagesToAdd();
 
@@ -317,10 +334,11 @@ export class BranchesComponent {
       .subscribe(() => {
         this.toastrService.success(`${amount} mensajes agregados correctamente`);
         this.closeAddMessagesModal();
+        this.reload(); // ✅ Recargar vista filtrada
       });
   }
 
-  onGenerateQr(branch: Branch) {
+  onGenerateQr(branch: Branch): void {
     const rid = this.restaurantId();
     if (!rid) return;
 
@@ -337,17 +355,23 @@ export class BranchesComponent {
         finalize(() => this.generatingQr.set(null))
       )
       .subscribe((res) => {
-        // Actualizar el QR en el branch actual
-        const updated = this.orgService
+        // ✅ Actualizar estado global (para Shell Component)
+        const updatedGlobal = this.orgService
           .branches()
           .map((b) => (b.id === branch.id ? { ...b, qrUrl: res.qrUrl } : b));
-        this.orgService.branches.set(updated);
+        this.orgService.branches.set(updatedGlobal);
+
+        // ✅ Actualizar estado local (para esta vista)
+        const updatedLocal = this.filteredBranches().map((b) =>
+          b.id === branch.id ? { ...b, qrUrl: res.qrUrl } : b
+        );
+        this.filteredBranches.set(updatedLocal);
 
         this.toastrService.success('Código QR generado correctamente');
       });
   }
 
-  onCsvSelected(ev: Event) {
+  onCsvSelected(ev: Event): void {
     const input = ev.target as HTMLInputElement;
     const file = input.files?.[0];
 
@@ -366,18 +390,18 @@ export class BranchesComponent {
         input.value = '';
         this.toastrService.success('Sucursales cargadas correctamente');
         this.paginationState.resetToFirstPage();
-        this.fetch();
+        this.reload(); // ✅ Recargar vista filtrada
       });
   }
 
-  updateForm<K extends keyof BranchForm>(key: K, ev: Event) {
+  updateForm<K extends keyof BranchForm>(key: K, ev: Event): void {
     const el = ev.target as HTMLInputElement;
-    this.form.update((f) => ({ ...f, [key]: el.value as any }));
+    this.form.update((f) => ({ ...f, [key]: el.value }));
   }
 
-  updateFormChecked<K extends keyof BranchForm>(key: K, ev: Event) {
+  updateFormChecked<K extends keyof BranchForm>(key: K, ev: Event): void {
     const el = ev.target as HTMLInputElement;
-    this.form.update((f) => ({ ...f, [key]: el.checked as any }));
+    this.form.update((f) => ({ ...f, [key]: el.checked }));
   }
 
   updateMessagesToAdd(ev: Event): void {

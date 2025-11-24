@@ -20,8 +20,8 @@ export class OrgService {
     () => this.restaurants()?.find((r) => r.id === this.selectedRestaurantId()) ?? null
   );
 
+  // ✅ Estado global: TODAS las sucursales activas (para Shell Component)
   readonly branches = signal<Branch[]>([]);
-  readonly totalBranches = signal<number>(0);
   readonly selectedBranchId = signal<string | null>(null);
   readonly selectedBranch = computed(
     () => this.branches().find((b) => b.id === this.selectedBranchId()) ?? null
@@ -33,19 +33,17 @@ export class OrgService {
   constructor() {
     this.initializeFromStorage();
 
-    // Effect para cargar branches automáticamente cuando cambia el restaurante
     effect(() => {
       const rid = this.selectedRestaurantId();
 
       if (!rid) {
         this.branches.set([]);
-        this.totalBranches.set(0);
         this.selectedBranchId.set(null);
         return;
       }
 
-      // Cargar branches del restaurante seleccionado
-      this.loadBranches(rid).subscribe();
+      // ✅ Cargar TODAS las sucursales activas (sin filtros, para Shell)
+      this.loadAllActiveBranches(rid).subscribe();
     });
   }
 
@@ -68,7 +66,6 @@ export class OrgService {
       tap((list) => {
         this.restaurants.set(Array.isArray(list.restaurants) ? list.restaurants : []);
 
-        // Mantener la selección actual si existe en la lista
         const currentSelection = this.selectedRestaurantId();
         const exists = currentSelection && list.restaurants.some((r) => r.id === currentSelection);
 
@@ -76,7 +73,6 @@ export class OrgService {
           return;
         }
 
-        // Si no existe la selección actual, buscar en localStorage
         const saved = localStorage.getItem(this.LS_RESTAURANT);
         const savedExists = saved && list.restaurants.some((r) => r.id === saved);
         const fallback = list.restaurants[0]?.id ?? null;
@@ -107,42 +103,17 @@ export class OrgService {
     }
   }
 
-  loadBranches(
-    restaurantId: string,
-    params?: {
-      search?: string;
-      isActive?: boolean;
-      limit?: number;
-      offset?: number;
-    }
-  ) {
+  private loadAllActiveBranches(restaurantId: string) {
     this.loadingBranches.set(true);
 
-    let httpParams = new HttpParams();
-
-    if (params?.search) {
-      httpParams = httpParams.set('search', params.search);
-    }
-    if (params?.isActive !== undefined) {
-      httpParams = httpParams.set('isActive', params.isActive.toString());
-    }
-    if (params?.limit !== undefined) {
-      httpParams = httpParams.set('limit', params.limit.toString());
-    }
-    if (params?.offset !== undefined) {
-      httpParams = httpParams.set('offset', params.offset.toString());
-    }
+    const params = new HttpParams().set('isActive', 'true').set('limit', '1000').set('offset', '0');
 
     return this.http
-      .get<BranchListResponse>(`${this.apiUrl}/branches/restaurant/${restaurantId}`, {
-        params: httpParams
-      })
+      .get<BranchListResponse>(`${this.apiUrl}/branches/restaurant/${restaurantId}`, { params })
       .pipe(
         tap((list) => {
           this.branches.set(Array.isArray(list.branches) ? list.branches : []);
-          this.totalBranches.set(list.total || 0);
 
-          // Mantener la selección actual si existe en la nueva lista
           const currentSelection = this.selectedBranchId();
           const exists = currentSelection && list.branches.some((b) => b.id === currentSelection);
 
@@ -150,7 +121,6 @@ export class OrgService {
             return;
           }
 
-          // Si no existe la selección actual, buscar en localStorage
           const saved = localStorage.getItem(this.LS_BRANCHKEY(restaurantId));
           const savedExists = saved && list.branches.some((b) => b.id === saved);
           const fallback = list.branches[0]?.id ?? null;
@@ -165,7 +135,6 @@ export class OrgService {
         catchError((error) => {
           console.error('Error loading branches:', error);
           this.branches.set([]);
-          this.totalBranches.set(0);
           this.selectedBranchId.set(null);
           return of({ branches: [], total: 0 });
         }),
@@ -192,5 +161,12 @@ export class OrgService {
     const next = this.branches().map((b) => (b.id === updated.id ? updated : b));
 
     this.branches.set(next);
+  }
+
+  refreshGlobalBranches(): void {
+    const rid = this.selectedRestaurantId();
+    if (rid) {
+      this.loadAllActiveBranches(rid).subscribe();
+    }
   }
 }
