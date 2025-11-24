@@ -1,8 +1,8 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
+import { map, Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { Product, ProductListResponse } from './types/products.types';
-import { map, Observable } from 'rxjs';
 
 interface ProductResponse {
   product: Product;
@@ -19,8 +19,8 @@ export class ProductsService {
   readonly products = signal<Product[]>([]);
   readonly totalProducts = signal(0);
 
-  createProduct(restaurantId: string, newProduct: Partial<Product>): Observable<Product> {
-    return this.http.post<Product>(`${this.apiUrl}/products/${restaurantId}`, newProduct);
+  createProduct(restaurantId: string, newProduct: Partial<Product>): Observable<ProductResponse> {
+    return this.http.post<ProductResponse>(`${this.apiUrl}/products/${restaurantId}`, newProduct);
   }
 
   bulkCreateProducts(restaurantId: string, file: File): Observable<void> {
@@ -34,16 +34,17 @@ export class ProductsService {
     restaurantId: string,
     productId: string,
     updatedProduct: Partial<Product>
-  ): Observable<Product> {
+  ): Observable<ProductResponse> {
     return this.http
       .patch<ProductResponse>(
         `${this.apiUrl}/products/restaurant/${restaurantId}/${productId}`,
         updatedProduct
       )
       .pipe(
-        map((response) => {
-          this.products.update((products) => [...products, response.product]);
-          return response.product;
+        tap((response) => {
+          this.products.update((products) =>
+            products.map((p) => (p.id === response.product.id ? response.product : p))
+          );
         })
       );
   }

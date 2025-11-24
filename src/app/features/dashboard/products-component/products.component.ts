@@ -8,7 +8,7 @@ import {
   signal,
 } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
-import { catchError, EMPTY, finalize } from 'rxjs';
+import { catchError, EMPTY, finalize, tap } from 'rxjs';
 import { OrgService } from '../../../core/services/org.service';
 import { ProductsService } from '../../../core/services/products.service';
 import { Mode } from '../../../core/services/types/common.types';
@@ -251,6 +251,11 @@ export class ProductsComponent {
       : this.productsService.deactivateProduct(this.restaurantId()!, b.id);
 
     op.pipe(
+      tap((updatedProduct) => {
+        this.productsService.products.update((products) =>
+          products.map((p) => (p.id === updatedProduct.id ? updatedProduct : p))
+        );
+      }),
       catchError((e) => {
         console.error('Error toggling branch status:', e);
         this.toastrService.error('Error al cambiar el estado de la sucursal');

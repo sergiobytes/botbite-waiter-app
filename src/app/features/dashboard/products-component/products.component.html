@@ -79,7 +79,7 @@
               "
               class="text-xs border px-2 py-0.5 rounded-full"
             >
-              {{ product.isActive ? 'Activa' : 'Inactiva' }}
+              {{ product.isActive ? 'Activo' : 'Inactivo' }}
             </span>
           </td>
           <td class="px-4 py-3">
@@ -148,8 +148,8 @@
     (cancel)="closeModal()"
     (confirm)="save()"
   >
-    <form (submit)="$event.preventDefault(); save()" class="grid md:grid-cols-2 gap-4">
-      <div class="md:col-span-2">
+    <form (submit)="$event.preventDefault(); save()" class="space-y-4">
+      <div class="space-y-1">
         <label for="productName" class="text-sm font-medium">Nombre</label>
         <input
           id="productName"
@@ -162,20 +162,20 @@
           aria-required="true"
         />
       </div>
-      <div class="md:col-span-2">
+
+      <div class="space-y-1">
         <label for="productDescription" class="text-sm font-medium">Descripción</label>
-        <input
+        <textarea
           id="productDescription"
-          type="text"
-          class="w-full rounded-xl border border-black/10 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black/20"
+          rows="3"
+          class="w-full rounded-xl border border-black/10 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black/20 resize-none"
           [value]="form().description"
           (input)="updateForm('description', $event)"
-          required
-          maxlength="80"
-          aria-required="true"
-        />
+          maxlength="200"
+        ></textarea>
       </div>
-      <div class="md:col-span-2 flex items-center gap-2">
+
+      <div class="flex items-center gap-2">
         <input
           id="activeProduct"
           type="checkbox"
@@ -183,7 +183,7 @@
           (change)="updateFormChecked('isActive', $event)"
           class="rounded"
         />
-        <label for="activeCategory" class="text-sm">Activa</label>
+        <label for="activeProduct" class="text-sm">Activo</label>
       </div>
 
       @if (!isFormValid() && form().name) {
