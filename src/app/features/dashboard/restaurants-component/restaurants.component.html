@@ -57,17 +57,14 @@
             </div>
           </td>
         </tr>
-        } @if (!loading() && restaurants().length === 0) {
-        <tr>
-          <td colspan="3" class="px-4 py-6 text-center text-neutral-600">No hay restaurantes.</td>
-        </tr>
-        } @if (loading()) {
-        <tr>
-          <td colspan="3" class="px-4 py-6">
-            <div class="h-6 w-full rounded bg-black/10 animate-pulse"></div>
-          </td>
-        </tr>
         }
+
+        <app-empty-state
+          [loading]="loading()"
+          [isEmpty]="restaurants().length === 0"
+          [colspan]="3"
+          message="No hay restaurantes para mostrar"
+        />
       </tbody>
     </table>
   </div>

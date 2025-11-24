@@ -1,13 +1,14 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
-import { RestaurantsService } from '../../../core/services/restaurants.service';
+import { catchError, EMPTY, finalize } from 'rxjs';
 import { OrgService } from '../../../core/services/org.service';
+import { RestaurantsService } from '../../../core/services/restaurants.service';
 import { Mode } from '../../../core/services/types/common.types';
 import { Restaurant } from '../../../core/services/types/restaurants.types';
-import { catchError, EMPTY, finalize } from 'rxjs';
-import { TitleComponent } from '../../../shared/components/title/title';
+import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state';
 import { ModalComponent } from '../../../shared/components/modal/modal';
+import { TitleComponent } from '../../../shared/components/title/title';
 
 interface RestaurantForm {
   readonly id?: string;
@@ -17,7 +18,7 @@ interface RestaurantForm {
 
 @Component({
   selector: 'app-restaurants.component',
-  imports: [CommonModule, TitleComponent, ModalComponent],
+  imports: [CommonModule, TitleComponent, ModalComponent, EmptyStateComponent],
   templateUrl: './restaurants.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
