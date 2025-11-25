@@ -19,7 +19,10 @@
         [disabled]="!restaurantId()"
         aria-label="Carga masiva por CSV"
       >
-        Cargar masiva (CSV)
+        <div class="flex items-center gap-2">
+          <lucide-icon [img]="iconsService.upload" size="15" color="black"></lucide-icon>
+          <span>Cargar masiva (CSV)</span>
+        </div>
       </button>
       <button
         class="rounded-xl bg-black text-white px-4 py-2 hover:opacity-90 disabled:opacity-50 transition-all hover:animate-scale"
@@ -27,13 +30,17 @@
         [disabled]="!restaurantId()"
         aria-label="Crear nueva sucursal"
       >
-        Nueva sucursal
+        <div class="flex items-center gap-2">
+          <lucide-icon [img]="iconsService.add" size="15" color="white"></lucide-icon>
+          <span> Nueva sucursal </span>
+        </div>
       </button>
     </div>
   </div>
 
   <div class="flex flex-col md:flex-row gap-3 items-stretch md:items-center">
     <div class="md:ml-auto flex items-center gap-2">
+      <lucide-icon [img]="iconsService.search" size="15" color="black"></lucide-icon>
       <input
         type="text"
         placeholder="Buscar..."
@@ -61,8 +68,8 @@
         <tr>
           <th class="text-left font-medium px-4 py-3">Nombre</th>
           <th class="text-left font-medium px-4 py-3">Dirección</th>
-          <th class="text-left font-medium px-4 py-3">Asistente</th>
-          <th class="text-left font-medium px-4 py-3">Caja</th>
+          <th class="text-left font-medium px-4 py-3">Tel. Asistente</th>
+          <th class="text-left font-medium px-4 py-3">Tel. Caja</th>
           <th class="text-left font-medium px-4 py-3">Mensajes</th>
           <th class="text-left font-medium px-4 py-3">Estado</th>
           <th class="text-right font-medium px-4 py-3">Acciones</th>
@@ -80,8 +87,13 @@
                 target="_blank"
                 rel="noopener"
                 class="text-xs underline underline-offset-4"
-                >QR</a
               >
+                <div
+                  class="p-1 border border-black/20 rounded-lg hover:bg-black/5 transition-all hover:animate-scale flex items-center justify-center"
+                >
+                  <lucide-icon [img]="iconsService.qrCode" size="20"></lucide-icon>
+                </div>
+              </a>
               }
             </div>
           </td>
@@ -89,62 +101,85 @@
           <td class="px-4 py-3">{{ branch.phoneNumberAssistant }}</td>
           <td class="px-4 py-3">{{ branch.phoneNumberReception }}</td>
           <td class="px-4 py-3">{{ branch.availableMessages }}</td>
-          <td class="px-4 py-3">
-            <span
+          <td class="px-4 py-3 flex">
+            <div
+              class="flex items-center justify-center gap-2 rounded-full border text-xs px-2 py-0.5"
               [class]="
                 branch.isActive
                   ? 'bg-green-100 text-green-800 border-green-200'
-                  : 'bg-neutral-100 text-neutral-700 border-neutral-200'
+                  : 'bg-red-100 text-red-800 border-red-200'
               "
-              class="text-xs border px-2 py-0.5 rounded-full"
             >
-              {{ branch.isActive ? 'Activa' : 'Inactiva' }}
-            </span>
+              <lucide-icon
+                [img]="branch.isActive ? iconsService.active : iconsService.inactive"
+                size="20"
+                [color]="branch.isActive ? 'green' : 'red'"
+              ></lucide-icon>
+
+              <span class="">
+                {{ branch.isActive ? 'Activa' : 'Inactiva' }}
+              </span>
+            </div>
           </td>
           <td class="px-4 py-3">
             <div class="flex items-center gap-2 justify-end">
               @if(canAddMessages()) {
               <button
-                class="px-3 py-1 border border-black/10 rounded-lg hover:bg-black/5"
+                class="px-3 py-1 border border-black/10 rounded-lg hover:bg-black/5 transition-all hover:animate-scale"
                 (click)="openAddMessages(branch)"
                 [attr.aria-label]="'Agregar mensajes a ' + branch.name"
               >
-                + Mensajes
+                <div class="flex items-center gap-2">
+                  <lucide-icon [img]="iconsService.add" size="15" color="green"></lucide-icon>
+                  <span>Mensajes</span>
+                </div>
               </button>
               } @if(!branch.qrUrl) {
               <button
-                class="px-3 py-1 border border-black/10 rounded-lg hover:bg-black/5"
+                class="px-3 py-1 border border-black/10 rounded-lg hover:bg-black/5 transition-all hover:animate-scale"
                 (click)="onGenerateQr(branch)"
                 [attr.aria-label]="'Generar QR de ' + branch.name"
               >
-                {{ generatingQr() === branch.id ? 'Generando...' : 'Generar QR' }}
+                <div class="flex items-center gap-2">
+                  <lucide-icon [img]="iconsService.qrCode" size="20"></lucide-icon>
+                  <span>{{ generatingQr() === branch.id ? 'Generando...' : 'Generar QR' }}</span>
+                </div>
               </button>
               }
 
               <button
-                class="px-3 py-1 border border-black/10 rounded-lg hover:bg-black/5"
+                class="px-3 py-1 border border-yellow-200 bg-yellow-100 text-yellow-800 rounded-lg hover:bg-yellow-50 transition-all hover:animate-scale"
                 (click)="openEdit(branch)"
                 [attr.aria-label]="'Editar sucursal ' + branch.name"
               >
-                Editar
+                <div class="flex items-center gap-2">
+                  <lucide-icon [img]="iconsService.edit" size="15" color="orange"></lucide-icon>
+                  <span>Editar</span>
+                </div>
               </button>
 
               @if(branch.isActive) {
               <button
-                class="px-3 py-1 border border-black/10 rounded-lg hover:bg-black/5"
+                class="px-3 py-1 border rounded-lg hover:bg-black/5 transition-all hover:animate-scale bg-red-100 text-red-800 border-red-200"
                 (click)="confirmToggle(branch, false)"
                 [attr.aria-label]="'Desactivar ' + branch.name"
               >
-                Desactivar
+                <div class="flex items-center gap-2">
+                  <lucide-icon [img]="iconsService.disable" size="15" color="red"></lucide-icon>
+                  <span>Desactivar</span>
+                </div>
               </button>
 
               } @else {
               <button
-                class="px-3 py-1 border border-black/10 rounded-lg hover:bg-black/5"
+                class="px-3 py-1 border rounded-lg hover:bg-black/5 transition-all hover:animate-scale bg-green-100 text-green-800 border-green-200"
                 (click)="confirmToggle(branch, true)"
                 [attr.aria-label]="'Activar ' + branch.name"
               >
-                Activar
+                <div class="flex items-center gap-2">
+                  <lucide-icon [img]="iconsService.active" size="15" color="green"></lucide-icon>
+                  <span>Activar</span>
+                </div>
               </button>
               }
             </div>

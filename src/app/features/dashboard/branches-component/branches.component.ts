@@ -7,10 +7,12 @@ import {
   inject,
   signal,
 } from '@angular/core';
+import { LucideAngularModule } from 'lucide-angular';
 import { ToastrService } from 'ngx-toastr';
 import { catchError, EMPTY, finalize } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
 import { BranchesService } from '../../../core/services/branches.service';
+import { IconsService } from '../../../core/services/icons.service';
 import { OrgService } from '../../../core/services/org.service';
 import { Branch } from '../../../core/services/types/branches.types';
 import { Mode } from '../../../core/services/types/common.types';
@@ -32,7 +34,14 @@ interface BranchForm {
 
 @Component({
   selector: 'app-branches',
-  imports: [CommonModule, TitleComponent, PaginationComponent, ModalComponent, EmptyStateComponent],
+  imports: [
+    CommonModule,
+    TitleComponent,
+    PaginationComponent,
+    ModalComponent,
+    EmptyStateComponent,
+    LucideAngularModule,
+  ],
   templateUrl: './branches.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -41,6 +50,7 @@ export class BranchesComponent {
   protected readonly orgService = inject(OrgService);
   private readonly authService = inject(AuthService);
   private readonly toastrService = inject(ToastrService);
+  protected readonly iconsService = inject(IconsService);
 
   readonly saving = signal(false);
   readonly loading = signal(false);

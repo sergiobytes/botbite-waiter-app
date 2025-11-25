@@ -13,6 +13,7 @@ import {
   MessagesSquare,
   Pen,
   Power,
+  QrCode,
   ScrollText,
   Search,
   ShieldCheck,
@@ -20,6 +21,7 @@ import {
   ShieldPlus,
   ShieldX,
   StarIcon,
+  Upload,
   UserPlus,
   Users,
   Utensils,
@@ -55,4 +57,7 @@ export class IconsService {
   readonly edit = Pen;
   readonly disable = ShieldOff;
   readonly addRole = ShieldPlus;
+
+  readonly qrCode = QrCode;
+  readonly upload = Upload;
 }
