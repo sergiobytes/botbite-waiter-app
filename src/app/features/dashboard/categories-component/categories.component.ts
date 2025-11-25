@@ -4,12 +4,12 @@ import { LucideAngularModule } from 'lucide-angular';
 import { ToastrService } from 'ngx-toastr';
 import { catchError, EMPTY, finalize } from 'rxjs';
 import { CategoriesService } from '../../../core/services/categories.service';
+import { IconsService } from '../../../core/services/icons.service';
 import { Category } from '../../../core/services/types/category.types';
 import { Mode } from '../../../core/services/types/common.types';
 import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state';
 import { ModalComponent } from '../../../shared/components/modal/modal';
 import { TitleComponent } from '../../../shared/components/title/title';
-import { IconsService } from '../../../core/services/icons.service';
 interface CategoryForm {
   readonly id?: number;
   name: string;
