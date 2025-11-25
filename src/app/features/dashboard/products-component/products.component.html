@@ -209,17 +209,6 @@
         ></textarea>
       </div>
 
-      <div class="flex items-center gap-2">
-        <input
-          id="activeProduct"
-          type="checkbox"
-          [checked]="form().isActive"
-          (change)="updateFormChecked('isActive', $event)"
-          class="rounded"
-        />
-        <label for="activeProduct" class="text-sm">Activo</label>
-      </div>
-
       @if (!isFormValid() && form().name) {
       <p class="text-sm text-red-600">El nombre es obligatorio</p>
       }

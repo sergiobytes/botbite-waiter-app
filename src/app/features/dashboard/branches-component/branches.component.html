@@ -279,17 +279,6 @@
         />
       </div>
 
-      <div class="md:col-span-2 flex items-center gap-2">
-        <input
-          id="bactive"
-          type="checkbox"
-          [checked]="form().isActive"
-          (change)="updateFormChecked('isActive', $event)"
-          class="rounded"
-        />
-        <label for="bactive" class="text-sm">Activa</label>
-      </div>
-
       @if (!isFormValid() && (form().name || form().address)) {
       <p class="md:col-span-2 text-sm text-red-600">Nombre y dirección son obligatorios</p>
       }

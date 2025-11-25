@@ -218,7 +218,6 @@ export class ProductsComponent {
     const dto: Partial<Product> = {
       name: data.name.trim(),
       description: data.description?.trim(),
-      isActive: !!data.isActive,
     };
 
     const op =
