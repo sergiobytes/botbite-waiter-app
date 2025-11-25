@@ -12,6 +12,7 @@ import {
   MapPin,
   Menu,
   MessagesSquare,
+  NotebookPen,
   Pen,
   Power,
   QrCode,
@@ -46,20 +47,17 @@ export class IconsService {
   readonly message = MessagesSquare;
   readonly assistant = Bot;
   readonly hand = Hand;
-
   readonly addUser = UserPlus;
   readonly search = Search;
   readonly active = ShieldCheck;
   readonly inactive = ShieldX;
-
   readonly next = ArrowRight;
   readonly previous = ArrowLeft;
-
   readonly add = CirclePlus;
   readonly edit = Pen;
   readonly disable = ShieldOff;
   readonly addRole = ShieldPlus;
-
   readonly qrCode = QrCode;
   readonly upload = Upload;
+  readonly menus = NotebookPen;
 }
