@@ -19,7 +19,10 @@
         [disabled]="!restaurantId()"
         aria-label="Carga masiva por CSV"
       >
-        Carga masiva (CSV)
+        <div class="flex items-center gap-2">
+          <lucide-icon [img]="iconsService.upload" size="15" color="black"></lucide-icon>
+          <span>Cargar masiva (CSV)</span>
+        </div>
       </button>
       <button
         class="rounded-xl bg-black text-white px-4 py-2 hover:opacity-90 disabled:opacity-50 transition-all hover:animate-scale"
@@ -27,13 +30,17 @@
         [disabled]="!restaurantId()"
         aria-label="Nuevo producto"
       >
-        Nuevo producto
+        <div class="flex items-center gap-2">
+          <lucide-icon [img]="iconsService.add" size="15" color="white"></lucide-icon>
+          <span> Nuevo producto </span>
+        </div>
       </button>
     </div>
   </div>
 
   <div class="flex flex-col md:flex-row gap-3 items-stretch md:items-center">
     <div class="md:ml-auto flex items-center gap-2">
+      <lucide-icon [img]="iconsService.search" size="15" color="black"></lucide-icon>
       <input
         type="text"
         placeholder="Buscar"
@@ -70,44 +77,61 @@
         <tr class="border-t border-black/10 animate-fade-in animate-duration-300">
           <td class="px-4 py-3">{{ product.name }}</td>
           <td class="px-4 py-3">{{ product.description }}</td>
-          <td class="px-4 py-3">
-            <span
+          <td class="px-4 py-3 flex">
+            <div
+              class="flex items-center justify-center gap-2 rounded-full border text-xs px-2 py-0.5"
               [class]="
                 product.isActive
                   ? 'bg-green-100 text-green-800 border-green-200'
-                  : 'bg-neutral-100 text-neutral-700 border-neutral-200'
+                  : 'bg-red-100 text-red-800 border-red-200'
               "
-              class="text-xs border px-2 py-0.5 rounded-full animate-fade-in animate-duration-200"
             >
-              {{ product.isActive ? 'Activo' : 'Inactivo' }}
-            </span>
+              <lucide-icon
+                [img]="product.isActive ? iconsService.active : iconsService.inactive"
+                size="20"
+                [color]="product.isActive ? 'green' : 'red'"
+              ></lucide-icon>
+
+              <span class="">
+                {{ product.isActive ? 'Activa' : 'Inactiva' }}
+              </span>
+            </div>
           </td>
           <td class="px-4 py-3">
             <div class="flex items-center gap-2 justify-end">
               <button
-                class="px-3 py-1 border border-black/10 rounded-lg hover:bg-black/5 transition-all hover:animate-scale"
+                class="px-3 py-1 border border-yellow-200 bg-yellow-100 text-yellow-800 rounded-lg hover:bg-yellow-50 transition-all hover:animate-scale"
                 (click)="openEdit(product)"
                 [attr.aria-label]="'Editar producto ' + product.name"
               >
-                Editar
+                <div class="flex items-center gap-2">
+                  <lucide-icon [img]="iconsService.edit" size="15" color="orange"></lucide-icon>
+                  <span>Editar</span>
+                </div>
               </button>
 
               @if(product.isActive) {
               <button
-                class="px-3 py-1 border border-black/10 rounded-lg hover:bg-black/5 transition-all hover:animate-scale"
+                class="px-3 py-1 border rounded-lg hover:bg-black/5 transition-all hover:animate-scale bg-red-100 text-red-800 border-red-200"
                 (click)="confirmToggle(product, false)"
                 [attr.aria-label]="'Desactivar ' + product.name"
               >
-                Desactivar
+                <div class="flex items-center gap-2">
+                  <lucide-icon [img]="iconsService.disable" size="15" color="red"></lucide-icon>
+                  <span>Desactivar</span>
+                </div>
               </button>
 
               } @else {
               <button
-                class="px-3 py-1 border border-black/10 rounded-lg hover:bg-black/5 transition-all hover:animate-scale"
+                class="px-3 py-1 border rounded-lg hover:bg-black/5 transition-all hover:animate-scale bg-green-100 text-green-800 border-green-200"
                 (click)="confirmToggle(product, true)"
                 [attr.aria-label]="'Activar ' + product.name"
               >
-                Activar
+                <div class="flex items-center gap-2">
+                  <lucide-icon [img]="iconsService.active" size="15" color="green"></lucide-icon>
+                  <span>Activar</span>
+                </div>
               </button>
               }
             </div>

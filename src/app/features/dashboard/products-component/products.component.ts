@@ -7,8 +7,10 @@ import {
   inject,
   signal,
 } from '@angular/core';
+import { LucideAngularModule } from 'lucide-angular';
 import { ToastrService } from 'ngx-toastr';
 import { catchError, EMPTY, finalize, tap } from 'rxjs';
+import { IconsService } from '../../../core/services/icons.service';
 import { OrgService } from '../../../core/services/org.service';
 import { ProductsService } from '../../../core/services/products.service';
 import { Mode } from '../../../core/services/types/common.types';
@@ -29,7 +31,14 @@ interface ProductForm {
 
 @Component({
   selector: 'app-products.component',
-  imports: [CommonModule, TitleComponent, PaginationComponent, ModalComponent, EmptyStateComponent],
+  imports: [
+    CommonModule,
+    TitleComponent,
+    PaginationComponent,
+    ModalComponent,
+    EmptyStateComponent,
+    LucideAngularModule,
+  ],
   templateUrl: './products.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -37,6 +46,7 @@ export class ProductsComponent {
   protected readonly productsService = inject(ProductsService);
   private readonly orgService = inject(OrgService);
   private readonly toastrService = inject(ToastrService);
+  protected readonly iconsService = inject(IconsService);
 
   readonly saving = signal(false);
   readonly loading = signal(false);
