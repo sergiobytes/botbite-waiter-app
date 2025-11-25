@@ -13,6 +13,7 @@ export class UsersService {
   private readonly apiUrl = environment.apiBaseUrl;
 
   readonly users = signal<UserRow[]>([]);
+  readonly totalUsers = signal<number>(0);
 
   list(params: {
     search?: string;
@@ -44,6 +45,7 @@ export class UsersService {
     return this.http.get<UserListResponse>(`${this.apiUrl}/users`, { params: httpParams }).pipe(
       tap((list) => {
         this.users.set(Array.isArray(list.users) ? list.users : []);
+        this.totalUsers.set(list.total || 0);
       })
     );
   }

@@ -92,11 +92,13 @@ export class ProductsComponent {
 
   private readonly paginationState = createPaginationState(this.productsService.totalProducts, {
     onChange: () => this.fetch(),
+    loading: this.loading,
   });
 
   readonly pagination = this.paginationState.pagination;
   readonly pageFrom = this.paginationState.pageFrom;
   readonly pageTo = this.paginationState.pageTo;
+  readonly stableTotal = this.paginationState.stableTotal;
   readonly canPrev = this.paginationState.canPrev;
   readonly canNext = this.paginationState.canNext;
 

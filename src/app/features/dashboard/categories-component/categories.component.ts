@@ -9,27 +9,40 @@ import { Category } from '../../../core/services/types/category.types';
 import { Mode } from '../../../core/services/types/common.types';
 import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state';
 import { ModalComponent } from '../../../shared/components/modal/modal';
+import { PaginationComponent } from '../../../shared/components/pagination/pagination';
 import { TitleComponent } from '../../../shared/components/title/title';
+import { createPaginationState } from '../../../shared/utils/pagination.util';
+import { createSearchState } from '../../../shared/utils/search.util';
+
 interface CategoryForm {
   readonly id?: number;
   name: string;
   isActive: boolean;
 }
+
 @Component({
   selector: 'app-categories',
-  imports: [CommonModule, TitleComponent, ModalComponent, EmptyStateComponent, LucideAngularModule],
+  imports: [
+    CommonModule,
+    TitleComponent,
+    ModalComponent,
+    PaginationComponent,
+    EmptyStateComponent,
+    LucideAngularModule,
+  ],
   templateUrl: './categories.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CategoriesComponent {
-  private readonly categoriesService = inject(CategoriesService);
+  protected readonly categoriesService = inject(CategoriesService);
   private readonly toastrService = inject(ToastrService);
-   protected readonly iconsService = inject(IconsService);
+  protected readonly iconsService = inject(IconsService);
 
   readonly saving = signal(false);
   readonly mode = signal<Mode>(null);
   readonly confirming = signal(false);
   readonly target = signal<Category | null>(null);
+  readonly filters = signal<{ isActive?: boolean }>({});
 
   readonly form = signal<CategoryForm>({
     name: '',
@@ -37,7 +50,13 @@ export class CategoriesComponent {
   });
 
   readonly loading = signal(false);
-  readonly categoriesList = signal<Category[]>([]);
+  readonly categories = computed(() => this.categoriesService.categories());
+
+  readonly activeFilterValue = computed(() => {
+    const isActive = this.filters().isActive;
+    if (isActive === undefined) return '';
+    return isActive ? 'true' : 'false';
+  });
 
   readonly modalTitle = computed(() => {
     return this.mode() === 'create' ? 'Nueva categoría' : 'Editar categoría';
@@ -48,15 +67,45 @@ export class CategoriesComponent {
     return f.name.trim() !== '';
   });
 
+  private readonly paginationState = createPaginationState(
+    this.categoriesService.totalCategories,
+    {
+      onChange: () => this.fetch(),
+      loading: this.loading,
+    }
+  );
+
+  readonly pagination = this.paginationState.pagination;
+  readonly pageFrom = this.paginationState.pageFrom;
+  readonly pageTo = this.paginationState.pageTo;
+  readonly stableTotal = this.paginationState.stableTotal;
+  readonly canPrev = this.paginationState.canPrev;
+  readonly canNext = this.paginationState.canNext;
+
+  private readonly searchState = createSearchState({
+    onSearch: () => {
+      this.paginationState.resetToFirstPage();
+      this.fetch();
+    },
+  });
+
+  readonly search = this.searchState.searchTerm;
+
   constructor() {
-    this.loadCategories();
+    this.fetch();
   }
 
-  private loadCategories(): void {
+  private fetch(): void {
     this.loading.set(true);
+    const { limit, offset } = this.pagination();
 
     this.categoriesService
-      .getCategories()
+      .list({
+        search: this.search() || undefined,
+        isActive: this.filters().isActive,
+        limit,
+        offset,
+      })
       .pipe(
         catchError((error) => {
           console.error('Error loading categories:', error);
@@ -65,9 +114,35 @@ export class CategoriesComponent {
         }),
         finalize(() => this.loading.set(false))
       )
-      .subscribe((categories: Category[]) => {
-        this.categoriesList.set(categories);
-      });
+      .subscribe();
+  }
+
+  reload(): void {
+    this.fetch();
+  }
+
+  nextPage = () => this.paginationState.nextPage();
+  prevPage = () => this.paginationState.prevPage();
+  changeLimit = (e: Event) => this.paginationState.changeLimit(e);
+  updateSearch = (e: Event) => this.searchState.updateSearch(e);
+
+  updateFilterActive(event: Event) {
+    const select = event.target as HTMLSelectElement;
+    const value = select.value;
+
+    let isActive: boolean | undefined;
+
+    if (value === '') {
+      isActive = undefined;
+    } else if (value === 'true') {
+      isActive = true;
+    } else if (value === 'false') {
+      isActive = false;
+    }
+
+    this.filters.update((f) => ({ ...f, isActive }));
+    this.paginationState.resetToFirstPage();
+    this.fetch();
   }
 
   openCreate(): void {
@@ -105,8 +180,8 @@ export class CategoriesComponent {
 
     const operation =
       this.mode() === 'create'
-        ? this.categoriesService.createCategory(categoryData)
-        : this.categoriesService.updateCategory(formValue.id!, categoryData);
+        ? this.categoriesService.create(categoryData)
+        : this.categoriesService.update(formValue.id!, categoryData);
 
     operation
       .pipe(
@@ -120,7 +195,7 @@ export class CategoriesComponent {
       .subscribe(() => {
         this.toastrService.success('Categoría guardada correctamente');
         this.closeModal();
-        this.loadCategories();
+        this.fetch();
       });
   }
 
@@ -139,7 +214,7 @@ export class CategoriesComponent {
     if (!targetCategory?.id) return;
 
     this.categoriesService
-      .updateCategory(targetCategory.id, { isActive: false })
+      .update(targetCategory.id, { isActive: false })
       .pipe(
         catchError((error) => {
           console.error('Error disabling category:', error);
@@ -151,7 +226,7 @@ export class CategoriesComponent {
         this.toastrService.success('Categoría deshabilitada correctamente');
         this.confirming.set(false);
         this.target.set(null);
-        this.loadCategories();
+        this.fetch();
       });
   }
 

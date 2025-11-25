@@ -14,6 +14,30 @@
     </button>
   </div>
 
+  <div class="flex flex-col md:flex-row gap-3 items-stretch md:items-center">
+    <div class="md:ml-auto flex items-center gap-2">
+      <lucide-icon [img]="iconsService.search" size="15" color="black"></lucide-icon>
+      <input
+        type="text"
+        placeholder="Buscar..."
+        class="rounded-xl border border-black/10 px-3 py-2 w-64"
+        [value]="search()"
+        (input)="updateSearch($event)"
+        aria-label="Buscar categorías"
+      />
+      <select
+        class="rounded-xl border border-black/10 px-3 py-2"
+        [value]="activeFilterValue()"
+        (change)="updateFilterActive($event)"
+        aria-label="Filtrar por estado"
+      >
+        <option value="">Todos</option>
+        <option value="true">Activos</option>
+        <option value="false">Inactivos</option>
+      </select>
+    </div>
+  </div>
+
   <div class="rounded-2xl border border-black/10 overflow-hidden overflow-x-auto">
     <table class="w-full text-sm min-w-[600px]">
       <thead class="bg-neutral-50 text-neutral-600">
@@ -24,7 +48,7 @@
         </tr>
       </thead>
       <tbody>
-        @for(category of categoriesList(); track category.id) {
+        @for(category of categories(); track category.id) {
         <tr class="border-t border-black/10 animate-fade-in animate-duration-300">
           <td class="px-4 py-3">{{ category.name }}</td>
           <td class="px-4 py-3 flex">
@@ -78,13 +102,25 @@
 
         <app-empty-state
           [loading]="loading()"
-          [isEmpty]="categoriesList().length === 0"
+          [isEmpty]="categories().length === 0"
           [colspan]="3"
           message="No hay categorías para mostrar"
         />
       </tbody>
     </table>
   </div>
+
+  <app-pagination
+    [pageFrom]="pageFrom()"
+    [pageTo]="pageTo()"
+    [total]="stableTotal()"
+    [currentLimit]="pagination().limit"
+    [canPrev]="canPrev()"
+    [canNext]="canNext()"
+    (previousPage)="prevPage()"
+    (nextPage)="nextPage()"
+    (limitChange)="changeLimit($event)"
+  />
 
   <app-modal
     [isOpen]="mode() !== null"

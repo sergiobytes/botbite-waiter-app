@@ -10,7 +10,10 @@ import { Mode } from '../../../core/services/types/common.types';
 import { Restaurant } from '../../../core/services/types/restaurants.types';
 import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state';
 import { ModalComponent } from '../../../shared/components/modal/modal';
+import { PaginationComponent } from '../../../shared/components/pagination/pagination';
 import { TitleComponent } from '../../../shared/components/title/title';
+import { createPaginationState } from '../../../shared/utils/pagination.util';
+import { createSearchState } from '../../../shared/utils/search.util';
 
 interface RestaurantForm {
   readonly id?: string;
@@ -20,12 +23,19 @@ interface RestaurantForm {
 
 @Component({
   selector: 'app-restaurants.component',
-  imports: [CommonModule, TitleComponent, ModalComponent, EmptyStateComponent, LucideAngularModule],
+  imports: [
+    CommonModule,
+    TitleComponent,
+    ModalComponent,
+    PaginationComponent,
+    EmptyStateComponent,
+    LucideAngularModule,
+  ],
   templateUrl: './restaurants.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RestaurantsComponent {
-  private readonly restaurantsService = inject(RestaurantsService);
+  protected readonly restaurantsService = inject(RestaurantsService);
   private readonly orgService = inject(OrgService);
   private readonly toastrService = inject(ToastrService);
   protected readonly iconsService = inject(IconsService);
@@ -35,6 +45,7 @@ export class RestaurantsComponent {
   readonly mode = signal<Mode>(null);
   readonly target = signal<Restaurant | null>(null);
   readonly confirming = signal(false);
+  readonly filters = signal<{ isActive?: boolean }>({});
 
   readonly form = signal<RestaurantForm>({
     name: '',
@@ -43,7 +54,13 @@ export class RestaurantsComponent {
 
   readonly trackById = (_: string, restaurant: Restaurant) => restaurant.id;
 
-  readonly restaurants = computed(() => this.orgService.restaurants());
+  readonly restaurants = computed(() => this.restaurantsService.restaurants());
+
+  readonly activeFilterValue = computed(() => {
+    const isActive = this.filters().isActive;
+    if (isActive === undefined) return '';
+    return isActive ? 'true' : 'false';
+  });
 
   readonly modalTitle = computed(() => {
     return this.mode() === 'create' ? 'Nuevo restaurante' : 'Editar restaurante';
@@ -53,6 +70,84 @@ export class RestaurantsComponent {
     const f = this.form();
     return f.name.trim() !== '';
   });
+
+  private readonly paginationState = createPaginationState(
+    this.restaurantsService.totalRestaurants,
+    {
+      onChange: () => this.fetch(),
+      loading: this.loading,
+    }
+  );
+
+  readonly pagination = this.paginationState.pagination;
+  readonly pageFrom = this.paginationState.pageFrom;
+  readonly pageTo = this.paginationState.pageTo;
+  readonly stableTotal = this.paginationState.stableTotal;
+  readonly canPrev = this.paginationState.canPrev;
+  readonly canNext = this.paginationState.canNext;
+
+  private readonly searchState = createSearchState({
+    onSearch: () => {
+      this.paginationState.resetToFirstPage();
+      this.fetch();
+    },
+  });
+
+  readonly search = this.searchState.searchTerm;
+
+  constructor() {
+    this.fetch();
+  }
+
+  private fetch(): void {
+    this.loading.set(true);
+    const { limit, offset } = this.pagination();
+
+    this.restaurantsService
+      .list({
+        search: this.search() || undefined,
+        isActive: this.filters().isActive,
+        limit,
+        offset,
+      })
+      .pipe(
+        catchError((error) => {
+          console.error('Error loading restaurants:', error);
+          this.toastrService.error('No se pudieron cargar los restaurantes');
+          return EMPTY;
+        }),
+        finalize(() => this.loading.set(false))
+      )
+      .subscribe();
+  }
+
+  reload(): void {
+    this.fetch();
+  }
+
+  nextPage = () => this.paginationState.nextPage();
+  prevPage = () => this.paginationState.prevPage();
+  changeLimit = (e: Event) => this.paginationState.changeLimit(e);
+  updateSearch = (e: Event) => this.searchState.updateSearch(e);
+
+  updateFilterActive(event: Event) {
+    const select = event.target as HTMLSelectElement;
+    const value = select.value;
+
+    let isActive: boolean | undefined;
+
+    if (value === '') {
+      isActive = undefined;
+    } else if (value === 'true') {
+      isActive = true;
+    } else if (value === 'false') {
+      isActive = false;
+    }
+
+    this.filters.update((f) => ({ ...f, isActive }));
+    this.paginationState.resetToFirstPage();
+    this.fetch();
+  }
 
   openCreate(): void {
     this.mode.set('create');
@@ -87,8 +182,8 @@ export class RestaurantsComponent {
 
     const operation =
       this.mode() === 'create'
-        ? this.restaurantsService.createRestaurant(restaurantData)
-        : this.restaurantsService.updateRestaurant(formValue.id!, restaurantData);
+        ? this.restaurantsService.create(restaurantData)
+        : this.restaurantsService.update(formValue.id!, restaurantData);
 
     operation
       .pipe(
@@ -102,6 +197,8 @@ export class RestaurantsComponent {
       .subscribe(() => {
         this.toastrService.success('Restaurante guardado correctamente');
         this.mode.set(null);
+        this.fetch();
+        this.orgService.loadRestaurants().subscribe();
       });
   }
 
@@ -120,7 +217,7 @@ export class RestaurantsComponent {
     if (!targetRestaurant?.id) return;
 
     this.restaurantsService
-      .updateRestaurant(targetRestaurant.id, { isActive: false })
+      .update(targetRestaurant.id, { isActive: false })
       .pipe(
         catchError((error) => {
           console.error('Error disabling restaurant:', error);
@@ -132,6 +229,8 @@ export class RestaurantsComponent {
         this.toastrService.success('Restaurante deshabilitado correctamente');
         this.confirming.set(false);
         this.target.set(null);
+        this.fetch();
+        this.orgService.loadRestaurants().subscribe();
       });
   }
 

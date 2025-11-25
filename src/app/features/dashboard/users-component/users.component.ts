@@ -37,7 +37,6 @@ export class UsersComponent {
   protected readonly iconsService = inject(IconsService);
 
   readonly loading = signal(false);
-  readonly total = signal(0);
   readonly roleFilter = signal<UserRole | ''>('');
   readonly mode = signal<Mode>(null);
   readonly saving = signal(false);
@@ -92,7 +91,7 @@ export class UsersComponent {
     }"?`;
   });
 
-  private readonly paginationState = createPaginationState(this.total, {
+  private readonly paginationState = createPaginationState(this.usersService.totalUsers, {
     onChange: () => this.reload(),
   });
 
@@ -127,8 +126,7 @@ export class UsersComponent {
         offset,
       })
       .subscribe({
-        next: (res) => {
-          this.total.set(res.total);
+        next: () => {
           this.loading.set(false);
         },
         error: () => {

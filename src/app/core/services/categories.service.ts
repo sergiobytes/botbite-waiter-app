@@ -1,8 +1,8 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
 import { environment } from '../../../environments/environment';
-import { Category } from './types/category.types';
-import { Observable, tap } from 'rxjs';
+import { Category, CategoryListResponse, CategoryResponse } from './types/category.types';
+import { map, Observable, tap } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -12,46 +12,54 @@ export class CategoriesService {
   private readonly apiUrl = environment.apiBaseUrl;
 
   readonly categories = signal<Category[]>([]);
+  readonly totalCategories = signal<number>(0);
 
-  getCategories(): Observable<Category[]> {
-    return this.http
-      .get<Category[]>(`${this.apiUrl}/categories`)
-      .pipe(tap((categories) => this.categories.set(categories)));
-  }
+  list(params: {
+    search?: string;
+    isActive?: boolean;
+    limit?: number;
+    offset?: number;
+  }): Observable<CategoryListResponse> {
+    let httpParams = new HttpParams();
 
-  createCategory(newCategory: Partial<Category>): Observable<Category> {
+    if (params?.search) {
+      httpParams = httpParams.set('search', params.search);
+    }
+    if (params?.isActive !== undefined) {
+      httpParams = httpParams.set('isActive', params.isActive.toString());
+    }
+    if (params?.limit !== undefined) {
+      httpParams = httpParams.set('limit', params.limit.toString());
+    }
+    if (params?.offset !== undefined) {
+      httpParams = httpParams.set('offset', params.offset.toString());
+    }
+
     return this.http
-      .post<Category>(`${this.apiUrl}/categories`, {
-        name: newCategory.name,
-        isActive: newCategory.isActive,
-      })
+      .get<CategoryListResponse>(`${this.apiUrl}/categories`, { params: httpParams })
       .pipe(
-        tap((category) => {
-          this.categories.update((categories) => [...categories, category]);
+        tap((response) => {
+          this.categories.set(response.categories);
+          this.totalCategories.set(response.total);
         })
       );
   }
 
-  updateCategory(id: number, updatedCategory: Partial<Category>): Observable<Category> {
-    return this.http
-      .patch<Category>(`${this.apiUrl}/categories/${id}`, {
-        name: updatedCategory.name,
-        isActive: updatedCategory.isActive,
-      })
-      .pipe(
-        tap((category) => {
-          this.categories.update((categories) =>
-            categories.map((cat) => (cat.id === id ? category : cat))
-          );
-        })
-      );
+  create(newCategory: Partial<Category>): Observable<CategoryResponse> {
+    return this.http.post<CategoryResponse>(`${this.apiUrl}/categories`, {
+      name: newCategory.name,
+      isActive: newCategory.isActive,
+    });
   }
 
-  removeCategory(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/categories/${id}`).pipe(
-      tap(() => {
-        this.categories.update((categories) => categories.filter((cat) => cat.id !== id));
-      })
-    );
+  update(id: number, updatedCategory: Partial<Category>): Observable<CategoryResponse> {
+    return this.http.patch<CategoryResponse>(`${this.apiUrl}/categories/${id}`, {
+      name: updatedCategory.name,
+      isActive: updatedCategory.isActive,
+    });
+  }
+
+  remove(id: number): Observable<CategoryResponse> {
+    return this.http.delete<CategoryResponse>(`${this.apiUrl}/categories/${id}`);
   }
 }
