@@ -1,14 +1,9 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
+import { map, Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { OrgService } from './org.service';
-import { Observable, map } from 'rxjs';
-import { Restaurant } from './types/restaurants.types';
-
-interface RestaurantResponse {
-  restaurant: Restaurant;
-  message: string;
-}
+import { Restaurant, RestaurantResponse } from './types/restaurants.types';
 
 @Injectable({
   providedIn: 'root',
@@ -19,14 +14,12 @@ export class RestaurantsService {
   private readonly apiUrl = environment.apiBaseUrl;
 
   createRestaurant(newRestaurant: Partial<Restaurant>): Observable<Restaurant> {
-    return this.http
-      .post<RestaurantResponse>(`${this.apiUrl}/restaurants`, newRestaurant)
-      .pipe(
-        map((response) => {
-          this.org.restaurants.update((restaurants) => [...restaurants, response.restaurant]);
-          return response.restaurant;
-        })
-      );
+    return this.http.post<RestaurantResponse>(`${this.apiUrl}/restaurants`, newRestaurant).pipe(
+      map((response) => {
+        this.org.restaurants.update((restaurants) => [...restaurants, response.restaurant]);
+        return response.restaurant;
+      })
+    );
   }
 
   updateRestaurant(id: string, updatedRestaurant: Partial<Restaurant>): Observable<Restaurant> {

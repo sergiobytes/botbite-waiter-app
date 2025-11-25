@@ -12,7 +12,18 @@ export interface Branch {
   updatedAt: Date | string;
 }
 
+export interface BranchResponse {
+  branch: Branch;
+  message: string;
+}
+
 export interface BranchListResponse {
   branches: Branch[];
   total: number;
+}
+
+export interface BranchesBulkResponse {
+  branches: Branch[];
+  count: number;
+  message: string;
 }

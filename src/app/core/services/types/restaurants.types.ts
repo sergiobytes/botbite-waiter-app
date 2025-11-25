@@ -15,3 +15,8 @@ export interface RestaurantListResponse {
   total: number;
   pagination: Pagination;
 }
+
+export interface RestaurantResponse {
+  restaurant: Restaurant;
+  message: string;
+}
