@@ -1,12 +1,16 @@
-import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input, output } from '@angular/core';
+import { LucideAngularModule } from 'lucide-angular';
+import { IconsService } from '../../../core/services/icons.service';
 
 @Component({
   selector: 'app-pagination',
-  imports: [],
+  imports: [LucideAngularModule],
   templateUrl: './pagination.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PaginationComponent {
+  protected readonly iconsService = inject(IconsService);
+
   total = input.required<number>();
   pageFrom = input.required<number>();
   pageTo = input.required<number>();

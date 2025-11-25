@@ -1,8 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { LucideAngularModule } from 'lucide-angular';
 import { ToastrService } from 'ngx-toastr';
 import { catchError, EMPTY } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
+import { IconsService } from '../../../core/services/icons.service';
 import { Mode, UserRole } from '../../../core/services/types/common.types';
 import { UserRow } from '../../../core/services/types/users.types';
 import { UsersService } from '../../../core/services/users.service';
@@ -23,6 +25,7 @@ import { createSearchState } from '../../../shared/utils/search.util';
     ModalComponent,
     RoleBadgeComponent,
     EmptyStateComponent,
+    LucideAngularModule,
   ],
   templateUrl: './users.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -31,6 +34,7 @@ export class UsersComponent {
   protected readonly usersService = inject(UsersService);
   private readonly authService = inject(AuthService);
   private readonly toastrService = inject(ToastrService);
+  protected readonly iconsService = inject(IconsService);
 
   readonly loading = signal(false);
   readonly total = signal(0);

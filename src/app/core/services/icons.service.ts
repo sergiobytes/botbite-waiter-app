@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
 import {
+  ArrowLeft,
+  ArrowRight,
   Bot,
   Download,
   Hand,
@@ -10,7 +12,11 @@ import {
   MessagesSquare,
   Power,
   ScrollText,
+  Search,
+  ShieldCheck,
+  ShieldX,
   StarIcon,
+  UserPlus,
   Users,
   Utensils,
 } from 'lucide-angular';
@@ -32,4 +38,12 @@ export class IconsService {
   readonly message = MessagesSquare;
   readonly assistant = Bot;
   readonly hand = Hand;
+
+  readonly addUser = UserPlus;
+  readonly search = Search;
+  readonly active = ShieldCheck;
+  readonly inactive = ShieldX;
+
+  readonly next = ArrowRight;
+  readonly previous = ArrowLeft;
 }

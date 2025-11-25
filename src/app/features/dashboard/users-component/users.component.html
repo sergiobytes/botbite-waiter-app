@@ -8,20 +8,27 @@
         class="rounded-xl border border-black/10 px-4 py-2 hover:bg-black/5 transition-all hover:animate-scale"
         aria-label="Crear usuario"
       >
-        Crear usuario
+        <div class="flex items-center space-x-1">
+          <lucide-icon [img]="iconsService.addUser" size="15" color="black"></lucide-icon>
+          <span> Crear usuario </span>
+        </div>
       </button>
       <button
         (click)="openCreateClient()"
         class="rounded-xl bg-black text-white px-4 py-2 hover:opacity-90 transition-all hover:animate-scale"
         aria-label="Crear cliente"
       >
-        Crear cliente
+        <div class="flex items-center space-x-1">
+          <lucide-icon [img]="iconsService.addUser" size="15" color="white"></lucide-icon>
+          <span> Crear cliente </span>
+        </div>
       </button>
     </div>
   </div>
 
   <div class="flex flex-col md:flex-row gap-3 items-stretch md:items-center">
     <div class="md:ml-auto flex items-center gap-2">
+      <lucide-icon [img]="iconsService.search" size="15" color="black"></lucide-icon>
       <input
         id="search-users"
         type="search"
@@ -60,7 +67,9 @@
       </thead>
       <tbody>
         @for (row of usersService.users(); track row.id) {
-        <tr class="border-t border-black/5 hover:bg-neutral-50 animate-fade-in animate-duration-300">
+        <tr
+          class="border-t border-black/5 hover:bg-neutral-50 animate-fade-in animate-duration-300"
+        >
           <td class="px-4 py-3">{{ row.email }}</td>
           <td class="px-4 py-3">
             <div class="flex gap-1 flex-wrap">
@@ -69,23 +78,36 @@
               }
             </div>
           </td>
-          <td class="px-4 py-3">
-            <span
+          <td class="px-4 py-3 flex">
+            <div
+              class="flex items-center justify-center space-x-1 rounded-full border text-xs px-2 py-0.5"
               [class]="
                 row.isActive
                   ? 'bg-green-100 text-green-800 border-green-200'
-                  : 'bg-neutral-100 text-neutral-700 border-neutral-200'
+                  : 'bg-red-100 text-red-800 border-red-200'
               "
-              class="text-xs border px-2 py-0.5 rounded-full"
             >
-              {{ row.isActive ? 'Activo' : 'Inactivo' }}
-            </span>
+              <lucide-icon
+                [img]="row.isActive ? iconsService.active : iconsService.inactive"
+                size="20"
+                [color]="row.isActive ? 'green' : 'red'"
+              ></lucide-icon>
+
+              <span class="">
+                {{ row.isActive ? 'Activo' : 'Inactivo' }}
+              </span>
+            </div>
           </td>
           <td class="px-4 py-3">
             <div class="flex items-center gap-2 justify-end">
               @if (canActOn(row)) {
               <button
-                class="px-3 py-1 border border-black/10 rounded-lg hover:bg-black/5 disabled:opacity-50 disabled:cursor-not-allowed"
+                class="px-3 py-1 border border-black/10 rounded-lg hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed w-24 transition"
+                [class]="
+                  !row.isActive
+                    ? 'bg-green-100 text-green-800 border-green-200'
+                    : 'bg-red-100 text-red-800 border-red-200'
+                "
                 (click)="confirmToggleUser(row, row.isActive ? 'deactivate' : 'activate')"
                 [attr.aria-label]="
                   (row.isActive ? 'Desactivar' : 'Activar') + ' usuario ' + row.email
@@ -95,7 +117,7 @@
               </button>
               @if (isSuper()) { @if (!hasRole(row, 'admin')) {
               <button
-                class="px-3 py-1 border border-black/10 rounded-lg hover:bg-black/5 disabled:opacity-50 disabled:cursor-not-allowed"
+                class="px-3 py-1 border border-blue-200 bg-blue-100 text-blue-800 rounded-lg hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 (click)="confirmAdminRoleChange(row, 'add')"
                 [attr.aria-label]="'Hacer administrador a ' + row.email"
               >
@@ -103,7 +125,7 @@
               </button>
               } @else {
               <button
-                class="px-3 py-1 border border-black/10 rounded-lg hover:bg-black/5 disabled:opacity-50 disabled:cursor-not-allowed"
+                class="px-3 py-1 border border-yellow-200 bg-yellow-100 text-yellow-800 rounded-lg hover:bg-yellow-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 (click)="confirmAdminRoleChange(row, 'remove')"
                 [attr.aria-label]="'Quitar rol de administrador a ' + row.email"
               >
