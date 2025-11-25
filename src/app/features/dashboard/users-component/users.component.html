@@ -130,7 +130,10 @@
                 (click)="confirmAdminRoleChange(row, 'add')"
                 [attr.aria-label]="'Hacer administrador a ' + row.email"
               >
-                Hacer Admin
+                <div class="flex items-center gap-2">
+                  <lucide-icon [img]="iconsService.addRole" size="15" color="blue"></lucide-icon>
+                  <span> Hacer Admin </span>
+                </div>
               </button>
               } @else {
               <button

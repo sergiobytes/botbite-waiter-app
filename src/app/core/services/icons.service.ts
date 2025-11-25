@@ -17,6 +17,7 @@ import {
   Search,
   ShieldCheck,
   ShieldOff,
+  ShieldPlus,
   ShieldX,
   StarIcon,
   UserPlus,
@@ -53,4 +54,5 @@ export class IconsService {
   readonly add = CirclePlus;
   readonly edit = Pen;
   readonly disable = ShieldOff;
+  readonly addRole = ShieldPlus;
 }
