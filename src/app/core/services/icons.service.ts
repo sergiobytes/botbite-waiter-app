@@ -3,6 +3,7 @@ import {
   ArrowLeft,
   ArrowRight,
   Bot,
+  CirclePlus,
   Download,
   Hand,
   House,
@@ -10,10 +11,12 @@ import {
   MapPin,
   Menu,
   MessagesSquare,
+  Pen,
   Power,
   ScrollText,
   Search,
   ShieldCheck,
+  ShieldOff,
   ShieldX,
   StarIcon,
   UserPlus,
@@ -46,4 +49,8 @@ export class IconsService {
 
   readonly next = ArrowRight;
   readonly previous = ArrowLeft;
+
+  readonly add = CirclePlus;
+  readonly edit = Pen;
+  readonly disable = ShieldOff;
 }

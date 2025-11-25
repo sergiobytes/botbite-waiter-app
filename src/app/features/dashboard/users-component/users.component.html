@@ -8,7 +8,7 @@
         class="rounded-xl border border-black/10 px-4 py-2 hover:bg-black/5 transition-all hover:animate-scale"
         aria-label="Crear usuario"
       >
-        <div class="flex items-center space-x-1">
+        <div class="flex items-center gap-2">
           <lucide-icon [img]="iconsService.addUser" size="15" color="black"></lucide-icon>
           <span> Crear usuario </span>
         </div>
@@ -18,7 +18,7 @@
         class="rounded-xl bg-black text-white px-4 py-2 hover:opacity-90 transition-all hover:animate-scale"
         aria-label="Crear cliente"
       >
-        <div class="flex items-center space-x-1">
+        <div class="flex items-center gap-2">
           <lucide-icon [img]="iconsService.addUser" size="15" color="white"></lucide-icon>
           <span> Crear cliente </span>
         </div>
@@ -80,7 +80,7 @@
           </td>
           <td class="px-4 py-3 flex">
             <div
-              class="flex items-center justify-center space-x-1 rounded-full border text-xs px-2 py-0.5"
+              class="flex items-center justify-center gap-2 rounded-full border text-xs px-2 py-0.5"
               [class]="
                 row.isActive
                   ? 'bg-green-100 text-green-800 border-green-200'
@@ -102,7 +102,7 @@
             <div class="flex items-center gap-2 justify-end">
               @if (canActOn(row)) {
               <button
-                class="px-3 py-1 border border-black/10 rounded-lg hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed w-24 transition"
+                class="px-3 py-1 border border-black/10 rounded-lg hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed w-32 transition"
                 [class]="
                   !row.isActive
                     ? 'bg-green-100 text-green-800 border-green-200'
@@ -113,7 +113,16 @@
                   (row.isActive ? 'Desactivar' : 'Activar') + ' usuario ' + row.email
                 "
               >
-                {{ row.isActive ? 'Desactivar' : 'Activar' }}
+                <div class="flex items-center gap-2">
+                  <lucide-icon
+                    [img]="row.isActive ? iconsService.disable : iconsService.active"
+                    size="15"
+                    [color]="row.isActive ? 'red' : 'green'"
+                  ></lucide-icon>
+                  <span>
+                    {{ row.isActive ? 'Desactivar' : 'Activar' }}
+                  </span>
+                </div>
               </button>
               @if (isSuper()) { @if (!hasRole(row, 'admin')) {
               <button
@@ -125,7 +134,7 @@
               </button>
               } @else {
               <button
-                class="px-3 py-1 border border-yellow-200 bg-yellow-100 text-yellow-800 rounded-lg hover:bg-yellow-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                class="px-3 py-1 border border-orange-200 bg-orange-100 text-orange-800 rounded-lg hover:bg-yellow-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 (click)="confirmAdminRoleChange(row, 'remove')"
                 [attr.aria-label]="'Quitar rol de administrador a ' + row.email"
               >

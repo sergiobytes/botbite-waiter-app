@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { LucideAngularModule } from 'lucide-angular';
 import { ToastrService } from 'ngx-toastr';
 import { catchError, EMPTY, finalize } from 'rxjs';
 import { CategoriesService } from '../../../core/services/categories.service';
@@ -8,22 +9,22 @@ import { Mode } from '../../../core/services/types/common.types';
 import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state';
 import { ModalComponent } from '../../../shared/components/modal/modal';
 import { TitleComponent } from '../../../shared/components/title/title';
-
+import { IconsService } from '../../../core/services/icons.service';
 interface CategoryForm {
   readonly id?: number;
   name: string;
   isActive: boolean;
 }
-
 @Component({
   selector: 'app-categories',
-  imports: [CommonModule, TitleComponent, ModalComponent, EmptyStateComponent],
+  imports: [CommonModule, TitleComponent, ModalComponent, EmptyStateComponent, LucideAngularModule],
   templateUrl: './categories.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CategoriesComponent {
   private readonly categoriesService = inject(CategoriesService);
   private readonly toastrService = inject(ToastrService);
+   protected readonly iconsService = inject(IconsService);
 
   readonly saving = signal(false);
   readonly mode = signal<Mode>(null);

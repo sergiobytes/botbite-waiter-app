@@ -7,7 +7,10 @@
       (click)="openCreate()"
       aria-label="Crear nueva categoría"
     >
-      Nueva categoría
+      <div class="flex items-center gap-2">
+        <lucide-icon [img]="iconsService.add" size="15" color="white"></lucide-icon>
+        <span>Nueva categoría</span>
+      </div>
     </button>
   </div>
 
@@ -24,34 +27,48 @@
         @for(category of categoriesList(); track category.id) {
         <tr class="border-t border-black/10 animate-fade-in animate-duration-300">
           <td class="px-4 py-3">{{ category.name }}</td>
-          <td class="px-4 py-3">
-            <span
+          <td class="px-4 py-3 flex">
+            <div
+              class="flex items-center justify-center gap-2 rounded-full border text-xs px-2 py-0.5"
               [class]="
                 category.isActive
                   ? 'bg-green-100 text-green-800 border-green-200'
-                  : 'bg-neutral-100 text-neutral-700 border-neutral-200'
+                  : 'bg-red-100 text-red-800 border-red-200'
               "
-              class="text-xs border px-2 py-0.5 rounded-full animate-fade-in animate-duration-200"
             >
-              {{ category.isActive ? 'Activa' : 'Inactiva' }}
-            </span>
+              <lucide-icon
+                [img]="category.isActive ? iconsService.active : iconsService.inactive"
+                size="20"
+                [color]="category.isActive ? 'green' : 'red'"
+              ></lucide-icon>
+
+              <span class="">
+                {{ category.isActive ? 'Activa' : 'Inactiva' }}
+              </span>
+            </div>
           </td>
           <td class="px-4 py-3">
             <div class="flex items-center gap-2 justify-end">
               <button
-                class="px-3 py-1 border border-black/10 rounded-lg hover:bg-black/5 transition-all hover:animate-scale"
+                class="px-3 py-1 border border-yellow-200 bg-yellow-100 text-yellow-800 rounded-lg hover:bg-yellow-50 transition-all hover:animate-scale"
                 (click)="openEdit(category)"
                 [attr.aria-label]="'Editar categoría ' + category.name"
               >
-                Editar
+                <div class="flex items-center gap-2">
+                  <lucide-icon [img]="iconsService.edit" size="15" color="orange"></lucide-icon>
+                  <span>Editar</span>
+                </div>
               </button>
               @if (category.isActive) {
               <button
-                class="px-3 py-1 border border-black/10 rounded-lg hover:bg-black/5 transition-all hover:animate-scale"
+                class="px-3 py-1 border rounded-lg hover:bg-black/5 transition-all hover:animate-scale bg-red-100 text-red-800 border-red-200"
                 (click)="confirmDisable(category)"
                 [attr.aria-label]="'Deshabilitar categoría ' + category.name"
               >
-                Deshabilitar
+                <div class="flex items-center gap-2">
+                  <lucide-icon [img]="iconsService.disable" size="15" color="red"></lucide-icon>
+                  <span>Deshabilitar</span>
+                </div>
               </button>
               }
             </div>
