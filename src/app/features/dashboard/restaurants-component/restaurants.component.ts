@@ -1,7 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { LucideAngularModule } from 'lucide-angular';
 import { ToastrService } from 'ngx-toastr';
 import { catchError, EMPTY, finalize } from 'rxjs';
+import { IconsService } from '../../../core/services/icons.service';
 import { OrgService } from '../../../core/services/org.service';
 import { RestaurantsService } from '../../../core/services/restaurants.service';
 import { Mode } from '../../../core/services/types/common.types';
@@ -18,7 +20,7 @@ interface RestaurantForm {
 
 @Component({
   selector: 'app-restaurants.component',
-  imports: [CommonModule, TitleComponent, ModalComponent, EmptyStateComponent],
+  imports: [CommonModule, TitleComponent, ModalComponent, EmptyStateComponent, LucideAngularModule],
   templateUrl: './restaurants.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -26,6 +28,7 @@ export class RestaurantsComponent {
   private readonly restaurantsService = inject(RestaurantsService);
   private readonly orgService = inject(OrgService);
   private readonly toastrService = inject(ToastrService);
+  protected readonly iconsService = inject(IconsService);
 
   readonly loading = signal(false);
   readonly saving = signal(false);
