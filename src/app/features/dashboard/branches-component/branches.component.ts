@@ -20,6 +20,7 @@ import { EmptyStateComponent } from '../../../shared/components/empty-state/empt
 import { ModalComponent } from '../../../shared/components/modal/modal';
 import { PaginationComponent } from '../../../shared/components/pagination/pagination';
 import { TitleComponent } from '../../../shared/components/title/title';
+import { downloadTemplate } from '../../../shared/utils/download-template.util';
 import { createPaginationState } from '../../../shared/utils/pagination.util';
 import { createSearchState } from '../../../shared/utils/search.util';
 
@@ -396,6 +397,10 @@ export class BranchesComponent {
         this.paginationState.resetToFirstPage();
         this.reload();
       });
+  }
+
+  onDownloadTemplate(): void {
+    downloadTemplate('branches-template.csv');
   }
 
   updateForm<K extends keyof BranchForm>(key: K, ev: Event): void {

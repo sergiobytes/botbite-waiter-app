@@ -6,6 +6,16 @@
     />
 
     <div class="flex item-center gap-2 self-start sm:self-auto">
+      <button
+        class="rounded-xl border border-green-200 bg-green-100 text-green-800 hover:bg-green-50 px-4 py-2 disabled:opacity-50 transition-all hover:animate-scale"
+        (click)="onDownloadTemplate()"
+        aria-label="Plantilla de carga masiva por CSV"
+      >
+        <div class="flex items-center gap-2">
+          <lucide-icon [img]="iconsService.download" size="15" color="green"></lucide-icon>
+          <span>Plantilla CSV</span>
+        </div>
+      </button>
       <input
         #csvInput
         type="file"
