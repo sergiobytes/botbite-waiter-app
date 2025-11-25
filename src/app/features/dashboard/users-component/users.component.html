@@ -138,7 +138,10 @@
                 (click)="confirmAdminRoleChange(row, 'remove')"
                 [attr.aria-label]="'Quitar rol de administrador a ' + row.email"
               >
-                Quitar Admin
+                <div class="flex items-center gap-2">
+                  <lucide-icon [img]="iconsService.disable" size="15" color="orange"></lucide-icon>
+                  <span> Quitar Admin </span>
+                </div>
               </button>
               } } }
             </div>
