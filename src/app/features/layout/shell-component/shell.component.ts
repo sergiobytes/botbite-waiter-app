@@ -142,10 +142,6 @@ export class ShellComponent implements OnInit {
     this.router.navigateByUrl('/login');
   }
 
-  goToProfile(): void {
-    this.router.navigateByUrl('/dashboard/profile');
-  }
-
   getBestRole(roles?: string[]): string | undefined {
     if (!roles?.length) return undefined;
 

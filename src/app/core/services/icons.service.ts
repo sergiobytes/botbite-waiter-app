@@ -8,6 +8,7 @@ import {
   Hand,
   House,
   LayoutList,
+  LogOut,
   MapPin,
   Menu,
   MessagesSquare,
@@ -31,6 +32,7 @@ import {
   providedIn: 'root',
 })
 export class IconsService {
+  readonly logout = LogOut;
   readonly power = Power;
   readonly menu = Menu;
   readonly house = House;

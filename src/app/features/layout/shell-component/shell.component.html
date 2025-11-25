@@ -35,7 +35,14 @@
           class="w-full rounded-xl bg-white text-black py-3 hover:opacity-90 transition-all hover:animate-scale text-sm"
           aria-label="Cerrar sesión"
         >
-          Cerrar sesión
+          <div class="flex items-center justify-center gap-2">
+            <span>Cerrar sesión</span>
+            <lucide-icon
+              [img]="iconsService.logout"
+              size="18"
+              class="inline align-middle mr-2"
+            ></lucide-icon>
+          </div>
         </button>
       </div>
     </div>
