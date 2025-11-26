@@ -28,6 +28,16 @@
         (input)="updateFilterSearch($event)"
         aria-label="Buscar menús"
       />
+      <select
+        class="rounded-xl border border-black/10 px-3 py-2"
+        [value]="activeFilterValue()"
+        (change)="updateFilterActive($event)"
+        aria-label="Filtrar por estado"
+      >
+        <option value="">Todos</option>
+        <option value="true">Activos</option>
+        <option value="false">Inactivos</option>
+      </select>
     </div>
   </div>
 </div>

@@ -60,6 +60,12 @@ export class MenusComponent {
   readonly total = computed(() => this.filteredTotal());
   readonly branchId = computed(() => this.orgService.selectedBranchId());
 
+  readonly activeFilterValue = computed(() => {
+    const isActive = this.filters().isActive;
+    if (isActive === undefined) return '';
+    return isActive ? 'true' : 'false';
+  });
+
   private readonly paginationState = createPaginationState(this.total, {
     onChange: () => this.fetch(),
   });
@@ -122,6 +128,25 @@ export class MenusComponent {
   }
 
   updateFilterSearch = (e: Event) => this.searchState.updateSearch(e);
+
+  updateFilterActive(event: Event): void {
+    const select = event.target as HTMLSelectElement;
+    const value = select.value;
+
+    let isActive: boolean | undefined;
+
+    if (value === '') {
+      isActive = undefined;
+    } else if (value === 'true') {
+      isActive = true;
+    } else if (value === 'false') {
+      isActive = false;
+    }
+
+    this.filters.update((f) => ({ ...f, isActive }));
+    this.paginationState.resetToFirstPage();
+    this.fetch();
+  }
 
   openCreate(): void {
     this.mode.set('create');
