@@ -44,7 +44,7 @@ export class MenusComponent {
   private readonly toastrService = inject(ToastrService);
   protected readonly iconsService = inject(IconsService);
 
-  private loading = signal(false);
+  readonly loading = signal(false);
   readonly mode = signal<Mode>(null);
   readonly filters = signal<{ isActive?: boolean }>({});
 
@@ -91,7 +91,7 @@ export class MenusComponent {
     effect(() => {
       const bid = this.branchId();
 
-      if (bid && bid !== this.previousBranchId) {
+      if (bid !== this.previousBranchId) {
         this.previousBranchId = bid;
         this.paginationState.resetToFirstPage();
         this.filters.set({});
@@ -102,7 +102,13 @@ export class MenusComponent {
   }
 
   private fetch(): void {
-    if (!this.branchId()) return;
+    const bid = this.branchId();
+
+    if (!bid) {
+      this.filteredMenus.set([]);
+      this.filteredTotal.set(0);
+      return;
+    }
 
     this.loading.set(true);
     const { limit, offset } = this.pagination();
@@ -125,6 +131,10 @@ export class MenusComponent {
           this.toastrService.error('Error al cargar los menús');
         },
       });
+  }
+
+  reload(): void {
+    this.fetch();
   }
 
   updateFilterSearch = (e: Event) => this.searchState.updateSearch(e);
@@ -154,5 +164,18 @@ export class MenusComponent {
       name: '',
       isActive: true,
     });
+  }
+
+  openEdit(menu: Menu): void {
+    this.mode.set('edit');
+    this.form.set({
+      id: menu.id,
+      name: menu.name,
+      isActive: menu.isActive,
+    });
+  }
+
+  confirmToggle(menu: Menu, enable: boolean): void {
+
   }
 }

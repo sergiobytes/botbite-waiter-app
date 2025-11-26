@@ -40,4 +40,91 @@
       </select>
     </div>
   </div>
+
+  <div class="rounded-2xl border border-black/10 overflow-hidden overflow-x-auto">
+    <table class="w-full text-sm min-w-4xl">
+      <thead class="bg-neutral-50 text-neutral-600">
+        <tr>
+          <th class="text-left font-medium px-4 py-3">Nombre</th>
+          <th class="text-left font-medium px-4 py-3">Estado</th>
+          <th class="text-right font-medium px-4 py-3">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for(menu of menus(); track menu.id) {
+        <tr class="border-t border-black/10 animate-fade-in animate-duration-300">
+          <td class="px-4 py-3">
+            <div class="flex items-center gap-2">
+              <span>{{ menu.name }}</span>
+            </div>
+          </td>
+          <td class="px-4 py-3 flex">
+            <div
+              class="flex items-center justify-center gap-2 rounded-full border text-xs px-2 py-0.5"
+              [class]="
+                menu.isActive
+                  ? 'bg-green-100 text-green-800 border-green-200'
+                  : 'bg-red-100 text-red-800 border-red-200'
+              "
+            >
+              <lucide-icon
+                [img]="menu.isActive ? iconsService.active : iconsService.inactive"
+                size="20"
+                [color]="menu.isActive ? 'green' : 'red'"
+              ></lucide-icon>
+
+              <span class="">
+                {{ menu.isActive ? 'Activo' : 'Inactivo' }}
+              </span>
+            </div>
+          </td>
+          <td class="px-4 py-3">
+            <div class="flex items-center gap-2 justify-end">
+              <!-- Cargar menú -->
+              <!-- Ver items del menú -->
+              <!-- Editar -->
+              <button
+                class="px-3 py-1 border border-yellow-200 bg-yellow-100 text-yellow-800 rounded-lg hover:bg-yellow-50 transition-all hover:animate-scale"
+                (click)="openEdit(menu)"
+                [attr.aria-label]="'Editar menú ' + menu.name"
+              >
+                <div class="flex items-center gap-2">
+                  <lucide-icon [img]="iconsService.edit" size="15" color="orange"></lucide-icon>
+                  <span>Editar</span>
+                </div>
+              </button>
+              <!-- Desactivar/Activar -->
+              <button
+                class="px-3 py-1 border rounded-lg transition-all hover:animate-scale"
+                [class]="
+                  menu.isActive
+                    ? 'bg-red-100 text-red-800 border-red-200 hover:bg-red-50'
+                    : 'bg-green-100 text-green-800 border-green-200 hover:bg-green-50'
+                "
+                [attr.aria-label]="(menu.isActive ? 'Desactivar ' : 'Activar ') + menu.name"
+                (click)="confirmToggle(menu, menu.isActive)"
+              >
+                <div class="flex items-center gap-2">
+                  <lucide-icon
+                    [img]="menu.isActive ? iconsService.disable : iconsService.active"
+                    size="15"
+                    [color]="menu.isActive ? 'red' : 'green'"
+                  ></lucide-icon>
+                  <span>{{ menu.isActive ? 'Desactivar' : 'Activar' }}</span>
+                </div>
+              </button>
+            </div>
+          </td>
+        </tr>
+        }
+
+        <app-empty-state
+          [loading]="loading()"
+          [isEmpty]="menus().length === 0"
+          [colspan]="3"
+          message="No hay menús para mostrar."
+        />
+      </tbody>
+    </table>
+  </div>
 </div>
