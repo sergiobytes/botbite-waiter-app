@@ -62,6 +62,14 @@ export const routes: Routes = [
             (m) => m.ProductsComponent
           ),
       },
+      {
+        path: 'menus',
+        canActivate: [clientGuard],
+        loadComponent: () =>
+          import('./features/dashboard/menus-component/menus.component').then(
+            (m) => m.MenusComponent
+          ),
+      },
     ],
   },
   { path: '', pathMatch: 'full', redirectTo: '/login' },

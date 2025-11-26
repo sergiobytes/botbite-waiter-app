@@ -61,13 +61,29 @@ export class ShellComponent implements OnInit {
       requiredRole: 'admin',
       icon: this.iconsService.categories,
     },
-    { label: 'Restaurantes', to: '/dashboard/restaurants', icon: this.iconsService.restaurants },
-    { label: 'Sucursales', to: '/dashboard/branches', icon: this.iconsService.branches },
+    {
+      label: 'Restaurantes',
+      to: '/dashboard/restaurants',
+      requiredRole: 'user',
+      icon: this.iconsService.restaurants,
+    },
+    {
+      label: 'Sucursales',
+      to: '/dashboard/branches',
+      requiredRole: 'user',
+      icon: this.iconsService.branches,
+    },
     {
       label: 'Productos',
       to: '/dashboard/products',
       requiredRole: 'client',
       icon: this.iconsService.products,
+    },
+    {
+      label: 'Menús',
+      to: '/dashboard/menus',
+      requiredRole: 'client',
+      icon: this.iconsService.menus,
     },
   ];
 
