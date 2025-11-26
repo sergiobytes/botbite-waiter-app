@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { OrgService } from './org.service';
 import { environment } from '../../../environments/environment';
@@ -36,19 +36,62 @@ export class MenusService {
       .pipe(map((res) => res.menuItem));
   }
 
-  findMenusByBranch(): Observable<Menu[]> {
+  findMenusByBranch(params: {
+    search?: string;
+    isActive?: boolean;
+    limit?: number;
+    offset?: number;
+  }): Observable<Menu[]> {
     const branchId = this.orgService.selectedBranchId();
 
     if (!branchId) throw new Error('No branch selected');
 
+    let httpParams = new HttpParams();
+
+    if (params.search) {
+      httpParams = httpParams.set('search', params.search);
+    }
+    if (params.isActive !== undefined) {
+      httpParams = httpParams.set('isActive', params.isActive.toString());
+    }
+    if (params.limit !== undefined) {
+      httpParams = httpParams.set('limit', params.limit.toString());
+    }
+    if (params.offset !== undefined) {
+      httpParams = httpParams.set('offset', params.offset.toString());
+    }
+
     return this.http
-      .get<MenuListResponse>(`${this.apiUrl}/menus/${branchId}`)
+      .get<MenuListResponse>(`${this.apiUrl}/menus/${branchId}`, { params: httpParams })
       .pipe(map((response) => response.menus));
   }
 
-  findItemsByMenu(menuId: string): Observable<MenuItem[]> {
+  findItemsByMenu(
+    menuId: string,
+    params: {
+      search?: string;
+      isActive?: boolean;
+      limit?: number;
+      offset?: number;
+    }
+  ): Observable<MenuItem[]> {
+    let httpParams = new HttpParams();
+
+    if (params.search) {
+      httpParams = httpParams.set('search', params.search);
+    }
+    if (params.isActive !== undefined) {
+      httpParams = httpParams.set('isActive', params.isActive.toString());
+    }
+    if (params.limit !== undefined) {
+      httpParams = httpParams.set('limit', params.limit.toString());
+    }
+    if (params.offset !== undefined) {
+      httpParams = httpParams.set('offset', params.offset.toString());
+    }
+
     return this.http
-      .get<MenuItemListResponse>(`${this.apiUrl}/menus/${menuId}/items`)
+      .get<MenuItemListResponse>(`${this.apiUrl}/menus/${menuId}/items`, { params: httpParams })
       .pipe(map((response) => response.items));
   }
 
