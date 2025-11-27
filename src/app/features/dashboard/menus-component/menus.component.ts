@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
 import { ToastrService } from 'ngx-toastr';
-import { finalize } from 'rxjs';
+import { catchError, EMPTY, finalize } from 'rxjs';
 import { IconsService } from '../../../core/services/icons.service';
 import { MenusService } from '../../../core/services/menus.service';
 import { OrgService } from '../../../core/services/org.service';
@@ -44,8 +44,12 @@ export class MenusComponent {
   private readonly toastrService = inject(ToastrService);
   protected readonly iconsService = inject(IconsService);
 
+  readonly saving = signal(false);
   readonly loading = signal(false);
   readonly mode = signal<Mode>(null);
+  readonly confirming = signal(false);
+  private confirmEnable = signal<boolean | null>(null);
+  readonly target = signal<Menu | null>(null);
   readonly filters = signal<{ isActive?: boolean }>({});
 
   private readonly filteredMenus = signal<Menu[]>([]);
@@ -59,11 +63,28 @@ export class MenusComponent {
   readonly menus = computed(() => this.filteredMenus());
   readonly total = computed(() => this.filteredTotal());
   readonly branchId = computed(() => this.orgService.selectedBranchId());
+  readonly confirmTargetStatus = computed(() => !!this.confirmEnable());
 
   readonly activeFilterValue = computed(() => {
     const isActive = this.filters().isActive;
     if (isActive === undefined) return '';
     return isActive ? 'true' : 'false';
+  });
+
+  readonly modalTitle = computed(() => (this.mode() === 'create' ? 'Nuevo menú' : 'Editar menú'));
+
+  readonly isFormValid = computed(() => {
+    const f = this.form();
+    return f.name.trim() !== '';
+  });
+
+  readonly confirmTitle = computed(() =>
+    this.confirmTargetStatus() ? 'Activar menú' : 'Desactivar menú'
+  );
+
+  readonly confirmMessage = computed(() => {
+    const action = this.confirmTargetStatus() ? 'activar' : 'desactivar';
+    return `¿Seguro que quieres ${action} "${this.target()?.name}"?`;
   });
 
   private readonly paginationState = createPaginationState(this.total, {
@@ -137,6 +158,9 @@ export class MenusComponent {
     this.fetch();
   }
 
+  nextPage = () => this.paginationState.nextPage();
+  prevPage = () => this.paginationState.prevPage();
+  changeLimit = (e: Event) => this.paginationState.changeLimit(e);
   updateFilterSearch = (e: Event) => this.searchState.updateSearch(e);
 
   updateFilterActive(event: Event): void {
@@ -175,7 +199,78 @@ export class MenusComponent {
     });
   }
 
-  confirmToggle(menu: Menu, enable: boolean): void {
+  closeModal(): void {
+    this.mode.set(null);
+    this.form.set({
+      name: '',
+      isActive: true,
+    });
+  }
 
+  save(): void {
+    const f = this.form();
+    if (!f.name.trim()) {
+      this.toastrService.error('El nombre es obligatorio');
+      return;
+    }
+
+    this.saving.set(true);
+
+    const { id, ...data } = f;
+
+    const dto: Partial<Menu> = {
+      name: data.name.trim(),
+    };
+
+    const op =
+      this.mode() === 'create'
+        ? this.menusService.createMenu(dto)
+        : this.menusService.updateMenu(id!, dto);
+
+    op.pipe(
+      catchError((e) => {
+        console.error('Error saving menu', e);
+        this.toastrService.error('Error al guardar el menú');
+        return EMPTY;
+      }),
+      finalize(() => this.saving.set(false))
+    ).subscribe(() => {
+      this.toastrService.success(
+        `Menú ${this.mode() === 'create' ? 'creado' : 'actualizado'} correctamente`
+      );
+      this.closeModal();
+      this.reload();
+    });
+  }
+
+  confirmToggle(menu: Menu, enable: boolean): void {
+    this.target.set(menu);
+    this.confirmEnable.set(!enable);
+    this.confirming.set(true);
+  }
+
+  closeConfirmation(): void {
+    this.confirming.set(false);
+    this.target.set(null);
+    this.confirmEnable.set(null);
+  }
+
+  toggleActive(): void {
+    const menu = this.target();
+    const enable = this.confirmEnable();
+
+    if (!menu || enable === null) return;
+
+    console.log(enable);
+  }
+
+  updateForm<K extends keyof MenuForm>(key: K, ev: Event): void {
+    const el = ev.target as HTMLInputElement;
+    this.form.update((f) => ({ ...f, [key]: el.value }));
+  }
+
+  updateFormChecked<K extends keyof MenuForm>(key: K, ev: Event): void {
+    const el = ev.target as HTMLInputElement;
+    this.form.update((f) => ({ ...f, [key]: el.checked }));
   }
 }
