@@ -20,6 +20,8 @@ import { PaginationComponent } from '../../../shared/components/pagination/pagin
 import { TitleComponent } from '../../../shared/components/title/title';
 import { createPaginationState } from '../../../shared/utils/pagination.util';
 import { createSearchState } from '../../../shared/utils/search.util';
+import { createMenuSlug } from '../../../shared/utils/slug-genarator.util';
+import { Router } from '@angular/router';
 
 interface MenuForm {
   readonly id?: string;
@@ -43,6 +45,7 @@ export class MenusComponent {
   private readonly orgService = inject(OrgService);
   private readonly toastrService = inject(ToastrService);
   protected readonly iconsService = inject(IconsService);
+  private readonly router = inject(Router);
 
   readonly saving = signal(false);
   readonly loading = signal(false);
@@ -262,6 +265,11 @@ export class MenusComponent {
     if (!menu || enable === null) return;
 
     console.log(enable);
+  }
+
+  protected viewProducts(menu: Menu): void {
+    const slug = createMenuSlug(menu.name, menu.id);
+    this.router.navigate(['/dashboard/menus', slug]);
   }
 
   updateForm<K extends keyof MenuForm>(key: K, ev: Event): void {

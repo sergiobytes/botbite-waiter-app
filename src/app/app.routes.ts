@@ -70,6 +70,14 @@ export const routes: Routes = [
             (m) => m.MenusComponent
           ),
       },
+      {
+        path: 'menus/:slug',
+        canActivate: [clientGuard],
+        loadComponent: () =>
+          import('./features/dashboard/menu-items-component/menu-items.component').then(
+            (m) => m.MenuItemsComponent
+          ),
+      },
     ],
   },
   { path: '', pathMatch: 'full', redirectTo: '/login' },
