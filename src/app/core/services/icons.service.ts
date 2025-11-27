@@ -27,6 +27,7 @@ import {
   UserPlus,
   Users,
   Utensils,
+  Eye
 } from 'lucide-angular';
 
 @Injectable({
@@ -60,4 +61,6 @@ export class IconsService {
   readonly qrCode = QrCode;
   readonly upload = Upload;
   readonly menus = NotebookPen;
+
+  readonly eye = Eye;
 }
