@@ -126,14 +126,14 @@
             </div>
           </td>
         </tr>
-        }
-
+        } @empty {
         <app-empty-state
           [loading]="loading()"
           [isEmpty]="menus().length === 0"
           [colspan]="3"
           message="No hay menús para mostrar."
         />
+        }
       </tbody>
     </table>
   </div>

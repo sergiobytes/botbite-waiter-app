@@ -1,3 +1,5 @@
+import { Pagination } from './common.types';
+
 export interface Branch {
   id: string;
   name: string;
@@ -20,6 +22,7 @@ export interface BranchResponse {
 export interface BranchListResponse {
   branches: Branch[];
   total: number;
+  pagination: Pagination;
 }
 
 export interface BranchesBulkResponse {

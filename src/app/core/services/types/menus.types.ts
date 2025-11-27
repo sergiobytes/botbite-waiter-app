@@ -1,4 +1,5 @@
 import { Category } from './category.types';
+import { Pagination } from './common.types';
 import { Product } from './products.types';
 
 export interface Menu {
@@ -26,7 +27,8 @@ export interface MenuResponse {
 
 export interface MenuListResponse {
   menus: Menu[];
-  message: string;
+  total: number;
+  pagination: Pagination;
 }
 
 export interface MenuItemResponse {
@@ -36,5 +38,6 @@ export interface MenuItemResponse {
 
 export interface MenuItemListResponse {
   items: MenuItem[];
-  message: string;
+  total: number;
+  pagination: Pagination;
 }

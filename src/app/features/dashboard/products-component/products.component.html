@@ -150,14 +150,14 @@
             </div>
           </td>
         </tr>
-        }
-
+        } @empty {
         <app-empty-state
           [loading]="loading()"
           [isEmpty]="productsService.products().length === 0"
           [colspan]="4"
           message="No hay productos para mostrar."
         />
+        }
       </tbody>
     </table>
   </div>

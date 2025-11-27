@@ -1,1 +1,84 @@
-<p>menu-items.component works!</p>,
+<div class="space-y-6">
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <shared-title
+      [title]="menuName()"
+      description="Administración de productos relacionados al menú y sucursal seleccionada."
+    />
+
+    <!-- Boton para agregar productos al menu -->
+  </div>
+
+  <!-- Buscador -->
+  <div class="flex flex-col md:flex-row gap-3 items-stretch md:items-center">
+    <div class="md:ml-auto flex items-center gap-2">
+      <lucide-icon [img]="iconsService.search" size="15" color="black"></lucide-icon>
+    </div>
+  </div>
+
+  <div class="rounded-2xl border border-black/10 overflow-hidden overflow-x-auto">
+    <table class="w-full text-sm min-w-[600px]">
+      <thead class="bg-neutral-50 text-neutral-600">
+        <tr>
+          <th class="text-left font-medium px-4 py-3">Producto</th>
+          <th class="text-left font-medium px-4 py-3">Categoria</th>
+          <th class="text-left font-medium px-4 py-3">Estado</th>
+          <th class="text-left font-medium px-4 py-3">Precio</th>
+          <th class="text-right font-medium px-4 py-3">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for(menuItem of menuItems(); track menuItem.id) {
+        <tr class="border-t border-black/10 animate-fade-in animate-duration-300">
+          <td class="px-4 py-3">{{ menuItem.product.name }}</td>
+          <td class="px-4 py-3">{{ menuItem.category.name }}</td>
+          <td class="px-4 py-3 flex">
+            <div
+              class="flex items-center justify-center gap-2 rounded-full border text-xs px-2 py-0.5"
+              [class]="
+                menuItem.isActive
+                  ? 'bg-green-100 text-green-800 border-green-200'
+                  : 'bg-red-100 text-red-800 border-red-200'
+              "
+            >
+              <lucide-icon
+                [img]="menuItem.isActive ? iconsService.active : iconsService.inactive"
+                size="20"
+                [color]="menuItem.isActive ? 'green' : 'red'"
+              ></lucide-icon>
+
+              <span class="">
+                {{ menuItem.isActive ? 'Activa' : 'Inactiva' }}
+              </span>
+            </div>
+          </td>
+          <td class="px-4 py-3 text-right">{{ menuItem.price | currency : 'USD' }}</td>
+          <td>
+            <div class="flex items-center gap-2 justify-end">
+              <!-- Editar -->
+              <!-- Desactivar -->
+            </div>
+          </td>
+        </tr>
+        } @empty {
+        <app-empty-state
+          [loading]="loading()"
+          [isEmpty]="menuItems().length === 0"
+          [colspan]="5"
+          message="No hay productos para mostrar."
+        />
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <app-pagination
+    [total]="menusService.totalMenuItems()"
+    [pageFrom]="pageFrom()"
+    [pageTo]="pageTo()"
+    [canPrev]="canPrev()"
+    [canNext]="canNext()"
+    (previousPage)="prevPage()"
+    (nextPage)="nextPage()"
+    (limitChange)="changeLimit($event)"
+  />
+</div>

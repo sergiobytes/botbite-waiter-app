@@ -150,14 +150,14 @@
             </div>
           </td>
         </tr>
-        }
-
+        } @empty {
         <app-empty-state
           [loading]="loading()"
           [isEmpty]="usersService.users().length === 0"
           [colspan]="4"
           message="No hay usuarios para mostrar"
         />
+        }
       </tbody>
     </table>
   </div>

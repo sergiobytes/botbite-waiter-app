@@ -1,3 +1,4 @@
+import { Pagination } from './common.types';
 import { MenuItem } from './menus.types';
 
 export interface Order {
@@ -24,5 +25,6 @@ export interface OrderItem {
 
 export interface OrderListResponse {
   orders: Order[];
-  message: string;
+  total: number;
+  pagination: Pagination;
 }

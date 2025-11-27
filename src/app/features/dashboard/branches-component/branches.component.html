@@ -195,14 +195,14 @@
             </div>
           </td>
         </tr>
-        }
-
+        } @empty {
         <app-empty-state
           [loading]="loading()"
           [isEmpty]="branches().length === 0"
           [colspan]="7"
           message="No hay sucursales para mostrar."
         />
+        }
       </tbody>
     </table>
   </div>

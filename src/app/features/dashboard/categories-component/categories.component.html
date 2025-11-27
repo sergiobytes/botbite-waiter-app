@@ -98,14 +98,14 @@
             </div>
           </td>
         </tr>
-        }
-
+        } @empty {
         <app-empty-state
           [loading]="loading()"
           [isEmpty]="categories().length === 0"
           [colspan]="3"
           message="No hay categorías para mostrar"
         />
+        }
       </tbody>
     </table>
   </div>

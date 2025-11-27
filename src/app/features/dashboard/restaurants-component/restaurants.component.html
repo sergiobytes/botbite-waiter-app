@@ -101,14 +101,14 @@
             </div>
           </td>
         </tr>
-        }
-
-        <app-empty-state
+        } @empty {
+          <app-empty-state
           [loading]="loading()"
           [isEmpty]="restaurants().length === 0"
           [colspan]="3"
           message="No hay restaurantes para mostrar"
-        />
+          />
+        }
       </tbody>
     </table>
   </div>
