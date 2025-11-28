@@ -76,6 +76,15 @@ export class MenusService {
       );
   }
 
+  uploadMenuFile(file: File, menuId: string): Observable<Menu> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    return this.http
+      .post<MenuResponse>(`${this.apiUrl}/menus/menu/upload-file/${menuId}`, formData)
+      .pipe(map((response) => response.menu));
+  }
+
   updateMenu(menuId: string, updatedMenu: Partial<Menu>): Observable<Menu> {
     return this.http
       .patch<MenuResponse>(`${this.apiUrl}/menus/menu/${menuId}`, updatedMenu)
@@ -151,7 +160,11 @@ export class MenusService {
       );
   }
 
-  updateMenuItem(menuId: string, itemId: string, updatedItem: UpdateMenuItemDto): Observable<MenuItem> {
+  updateMenuItem(
+    menuId: string,
+    itemId: string,
+    updatedItem: UpdateMenuItemDto
+  ): Observable<MenuItem> {
     return this.http
       .patch<MenuItemResponse>(`${this.apiUrl}/menus/menu/${menuId}/items/${itemId}`, updatedItem)
       .pipe(map((response) => response.menuItem));

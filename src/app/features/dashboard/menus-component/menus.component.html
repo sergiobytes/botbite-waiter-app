@@ -46,6 +46,7 @@
       <thead class="bg-neutral-50 text-neutral-600">
         <tr>
           <th class="text-left font-medium px-4 py-3">Nombre</th>
+          <th class="text-left font-medium px-4 py-3">PDF</th>
           <th class="text-left font-medium px-4 py-3">Estado</th>
           <th class="text-right font-medium px-4 py-3">Acciones</th>
         </tr>
@@ -56,6 +57,28 @@
           <td class="px-4 py-3">
             <div class="flex items-center gap-2">
               <span>{{ menu.name }}</span>
+            </div>
+          </td>
+          <td class="px-4 py-3">
+            <div class="flex items-center gap-2">
+              @if(!menu.pdfLink) {
+              <span class="text-sm text-red-600 font-medium">No cargado</span>
+              } @else {
+              <button
+                (click)="downloadPdf(menu)"
+                class="px-3 py-1 border border-blue-200 bg-blue-100 text-blue-800 rounded-lg hover:bg-blue-50 transition-all hover:animate-scale"
+                [attr.aria-label]="'Descargar PDF del menú ' + menu.name"
+              >
+                <div class="flex items-center gap-2">
+                  <lucide-icon
+                    [img]="iconsService.downloadFile"
+                    size="15"
+                    color="blue"
+                  ></lucide-icon>
+                  <span class="text-sm font-medium">Descargar </span>
+                </div>
+              </button>
+              }
             </div>
           </td>
           <td class="px-4 py-3 flex">
@@ -81,6 +104,26 @@
           <td class="px-4 py-3">
             <div class="flex items-center gap-2 justify-end">
               <!-- Cargar menú -->
+              <input
+                #pdfInput
+                type="file"
+                accept=".pdf,application/pdf"
+                class="hidden"
+                (change)="onPdfSelected($event, menu.id)"
+              />
+              <button
+                class="px-3 py-1 border rounded-lg transition-all hover:animate-scale"
+                (click)="pdfInput.click()"
+              >
+                <div class="flex items-center gap-2">
+                  <lucide-icon
+                    [img]="iconsService.uploadFile"
+                    size="15"
+                    color="green"
+                  ></lucide-icon>
+                  <span> Cargar menú </span>
+                </div>
+              </button>
               <!-- Ver items del menú -->
               <button
                 class="px-3 py-1 border border-blue-200 bg-blue-100 text-blue-800 rounded-lg hover:bg-blue-50 transition-all hover:animate-scale"

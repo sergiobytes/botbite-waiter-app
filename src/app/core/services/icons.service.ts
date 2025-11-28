@@ -27,7 +27,9 @@ import {
   UserPlus,
   Users,
   Utensils,
-  Eye
+  Eye,
+  FileUp,
+  FileDown,
 } from 'lucide-angular';
 
 @Injectable({
@@ -61,6 +63,7 @@ export class IconsService {
   readonly qrCode = QrCode;
   readonly upload = Upload;
   readonly menus = NotebookPen;
-
   readonly eye = Eye;
+  readonly uploadFile = FileUp;
+  readonly downloadFile = FileDown;
 }

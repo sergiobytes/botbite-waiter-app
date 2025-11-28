@@ -45,6 +45,7 @@ export class MenusComponent {
 
   readonly saving = signal(false);
   readonly loading = signal(false);
+  readonly downloadingMenu = signal(false);
   readonly mode = signal<Mode>(null);
   readonly confirming = signal(false);
   private confirmEnable = signal<boolean | null>(null);
@@ -263,6 +264,44 @@ export class MenusComponent {
     console.log(enable);
   }
 
+  onPdfSelected(ev: Event, menuId: string): void {
+    const input = ev.target as HTMLInputElement;
+    const file = input.files?.[0];
+
+    if (!file) return;
+
+    this.menusService
+      .uploadMenuFile(file, menuId)
+      .pipe(
+        catchError((e) => {
+          console.error('Error uploading PDF:', e);
+          this.toastrService.error('Error al subir el archivo PDF');
+          return EMPTY;
+        })
+      )
+      .subscribe(() => {
+        input.value = '';
+        this.toastrService.success('Archivo PDF subido correctamente');
+        this.paginationState.resetToFirstPage();
+        this.reload();
+      });
+  }
+
+  async downloadPdf(menu: Menu): Promise<void> {
+    if (!menu.pdfLink) return;
+
+    this.downloadingMenu.set(true);
+
+    try {
+      await this.downloadPdfDirectly(menu.pdfLink, menu);
+      this.toastrService.success('Descarga iniciada');
+    } catch {
+      this.handleDownloadFallback(menu.pdfLink);
+    } finally {
+      this.downloadingMenu.set(false);
+    }
+  }
+
   protected viewProducts(menu: Menu): void {
     const slug = createMenuSlug(menu.name, menu.id);
     this.router.navigate(['/dashboard/menus', slug]);
@@ -276,5 +315,33 @@ export class MenusComponent {
   updateFormChecked<K extends keyof MenuForm>(key: K, ev: Event): void {
     const el = ev.target as HTMLInputElement;
     this.form.update((f) => ({ ...f, [key]: el.checked }));
+  }
+
+  private async downloadPdfDirectly(url: string, menu: Menu): Promise<void> {
+    const response = await fetch(url, { mode: 'cors' });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+    const blob = await response.blob();
+    const fileName = `${menu.name}.pdf`;
+
+    this.triggerDownload(blob, fileName);
+  }
+
+  private triggerDownload(blob: Blob, filename: string): void {
+    const objectUrl = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+
+    anchor.href = objectUrl;
+    anchor.download = filename;
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+
+    URL.revokeObjectURL(objectUrl);
+  }
+
+  private handleDownloadFallback(url: string): void {
+    this.toastrService.info('No se pudo descargar automáticamente. Abriendo en nueva pestaña.');
+    window.open(url, '_blank');
   }
 }
