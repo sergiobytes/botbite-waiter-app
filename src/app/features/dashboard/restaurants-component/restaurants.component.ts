@@ -14,12 +14,7 @@ import { PaginationComponent } from '../../../shared/components/pagination/pagin
 import { TitleComponent } from '../../../shared/components/title/title';
 import { createPaginationState } from '../../../shared/utils/pagination.util';
 import { createSearchState } from '../../../shared/utils/search.util';
-
-interface RestaurantForm {
-  readonly id?: string;
-  name: string;
-  isActive: boolean;
-}
+import { RestaurantForm } from '../../../core/services/forms/forms.interfaces';
 
 @Component({
   selector: 'app-restaurants.component',

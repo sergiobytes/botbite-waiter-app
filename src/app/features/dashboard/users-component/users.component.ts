@@ -4,6 +4,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { ToastrService } from 'ngx-toastr';
 import { catchError, EMPTY } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
+import { UserForm } from '../../../core/services/forms/forms.interfaces';
 import { IconsService } from '../../../core/services/icons.service';
 import { Mode, UserRole } from '../../../core/services/types/common.types';
 import { UserRow } from '../../../core/services/types/users.types';
@@ -40,7 +41,7 @@ export class UsersComponent {
   readonly roleFilter = signal<UserRole | ''>('');
   readonly mode = signal<Mode>(null);
   readonly saving = signal(false);
-  readonly form = signal<{ email: string; password: string }>({ email: '', password: '' });
+  readonly form = signal<UserForm>({ email: '', password: '' });
 
   readonly confirmingToggle = signal(false);
   readonly targetUser = signal<UserRow | null>(null);

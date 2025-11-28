@@ -12,6 +12,7 @@ import { ToastrService } from 'ngx-toastr';
 import { catchError, EMPTY, finalize } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
 import { BranchesService } from '../../../core/services/branches.service';
+import { BranchForm } from '../../../core/services/forms/forms.interfaces';
 import { IconsService } from '../../../core/services/icons.service';
 import { OrgService } from '../../../core/services/org.service';
 import { Branch } from '../../../core/services/types/branches.types';
@@ -23,15 +24,6 @@ import { TitleComponent } from '../../../shared/components/title/title';
 import { downloadTemplate } from '../../../shared/utils/download-template.util';
 import { createPaginationState } from '../../../shared/utils/pagination.util';
 import { createSearchState } from '../../../shared/utils/search.util';
-
-interface BranchForm {
-  readonly id?: string;
-  name: string;
-  address: string;
-  phoneNumberAssistant?: string;
-  phoneNumberReception?: string;
-  isActive: boolean;
-}
 
 @Component({
   selector: 'app-branches',

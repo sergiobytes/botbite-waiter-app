@@ -4,6 +4,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { ToastrService } from 'ngx-toastr';
 import { catchError, EMPTY, finalize } from 'rxjs';
 import { CategoriesService } from '../../../core/services/categories.service';
+import { CategoryForm } from '../../../core/services/forms/forms.interfaces';
 import { IconsService } from '../../../core/services/icons.service';
 import { Category } from '../../../core/services/types/category.types';
 import { Mode } from '../../../core/services/types/common.types';
@@ -13,12 +14,6 @@ import { PaginationComponent } from '../../../shared/components/pagination/pagin
 import { TitleComponent } from '../../../shared/components/title/title';
 import { createPaginationState } from '../../../shared/utils/pagination.util';
 import { createSearchState } from '../../../shared/utils/search.util';
-
-interface CategoryForm {
-  readonly id?: number;
-  name: string;
-  isActive: boolean;
-}
 
 @Component({
   selector: 'app-categories',
@@ -67,13 +62,10 @@ export class CategoriesComponent {
     return f.name.trim() !== '';
   });
 
-  private readonly paginationState = createPaginationState(
-    this.categoriesService.totalCategories,
-    {
-      onChange: () => this.fetch(),
-      loading: this.loading,
-    }
-  );
+  private readonly paginationState = createPaginationState(this.categoriesService.totalCategories, {
+    onChange: () => this.fetch(),
+    loading: this.loading,
+  });
 
   readonly pagination = this.paginationState.pagination;
   readonly pageFrom = this.paginationState.pageFrom;

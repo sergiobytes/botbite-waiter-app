@@ -9,6 +9,7 @@ import {
   MenuItemResponse,
   MenuListResponse,
   MenuResponse,
+  CreateMenuItemDto,
 } from './types/menus.types';
 import { map, Observable, tap } from 'rxjs';
 
@@ -87,9 +88,9 @@ export class MenusService {
   //#endregion
 
   //#region Menu Items
-  createMenuItem(menuId: string, newMenuItem: Partial<MenuItem>): Observable<MenuItem> {
+  createMenuItem(menuId: string, dto: CreateMenuItemDto): Observable<MenuItem> {
     return this.http
-      .post<MenuItemResponse>(`${this.apiUrl}/menus/menu/${menuId}/items`, newMenuItem)
+      .post<MenuItemResponse>(`${this.apiUrl}/menus/menu/${menuId}/items`, dto)
       .pipe(map((res) => res.menuItem));
   }
 

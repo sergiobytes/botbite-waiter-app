@@ -5,13 +5,41 @@
       description="Administración de productos relacionados al menú y sucursal seleccionada."
     />
 
-    <!-- Boton para agregar productos al menu -->
+    <button
+      class="rounded-xl bg-black text-white px-4 py-2 hover:opacity-90 disabled:opacity-50 self-start sm:self-auto transition-all hover:animate-scale"
+      (click)="openAddProductsModal()"
+      [disabled]="!menuId()"
+      aria-label="Agregar productos al menú"
+    >
+      <div class="flex items-center gap-2">
+        <lucide-icon [img]="iconsService.add" size="15" color="white"></lucide-icon>
+        <span>Agregar productos</span>
+      </div>
+    </button>
   </div>
 
   <!-- Buscador -->
   <div class="flex flex-col md:flex-row gap-3 items-stretch md:items-center">
     <div class="md:ml-auto flex items-center gap-2">
       <lucide-icon [img]="iconsService.search" size="15" color="black"></lucide-icon>
+      <input
+        type="text"
+        placeholder="Buscar..."
+        class="rounded-xl border border-black/10 px-3 py-2 w-64"
+        [value]="searchTerm()"
+        (input)="updateFilterSearch($event)"
+        aria-label="Buscar productos"
+      />
+      <select
+        class="rounded-xl border border-black/10 px-3 py-2"
+        [value]="activeFilterValue()"
+        (change)="updateFilterActive($event)"
+        aria-label="Filtrar por estado"
+      >
+        <option value="">Todos</option>
+        <option value="true">Activos</option>
+        <option value="false">Inactivos</option>
+      </select>
     </div>
   </div>
 
@@ -81,4 +109,128 @@
     (nextPage)="nextPage()"
     (limitChange)="changeLimit($event)"
   />
+
+  <!-- Modal para agregar múltiples productos -->
+  <app-modal
+    [isOpen]="showModal()"
+    [title]="modalTitle()"
+    [maxWidth]="'max-w-4xl'"
+    [showActions]="true"
+    [loading]="saving()"
+    [confirmDisabled]="!canSaveProducts()"
+    confirmText="Guardar productos"
+    (close)="closeModal()"
+    (cancel)="closeModal()"
+    (confirm)="saveProducts()"
+  >
+    <div class="space-y-4">
+      <!-- Selector de Categoría -->
+      <div class="space-y-2">
+        <label for="category" class="text-sm font-medium text-neutral-700">
+          Categoría <span class="text-red-500">*</span>
+        </label>
+        <select
+          id="category"
+          class="w-full rounded-xl border border-black/10 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black/20"
+          [value]="selectedCategoryId()"
+          (change)="updateCategory($event)"
+        >
+          <option value="">Selecciona una categoría</option>
+          @for(category of categories(); track category.id) {
+            <option [value]="category.id">{{ category.name }}</option>
+          }
+        </select>
+      </div>
+
+      <!-- Campo de Precio -->
+      <div class="space-y-2">
+        <label for="price" class="text-sm font-medium text-neutral-700">
+          Precio <span class="text-red-500">*</span>
+        </label>
+        <input
+          id="price"
+          type="number"
+          step="0.01"
+          min="0"
+          class="w-full rounded-xl border border-black/10 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black/20"
+          [value]="productPrice()"
+          (input)="updatePrice($event)"
+          placeholder="0.00"
+        />
+      </div>
+
+      <!-- Lista de Productos Disponibles -->
+      <div class="space-y-2">
+        <label class="text-sm font-medium text-neutral-700">
+          Productos <span class="text-red-500">*</span>
+          <span class="text-xs text-neutral-500 font-normal ml-2">
+            ({{ selectedProductIds().length }} seleccionados)
+          </span>
+        </label>
+
+        <!-- Campo de búsqueda de productos -->
+        <div class="relative">
+          <input
+            type="text"
+            placeholder="Buscar productos..."
+            class="w-full rounded-xl border border-black/10 px-3 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-black/20"
+            [value]="productSearchTerm()"
+            (input)="updateProductSearch($event)"
+          />
+          <lucide-icon
+            [img]="iconsService.search"
+            size="18"
+            color="gray"
+            class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"
+          ></lucide-icon>
+        </div>
+
+        @if(availableProducts().length === 0) {
+          <div class="text-sm text-neutral-500 py-8 text-center border border-dashed border-neutral-300 rounded-xl">
+            @if(productSearchTerm()) {
+              No se encontraron productos con "{{ productSearchTerm() }}".
+            } @else {
+              No hay productos disponibles para agregar.
+              <br />
+              Todos los productos activos ya están en este menú.
+            }
+          </div>
+        } @else {
+          <div class="border border-black/10 rounded-xl max-h-64 overflow-y-auto">
+            @for(product of availableProducts(); track product.id) {
+              <label
+                class="flex items-center gap-3 px-4 py-3 hover:bg-neutral-50 cursor-pointer border-b border-black/5 last:border-b-0 transition-colors"
+                [class.bg-blue-50]="isProductSelected(product.id)"
+              >
+                <input
+                  type="checkbox"
+                  [checked]="isProductSelected(product.id)"
+                  (change)="toggleProductSelection(product.id)"
+                  class="rounded border-neutral-300 text-black focus:ring-black"
+                />
+                <div class="flex-1">
+                  <div class="text-sm font-medium">{{ product.name }}</div>
+                  @if(product.description) {
+                    <div class="text-xs text-neutral-500">{{ product.description }}</div>
+                  }
+                </div>
+              </label>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Resumen -->
+      @if(selectedProductIds().length > 0) {
+        <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 text-sm">
+          <div class="font-medium text-blue-900 mb-1">Resumen:</div>
+          <div class="text-blue-800">
+            Se agregarán <strong>{{ selectedProductIds().length }}</strong> producto(s)
+            al menú con un precio de <strong>{{ productPrice() | currency: 'USD' }}</strong> cada uno.
+          </div>
+        </div>
+      }
+    </div>
+  </app-modal>
+
 </div>
