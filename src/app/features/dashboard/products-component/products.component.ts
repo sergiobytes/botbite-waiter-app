@@ -10,6 +10,7 @@ import {
 import { LucideAngularModule } from 'lucide-angular';
 import { ToastrService } from 'ngx-toastr';
 import { catchError, EMPTY, finalize, tap } from 'rxjs';
+import { ProductForm } from '../../../core/services/forms/forms.interfaces';
 import { IconsService } from '../../../core/services/icons.service';
 import { OrgService } from '../../../core/services/org.service';
 import { ProductsService } from '../../../core/services/products.service';
@@ -22,13 +23,6 @@ import { TitleComponent } from '../../../shared/components/title/title';
 import { downloadTemplate } from '../../../shared/utils/download-template.util';
 import { createPaginationState } from '../../../shared/utils/pagination.util';
 import { createSearchState } from '../../../shared/utils/search.util';
-
-interface ProductForm {
-  readonly id?: string;
-  name: string;
-  description?: string;
-  isActive: boolean;
-}
 
 @Component({
   selector: 'app-products.component',
