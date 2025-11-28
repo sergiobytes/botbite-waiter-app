@@ -78,7 +78,7 @@ export class MenuItemsComponent {
   // Productos que NO están en el menú actual
   protected readonly availableProducts = computed(() => {
     const allProducts = this.products();
-    const currentMenuItems = this.menuItems();
+    const currentMenuItems = this.menusService.allMenuItems();
     const menuProductIds = new Set(currentMenuItems.map((item) => item.product.id));
     const searchTerm = this.productSearchTerm().toLowerCase().trim();
 
@@ -224,6 +224,7 @@ export class MenuItemsComponent {
 
     combineLatest([
       this.menusService.findItemsByMenu(mid, params),
+      this.menusService.findAllItems(mid),
       this.productsService.findAllProductsByRestaurant(rid, {
         limit: 1000,
       }),

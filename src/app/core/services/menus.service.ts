@@ -26,6 +26,8 @@ export class MenusService {
   readonly menuItems = signal<MenuItem[]>([]);
   readonly totalMenuItems = signal<number>(0);
 
+  readonly allMenuItems = signal<MenuItem[]>([]);
+
   //#region Menu
   createMenu(newMenu: Partial<Menu>): Observable<Menu> {
     const branchId = this.orgService.selectedBranchId();
@@ -126,6 +128,22 @@ export class MenusService {
         tap((response) => {
           this.menuItems.set(response.items);
           this.totalMenuItems.set(response.total);
+        }),
+
+        map((response) => response.items)
+      );
+  }
+
+  findAllItems(menuId: string): Observable<MenuItem[]> {
+    return this.http
+      .get<MenuItemListResponse>(`${this.apiUrl}/menus/menu/${menuId}/items`, {
+        params: {
+          limit: 200,
+        },
+      })
+      .pipe(
+        tap((response) => {
+          this.allMenuItems.set(response.items);
         }),
 
         map((response) => response.items)
