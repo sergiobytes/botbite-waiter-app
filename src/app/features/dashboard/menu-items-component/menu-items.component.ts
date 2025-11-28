@@ -1,100 +1,135 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  inject,
+  signal,
+} from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
-import { ToastrService } from 'ngx-toastr';
-import { catchError, EMPTY } from 'rxjs';
-import { AuthService } from '../../../core/services/auth.service';
-import { UserForm } from '../../../core/services/forms/forms.interfaces';
+import { combineLatest } from 'rxjs';
+import { CategoriesService } from '../../../core/services/categories.service';
 import { IconsService } from '../../../core/services/icons.service';
-import { Mode, UserRole } from '../../../core/services/types/common.types';
-import { UserRow } from '../../../core/services/types/users.types';
-import { UsersService } from '../../../core/services/users.service';
+import { MenusService } from '../../../core/services/menus.service';
+import { OrgService } from '../../../core/services/org.service';
+import { ProductsService } from '../../../core/services/products.service';
+import { Menu, MenuItem } from '../../../core/services/types/menus.types';
 import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state';
-import { ModalComponent } from '../../../shared/components/modal/modal';
 import { PaginationComponent } from '../../../shared/components/pagination/pagination';
-import { RoleBadgeComponent } from '../../../shared/components/role-badge/role-badge';
 import { TitleComponent } from '../../../shared/components/title/title';
 import { createPaginationState } from '../../../shared/utils/pagination.util';
 import { createSearchState } from '../../../shared/utils/search.util';
+import { extractMenuIdFromSlug } from '../../../shared/utils/slug-genarator.util';
+import { ModalComponent } from '../../../shared/components/modal/modal';
+import { MenuItemForm } from '../../../core/services/forms/forms.interfaces';
 
 @Component({
-  selector: 'app-users.component',
+  selector: 'app-menu-items',
   imports: [
     CommonModule,
     TitleComponent,
+    EmptyStateComponent,
     PaginationComponent,
     ModalComponent,
-    RoleBadgeComponent,
-    EmptyStateComponent,
     LucideAngularModule,
   ],
-  templateUrl: './users.component.html',
+  templateUrl: './menu-items.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class UsersComponent {
-  protected readonly usersService = inject(UsersService);
-  private readonly authService = inject(AuthService);
-  private readonly toastrService = inject(ToastrService);
+export class MenuItemsComponent {
+  protected readonly menusService = inject(MenusService);
+  protected readonly productsService = inject(ProductsService);
+  protected readonly categoryService = inject(CategoriesService);
+  protected readonly orgService = inject(OrgService);
   protected readonly iconsService = inject(IconsService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
 
-  readonly loading = signal(false);
-  readonly roleFilter = signal<UserRole | ''>('');
-  readonly mode = signal<Mode>(null);
-  readonly saving = signal(false);
-  readonly form = signal<UserForm>({ email: '', password: '' });
+  protected readonly menuId = signal<string | null>(null);
+  protected readonly menu = signal<Menu | null>(null);
+  protected readonly menuItems = computed(() => this.menusService.menuItems());
+  protected readonly products = computed(() => this.productsService.products());
+  protected readonly loading = signal(false);
+  protected readonly showModal = signal(false);
+  protected readonly showConfirmModal = signal(false);
+  protected readonly target = signal<MenuItem | null>(null);
+  protected readonly filters = signal<{ isActive?: boolean }>({});
 
-  readonly confirmingToggle = signal(false);
-  readonly targetUser = signal<UserRow | null>(null);
-  readonly targetAction = signal<'activate' | 'deactivate' | null>(null);
+  protected readonly form = signal<MenuItemForm>({
+    product: [],
+    category: {
+      name: '',
+      isActive: true,
+    },
+    price: 0,
+    isActive: true,
+  });
 
-  readonly confirmingAdminRole = signal(false);
-  readonly targetUserRole = signal<UserRow | null>(null);
-  readonly targetRoleAction = signal<'add' | 'remove' | null>(null);
+  protected readonly selectedProductIds = signal<string[]>([]);
+  protected readonly selectedCategoryId = signal<string>('');
+  protected readonly productPrice = signal<number>(0);
+  protected readonly productSearchTerm = signal<string>('');
+  protected readonly saving = signal(false);
 
-  readonly me = computed(() => this.authService.user());
-  readonly myId = computed(() => this.me()?.id);
-  readonly isSuper = computed(() =>
-    (this.me()?.roles || []).map((r) => r.toLowerCase()).includes('super')
+  protected readonly categories = computed(() => this.categoryService.categories());
+
+  // Productos que NO están en el menú actual
+  protected readonly availableProducts = computed(() => {
+    const allProducts = this.products();
+    const currentMenuItems = this.menuItems();
+    const menuProductIds = new Set(currentMenuItems.map((item) => item.product.id));
+    const searchTerm = this.productSearchTerm().toLowerCase().trim();
+
+    let filtered = allProducts.filter((product) => !menuProductIds.has(product.id));
+
+    // Aplicar búsqueda si hay término
+    if (searchTerm) {
+      filtered = filtered.filter(
+        (product) =>
+          product.name.toLowerCase().includes(searchTerm) ||
+          (product.description && product.description.toLowerCase().includes(searchTerm))
+      );
+    }
+
+    return filtered;
+  });
+
+  protected readonly menuName = computed(() => this.menu()?.name ?? 'Menú');
+  protected readonly isEditing = computed(() => !!this.form().id);
+  protected readonly modalTitle = computed(() =>
+    this.isEditing() ? 'Editar Producto' : 'Agregar Productos'
   );
-  readonly isAdmin = computed(() =>
-    (this.me()?.roles || []).map((r) => r.toLowerCase()).includes('admin')
+  protected readonly confirmTargetStatus = computed(() => !this.target()?.isActive);
+  protected readonly confirmMessage = computed(() => {
+    const action = this.confirmTargetStatus() ? 'activar' : 'desactivar';
+    const productName = this.target()?.product?.name ?? 'este producto';
+    return `¿Seguro que quieres ${action} "${productName}"?`;
+  });
+
+  protected readonly canSaveProducts = computed(() => {
+    return (
+      this.selectedProductIds().length > 0 &&
+      this.selectedCategoryId() !== '' &&
+      this.productPrice() > 0
+    );
+  });
+
+  protected readonly activeFilterValue = computed(() => {
+    const isActive = this.filters().isActive;
+    if (isActive === undefined) return '';
+    return isActive ? 'true' : 'false';
+  });
+
+  private readonly stableTotal = signal(0);
+
+  private readonly paginationState = createPaginationState(
+    computed(() => (this.loading() ? this.stableTotal() : this.menusService.totalMenuItems())),
+    {
+      onChange: () => this.fetch(),
+    }
   );
-
-  readonly modalTitle = computed(() => {
-    const currentMode = this.mode();
-    if (currentMode === 'create-user') return 'Crear Usuario';
-    if (currentMode === 'create-client') return 'Crear Cliente';
-    return '';
-  });
-
-  readonly isFormValid = computed(() => {
-    const f = this.form();
-    return f.email.trim() !== '' && f.password.trim().length >= 6;
-  });
-
-  readonly toggleConfirmTitle = computed(() =>
-    this.targetAction() === 'activate' ? 'Activar usuario' : 'Desactivar usuario'
-  );
-
-  readonly toggleConfirmMessage = computed(() => {
-    const action = this.targetAction() === 'activate' ? 'activar' : 'desactivar';
-    return `¿Seguro que quieres ${action} a "${this.targetUser()?.email}"?`;
-  });
-
-  readonly adminRoleConfirmTitle = computed(() =>
-    this.targetRoleAction() === 'add' ? 'Agregar rol de Admin' : 'Quitar rol de Admin'
-  );
-
-  readonly adminRoleConfirmMessage = computed(() => {
-    const action = this.targetRoleAction() === 'add' ? 'agregar' : 'quitar';
-    return `¿Seguro que quieres ${action} el rol de administrador a "${
-      this.targetUserRole()?.email
-    }"?`;
-  });
-
-  private readonly paginationState = createPaginationState(this.usersService.totalUsers, {
-    onChange: () => this.reload(),
-  });
 
   readonly pagination = this.paginationState.pagination;
   readonly pageFrom = this.paginationState.pageFrom;
@@ -105,242 +140,200 @@ export class UsersComponent {
   private readonly searchState = createSearchState({
     onSearch: () => {
       this.paginationState.resetToFirstPage();
-      this.reload();
+      this.fetch();
     },
   });
 
-  readonly search = this.searchState.searchTerm;
+  readonly searchTerm = this.searchState.searchTerm;
 
   constructor() {
-    this.reload();
+    effect(() => {
+      const slug = this.route.snapshot.paramMap.get('slug');
+
+      if (!slug) {
+        this.menuId.set(null);
+        this.menu.set(null);
+        return;
+      }
+
+      const shortId = extractMenuIdFromSlug(slug);
+
+      if (!shortId) {
+        console.error('Invalid menu slug:', slug);
+        this.router.navigateByUrl('/dashboard/menus');
+        return;
+      }
+
+      this.loadMenuByShortId(shortId);
+    });
   }
 
-  reload() {
-    this.loading.set(true);
-    const { limit, offset } = this.pagination();
+  private loadMenuByShortId(shortId: string): void {
+    const branchId = this.orgService.selectedBranchId();
 
-    this.usersService
-      .list({
-        search: this.search() || undefined,
-        role: this.roleFilter() || undefined,
-        limit,
-        offset,
-      })
-      .subscribe({
-        next: () => {
-          this.loading.set(false);
-        },
-        error: () => {
-          this.loading.set(false);
-          this.toastrService.error('Error al cargar los usuarios');
-        },
-      });
+    if (!branchId) {
+      this.menuId.set(null);
+      this.menu.set(null);
+      return;
+    }
+
+    this.loading.set(true);
+
+    this.menusService.findMenusByBranch({}).subscribe({
+      next: () => {
+        const foundMenu = this.menusService.menus().find((m) => m.id.endsWith(shortId));
+
+        if (foundMenu) {
+          this.menuId.set(foundMenu.id);
+          this.menu.set(foundMenu);
+          this.fetch();
+        } else {
+          console.error('Menu not found for shortId:', shortId);
+          this.router.navigateByUrl('/dashboard/menus');
+        }
+
+        this.loading.set(false);
+      },
+      error: (error) => {
+        console.error('Error loading menus:', error);
+        this.loading.set(false);
+        this.router.navigateByUrl('/dashboard/menus');
+      },
+    });
+  }
+
+  private fetch(): void {
+    const mid = this.menuId();
+    const rid = this.orgService.selectedRestaurantId();
+
+    if (!mid || !rid) {
+      this.menusService.menuItems.set([]);
+      this.menusService.totalMenuItems.set(0);
+      return;
+    }
+
+    this.stableTotal.set(this.menusService.totalMenuItems());
+    this.loading.set(true);
+
+    const params = {
+      search: this.searchTerm() || undefined,
+      isActive: this.filters().isActive,
+      limit: this.pagination().limit,
+      offset: this.pagination().offset,
+    };
+
+    combineLatest([
+      this.menusService.findItemsByMenu(mid, params),
+      this.productsService.findAllProductsByRestaurant(rid, {
+        limit: 1000,
+      }),
+      this.categoryService.list({ limit: 100 }),
+    ]).subscribe();
   }
 
   nextPage = () => this.paginationState.nextPage();
   prevPage = () => this.paginationState.prevPage();
   changeLimit = (e: Event) => this.paginationState.changeLimit(e);
-  updateSearch = (e: Event) => this.searchState.updateSearch(e);
+  updateFilterSearch = (e: Event) => this.searchState.updateSearch(e);
 
-  updateRole(e: Event) {
-    const v = (e.target as HTMLSelectElement).value as UserRole | '';
-    this.roleFilter.set(v);
-    this.pagination.update((p) => ({ ...p, offset: 0 }));
-    this.reload();
+  protected updateFilterActive(event: Event): void {
+    const select = event.target as HTMLSelectElement;
+    const value = select.value;
+
+    let isActive: boolean | undefined;
+
+    if (value === '') {
+      isActive = undefined;
+    } else if (value === 'true') {
+      isActive = true;
+    } else if (value === 'false') {
+      isActive = false;
+    }
+
+    this.filters.update((f) => ({ ...f, isActive }));
+    this.paginationState.resetToFirstPage();
+    this.fetch();
   }
 
-  openCreateUser() {
-    this.mode.set('create-user');
-    this.form.set({ email: '', password: '' });
+  protected openAddProductsModal(): void {
+    this.selectedProductIds.set([]);
+    this.selectedCategoryId.set('');
+    this.productPrice.set(0);
+    this.productSearchTerm.set('');
+    this.showModal.set(true);
   }
 
-  openCreateClient() {
-    this.mode.set('create-client');
-    this.form.set({ email: '', password: '' });
+  protected closeModal(): void {
+    this.showModal.set(false);
+    this.selectedProductIds.set([]);
+    this.selectedCategoryId.set('');
+    this.productPrice.set(0);
+    this.productSearchTerm.set('');
   }
 
-  closeModal() {
-    this.mode.set(null);
-    this.form.set({ email: '', password: '' });
+  protected updateProductSearch(event: Event): void {
+    const target = event.target as HTMLInputElement;
+    this.productSearchTerm.set(target.value);
   }
 
-  save() {
-    const { email, password } = this.form();
-    if (!email || !password) {
-      this.toastrService.warning('Email y contraseña son obligatorios');
+  protected toggleProductSelection(productId: string): void {
+    this.selectedProductIds.update((ids) => {
+      if (ids.includes(productId)) {
+        return ids.filter((id) => id !== productId);
+      } else {
+        return [...ids, productId];
+      }
+    });
+  }
+
+  protected isProductSelected(productId: string): boolean {
+    return this.selectedProductIds().includes(productId);
+  }
+
+  protected updateCategory(event: Event): void {
+    const target = event.target as HTMLSelectElement;
+    this.selectedCategoryId.set(target.value);
+  }
+
+  protected updatePrice(event: Event): void {
+    const target = event.target as HTMLInputElement;
+    const value = parseFloat(target.value);
+    this.productPrice.set(isNaN(value) ? 0 : value);
+  }
+
+  protected saveProducts(): void {
+    const mid = this.menuId();
+    const productIds = this.selectedProductIds();
+    const categoryId = this.selectedCategoryId();
+    const price = this.productPrice();
+
+    if (!mid || productIds.length === 0 || !categoryId || price <= 0) {
       return;
     }
 
     this.saving.set(true);
 
-    const role = this.mode() === 'create-client' ? 'client' : 'user';
+    // Crear un array de observables para crear cada menu item
+    const createObservables = productIds.map((productId) =>
+      this.menusService.createMenuItem(mid, {
+        productId,
+        categoryId: parseInt(categoryId),
+        price,
+        isActive: true,
+      })
+    );
 
-    this.usersService.registerUserOrClient({ email, password }, `register-${role}`).subscribe({
+    // Ejecutar todas las creaciones en paralelo
+    combineLatest(createObservables).subscribe({
       next: () => {
-        this.toastrService.success('Usuario registrado');
-        this.closeModal();
         this.saving.set(false);
-        this.reload();
+        this.closeModal();
+        this.fetch();
       },
-      error: () => {
-        this.toastrService.error('No se pudo registrar al usuario');
+      error: (err) => {
+        console.error('Error saving menu items:', err);
         this.saving.set(false);
       },
     });
-  }
-
-  canActOn(row: UserRow) {
-    if (row.id === this.myId()) return false;
-    const userRoles = (row.roles || []).map((r) => r.toLowerCase());
-    if (userRoles.includes('super')) return false;
-    if (this.isSuper()) return true;
-    if (this.isAdmin() && !userRoles.includes('admin')) return true;
-    return false;
-  }
-
-  confirmToggleUser(user: UserRow, action: 'activate' | 'deactivate') {
-    if (!this.canActOn(user)) {
-      this.toastrService.warning(
-        `No puedes ${action === 'activate' ? 'activar' : 'desactivar'} este usuario`
-      );
-      return;
-    }
-
-    this.targetUser.set(user);
-    this.targetAction.set(action);
-    this.confirmingToggle.set(true);
-  }
-
-  closeToggleConfirmation(): void {
-    this.confirmingToggle.set(false);
-    this.targetUser.set(null);
-    this.targetAction.set(null);
-  }
-
-  executeToggle(): void {
-    const user = this.targetUser();
-    const action = this.targetAction();
-
-    if (!user || !action) return;
-
-    if (action === 'activate') this.activate(user);
-    else this.deactivate(user);
-
-    this.closeToggleConfirmation();
-  }
-
-  activate(row: UserRow) {
-    this.usersService
-      .activateUser(row.id)
-      .pipe(
-        catchError((e) => {
-          console.error(e);
-          this.toastrService.error('Error al activar el usuario');
-          return EMPTY;
-        })
-      )
-      .subscribe(() => {
-        this.toastrService.success('Usuario activado correctamente');
-        this.reload();
-      });
-  }
-
-  deactivate(row: UserRow) {
-    this.usersService
-      .deactivateUser(row.id)
-      .pipe(
-        catchError((e) => {
-          console.error(e);
-          this.toastrService.error('Error al desactivar el usuario');
-          return EMPTY;
-        })
-      )
-      .subscribe(() => {
-        this.toastrService.success('Usuario desactivado correctamente');
-        this.reload();
-      });
-  }
-
-  confirmAdminRoleChange(user: UserRow, action: 'add' | 'remove'): void {
-    if (!this.canActOn(user)) {
-      this.toastrService.warning('No puedes modificar este usuario');
-      return;
-    }
-
-    if (action === 'remove' && !this.isSuper()) {
-      this.toastrService.warning('Solo un superusuario puede quitar roles de administrador');
-      return;
-    }
-
-    this.targetUserRole.set(user);
-    this.targetRoleAction.set(action);
-    this.confirmingAdminRole.set(true);
-  }
-
-  closeAdminRoleConfirmation(): void {
-    this.confirmingAdminRole.set(false);
-    this.targetUserRole.set(null);
-    this.targetRoleAction.set(null);
-  }
-
-  executeAdminRoleChange(): void {
-    const user = this.targetUserRole();
-    const action = this.targetRoleAction();
-
-    if (!user || !action) return;
-
-    if (action === 'add') {
-      this.addAdmin(user);
-    } else {
-      this.removeAdmin(user);
-    }
-
-    this.closeAdminRoleConfirmation();
-  }
-
-  hasRole(row: UserRow, role: UserRole) {
-    return (row.roles || []).map((r) => r.toLowerCase()).includes(role);
-  }
-
-  addAdmin(row: UserRow) {
-    this.usersService
-      .addAdminRole(row.id)
-      .pipe(
-        catchError((e) => {
-          console.error(e);
-          this.toastrService.error('Error al añadir el rol de administrador');
-          return EMPTY;
-        })
-      )
-      .subscribe(() => {
-        this.toastrService.success('Rol de administrador añadido');
-        this.reload();
-      });
-  }
-
-  removeAdmin(row: UserRow) {
-    this.usersService
-      .removeAdminRole(row.id)
-      .pipe(
-        catchError((e) => {
-          console.error(e);
-          this.toastrService.error('Error al eliminar el rol de administrador');
-          return EMPTY;
-        })
-      )
-      .subscribe(() => {
-        this.toastrService.success('Rol de administrador eliminado');
-        this.reload();
-      });
-  }
-
-  updateFormEmail(e: Event) {
-    const value = (e.target as HTMLInputElement).value;
-    this.form.update((f) => ({ ...f, email: value }));
-  }
-
-  updateFormPassword(e: Event) {
-    const value = (e.target as HTMLInputElement).value;
-    this.form.update((f) => ({ ...f, password: value }));
   }
 }
