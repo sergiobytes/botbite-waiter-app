@@ -1,97 +1,100 @@
 import { CommonModule } from '@angular/common';
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  effect,
-  inject,
-  signal,
-} from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
-import { combineLatest } from 'rxjs';
+import { ToastrService } from 'ngx-toastr';
+import { catchError, EMPTY } from 'rxjs';
+import { AuthService } from '../../../core/services/auth.service';
+import { UserForm } from '../../../core/services/forms/forms.interfaces';
 import { IconsService } from '../../../core/services/icons.service';
-import { MenusService } from '../../../core/services/menus.service';
-import { OrgService } from '../../../core/services/org.service';
-import { ProductsService } from '../../../core/services/products.service';
-import { Menu, MenuItem } from '../../../core/services/types/menus.types';
+import { Mode, UserRole } from '../../../core/services/types/common.types';
+import { UserRow } from '../../../core/services/types/users.types';
+import { UsersService } from '../../../core/services/users.service';
+import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state';
+import { ModalComponent } from '../../../shared/components/modal/modal';
+import { PaginationComponent } from '../../../shared/components/pagination/pagination';
+import { RoleBadgeComponent } from '../../../shared/components/role-badge/role-badge';
 import { TitleComponent } from '../../../shared/components/title/title';
 import { createPaginationState } from '../../../shared/utils/pagination.util';
 import { createSearchState } from '../../../shared/utils/search.util';
-import { extractMenuIdFromSlug } from '../../../shared/utils/slug-genarator.util';
-import { CategoriesService } from '../../../core/services/categories.service';
-import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state';
-import { PaginationComponent } from '../../../shared/components/pagination/pagination';
-
-interface MenuItemForm {
-  readonly id?: string;
-  productId?: string;
-  price: number;
-  isActive: boolean;
-}
 
 @Component({
-  selector: 'app-menu-items',
+  selector: 'app-users.component',
   imports: [
     CommonModule,
     TitleComponent,
-    EmptyStateComponent,
     PaginationComponent,
+    ModalComponent,
+    RoleBadgeComponent,
+    EmptyStateComponent,
     LucideAngularModule,
   ],
-  templateUrl: './menu-items.component.html',
+  templateUrl: './users.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MenuItemsComponent {
-  protected readonly menusService = inject(MenusService);
-  protected readonly productsService = inject(ProductsService);
-  protected readonly categoryService = inject(CategoriesService);
-  protected readonly orgService = inject(OrgService);
+export class UsersComponent {
+  protected readonly usersService = inject(UsersService);
+  private readonly authService = inject(AuthService);
+  private readonly toastrService = inject(ToastrService);
   protected readonly iconsService = inject(IconsService);
-  private readonly route = inject(ActivatedRoute);
-  private readonly router = inject(Router);
 
-  protected readonly menuId = signal<string | null>(null);
-  protected readonly menu = signal<Menu | null>(null);
-  protected readonly menuItems = computed(() => this.menusService.menuItems());
-  protected readonly products = computed(() => this.productsService.products());
-  protected readonly loading = signal(false);
-  protected readonly showModal = signal(false);
-  protected readonly showConfirmModal = signal(false);
-  protected readonly target = signal<MenuItem | null>(null);
-  protected readonly filters = signal<{ isActive?: boolean }>({});
+  readonly loading = signal(false);
+  readonly roleFilter = signal<UserRole | ''>('');
+  readonly mode = signal<Mode>(null);
+  readonly saving = signal(false);
+  readonly form = signal<UserForm>({ email: '', password: '' });
 
-  protected readonly form = signal<MenuItemForm>({
-    price: 0,
-    isActive: true,
-  });
+  readonly confirmingToggle = signal(false);
+  readonly targetUser = signal<UserRow | null>(null);
+  readonly targetAction = signal<'activate' | 'deactivate' | null>(null);
 
-  protected readonly menuName = computed(() => this.menu()?.name ?? 'Menú');
-  protected readonly isEditing = computed(() => !!this.form().id);
-  protected readonly modalTitle = computed(() =>
-    this.isEditing() ? 'Editar Producto' : 'Agregar Producto'
+  readonly confirmingAdminRole = signal(false);
+  readonly targetUserRole = signal<UserRow | null>(null);
+  readonly targetRoleAction = signal<'add' | 'remove' | null>(null);
+
+  readonly me = computed(() => this.authService.user());
+  readonly myId = computed(() => this.me()?.id);
+  readonly isSuper = computed(() =>
+    (this.me()?.roles || []).map((r) => r.toLowerCase()).includes('super')
   );
-  protected readonly confirmTargetStatus = computed(() => !this.target()?.isActive);
-  protected readonly confirmMessage = computed(() => {
-    const action = this.confirmTargetStatus() ? 'activar' : 'desactivar';
-    const productName = this.target()?.product?.name ?? 'este producto';
-    return `¿Seguro que quieres ${action} "${productName}"?`;
-  });
-
-  protected readonly activeFilterValue = computed(() => {
-    const isActive = this.filters().isActive;
-    if (isActive === undefined) return '';
-    return isActive ? 'true' : 'false';
-  });
-
-  private readonly stableTotal = signal(0);
-
-  private readonly paginationState = createPaginationState(
-    computed(() => (this.loading() ? this.stableTotal() : this.menusService.totalMenuItems())),
-    {
-      onChange: () => this.fetch(),
-    }
+  readonly isAdmin = computed(() =>
+    (this.me()?.roles || []).map((r) => r.toLowerCase()).includes('admin')
   );
+
+  readonly modalTitle = computed(() => {
+    const currentMode = this.mode();
+    if (currentMode === 'create-user') return 'Crear Usuario';
+    if (currentMode === 'create-client') return 'Crear Cliente';
+    return '';
+  });
+
+  readonly isFormValid = computed(() => {
+    const f = this.form();
+    return f.email.trim() !== '' && f.password.trim().length >= 6;
+  });
+
+  readonly toggleConfirmTitle = computed(() =>
+    this.targetAction() === 'activate' ? 'Activar usuario' : 'Desactivar usuario'
+  );
+
+  readonly toggleConfirmMessage = computed(() => {
+    const action = this.targetAction() === 'activate' ? 'activar' : 'desactivar';
+    return `¿Seguro que quieres ${action} a "${this.targetUser()?.email}"?`;
+  });
+
+  readonly adminRoleConfirmTitle = computed(() =>
+    this.targetRoleAction() === 'add' ? 'Agregar rol de Admin' : 'Quitar rol de Admin'
+  );
+
+  readonly adminRoleConfirmMessage = computed(() => {
+    const action = this.targetRoleAction() === 'add' ? 'agregar' : 'quitar';
+    return `¿Seguro que quieres ${action} el rol de administrador a "${
+      this.targetUserRole()?.email
+    }"?`;
+  });
+
+  private readonly paginationState = createPaginationState(this.usersService.totalUsers, {
+    onChange: () => this.reload(),
+  });
 
   readonly pagination = this.paginationState.pagination;
   readonly pageFrom = this.paginationState.pageFrom;
@@ -102,99 +105,242 @@ export class MenuItemsComponent {
   private readonly searchState = createSearchState({
     onSearch: () => {
       this.paginationState.resetToFirstPage();
-      this.fetch();
+      this.reload();
     },
   });
 
-  readonly searchTerm = this.searchState.searchTerm;
+  readonly search = this.searchState.searchTerm;
 
   constructor() {
-    effect(() => {
-      const slug = this.route.snapshot.paramMap.get('slug');
-
-      if (!slug) {
-        this.menuId.set(null);
-        this.menu.set(null);
-        return;
-      }
-
-      const shortId = extractMenuIdFromSlug(slug);
-
-      if (!shortId) {
-        console.error('Invalid menu slug:', slug);
-        this.router.navigateByUrl('/dashboard/menus');
-        return;
-      }
-
-      this.loadMenuByShortId(shortId);
-    });
+    this.reload();
   }
 
-  private loadMenuByShortId(shortId: string): void {
-    const branchId = this.orgService.selectedBranchId();
-
-    if (!branchId) {
-      this.menuId.set(null);
-      this.menu.set(null);
-      return;
-    }
-
+  reload() {
     this.loading.set(true);
+    const { limit, offset } = this.pagination();
 
-    this.menusService.findMenusByBranch({}).subscribe({
-      next: () => {
-        const foundMenu = this.menusService.menus().find((m) => m.id.endsWith(shortId));
-
-        if (foundMenu) {
-          this.menuId.set(foundMenu.id);
-          this.menu.set(foundMenu);
-          this.fetch();
-        } else {
-          console.error('Menu not found for shortId:', shortId);
-          this.router.navigateByUrl('/dashboard/menus');
-        }
-
-        this.loading.set(false);
-      },
-      error: (error) => {
-        console.error('Error loading menus:', error);
-        this.loading.set(false);
-        this.router.navigateByUrl('/dashboard/menus');
-      },
-    });
-  }
-
-  private fetch(): void {
-    const mid = this.menuId();
-    const rid = this.orgService.selectedRestaurantId();
-
-    if (!mid || !rid) {
-      this.menusService.menuItems.set([]);
-      this.menusService.totalMenuItems.set(0);
-      return;
-    }
-
-    this.stableTotal.set(this.menusService.totalMenuItems());
-    this.loading.set(true);
-
-    const params = {
-      search: this.searchTerm() || undefined,
-      isActive: this.filters().isActive,
-      limit: this.pagination().limit,
-      offset: this.pagination().offset,
-    };
-
-    combineLatest([
-      this.menusService.findItemsByMenu(mid, params),
-      this.productsService.findAllProductsByRestaurant(rid, {
-        limit: 1000,
-      }),
-      this.categoryService.list({ limit: 100 }),
-    ]).subscribe();
+    this.usersService
+      .list({
+        search: this.search() || undefined,
+        role: this.roleFilter() || undefined,
+        limit,
+        offset,
+      })
+      .subscribe({
+        next: () => {
+          this.loading.set(false);
+        },
+        error: () => {
+          this.loading.set(false);
+          this.toastrService.error('Error al cargar los usuarios');
+        },
+      });
   }
 
   nextPage = () => this.paginationState.nextPage();
   prevPage = () => this.paginationState.prevPage();
   changeLimit = (e: Event) => this.paginationState.changeLimit(e);
-  updateFilterSearch = (e: Event) => this.searchState.updateSearch(e);
+  updateSearch = (e: Event) => this.searchState.updateSearch(e);
+
+  updateRole(e: Event) {
+    const v = (e.target as HTMLSelectElement).value as UserRole | '';
+    this.roleFilter.set(v);
+    this.pagination.update((p) => ({ ...p, offset: 0 }));
+    this.reload();
+  }
+
+  openCreateUser() {
+    this.mode.set('create-user');
+    this.form.set({ email: '', password: '' });
+  }
+
+  openCreateClient() {
+    this.mode.set('create-client');
+    this.form.set({ email: '', password: '' });
+  }
+
+  closeModal() {
+    this.mode.set(null);
+    this.form.set({ email: '', password: '' });
+  }
+
+  save() {
+    const { email, password } = this.form();
+    if (!email || !password) {
+      this.toastrService.warning('Email y contraseña son obligatorios');
+      return;
+    }
+
+    this.saving.set(true);
+
+    const role = this.mode() === 'create-client' ? 'client' : 'user';
+
+    this.usersService.registerUserOrClient({ email, password }, `register-${role}`).subscribe({
+      next: () => {
+        this.toastrService.success('Usuario registrado');
+        this.closeModal();
+        this.saving.set(false);
+        this.reload();
+      },
+      error: () => {
+        this.toastrService.error('No se pudo registrar al usuario');
+        this.saving.set(false);
+      },
+    });
+  }
+
+  canActOn(row: UserRow) {
+    if (row.id === this.myId()) return false;
+    const userRoles = (row.roles || []).map((r) => r.toLowerCase());
+    if (userRoles.includes('super')) return false;
+    if (this.isSuper()) return true;
+    if (this.isAdmin() && !userRoles.includes('admin')) return true;
+    return false;
+  }
+
+  confirmToggleUser(user: UserRow, action: 'activate' | 'deactivate') {
+    if (!this.canActOn(user)) {
+      this.toastrService.warning(
+        `No puedes ${action === 'activate' ? 'activar' : 'desactivar'} este usuario`
+      );
+      return;
+    }
+
+    this.targetUser.set(user);
+    this.targetAction.set(action);
+    this.confirmingToggle.set(true);
+  }
+
+  closeToggleConfirmation(): void {
+    this.confirmingToggle.set(false);
+    this.targetUser.set(null);
+    this.targetAction.set(null);
+  }
+
+  executeToggle(): void {
+    const user = this.targetUser();
+    const action = this.targetAction();
+
+    if (!user || !action) return;
+
+    if (action === 'activate') this.activate(user);
+    else this.deactivate(user);
+
+    this.closeToggleConfirmation();
+  }
+
+  activate(row: UserRow) {
+    this.usersService
+      .activateUser(row.id)
+      .pipe(
+        catchError((e) => {
+          console.error(e);
+          this.toastrService.error('Error al activar el usuario');
+          return EMPTY;
+        })
+      )
+      .subscribe(() => {
+        this.toastrService.success('Usuario activado correctamente');
+        this.reload();
+      });
+  }
+
+  deactivate(row: UserRow) {
+    this.usersService
+      .deactivateUser(row.id)
+      .pipe(
+        catchError((e) => {
+          console.error(e);
+          this.toastrService.error('Error al desactivar el usuario');
+          return EMPTY;
+        })
+      )
+      .subscribe(() => {
+        this.toastrService.success('Usuario desactivado correctamente');
+        this.reload();
+      });
+  }
+
+  confirmAdminRoleChange(user: UserRow, action: 'add' | 'remove'): void {
+    if (!this.canActOn(user)) {
+      this.toastrService.warning('No puedes modificar este usuario');
+      return;
+    }
+
+    if (action === 'remove' && !this.isSuper()) {
+      this.toastrService.warning('Solo un superusuario puede quitar roles de administrador');
+      return;
+    }
+
+    this.targetUserRole.set(user);
+    this.targetRoleAction.set(action);
+    this.confirmingAdminRole.set(true);
+  }
+
+  closeAdminRoleConfirmation(): void {
+    this.confirmingAdminRole.set(false);
+    this.targetUserRole.set(null);
+    this.targetRoleAction.set(null);
+  }
+
+  executeAdminRoleChange(): void {
+    const user = this.targetUserRole();
+    const action = this.targetRoleAction();
+
+    if (!user || !action) return;
+
+    if (action === 'add') {
+      this.addAdmin(user);
+    } else {
+      this.removeAdmin(user);
+    }
+
+    this.closeAdminRoleConfirmation();
+  }
+
+  hasRole(row: UserRow, role: UserRole) {
+    return (row.roles || []).map((r) => r.toLowerCase()).includes(role);
+  }
+
+  addAdmin(row: UserRow) {
+    this.usersService
+      .addAdminRole(row.id)
+      .pipe(
+        catchError((e) => {
+          console.error(e);
+          this.toastrService.error('Error al añadir el rol de administrador');
+          return EMPTY;
+        })
+      )
+      .subscribe(() => {
+        this.toastrService.success('Rol de administrador añadido');
+        this.reload();
+      });
+  }
+
+  removeAdmin(row: UserRow) {
+    this.usersService
+      .removeAdminRole(row.id)
+      .pipe(
+        catchError((e) => {
+          console.error(e);
+          this.toastrService.error('Error al eliminar el rol de administrador');
+          return EMPTY;
+        })
+      )
+      .subscribe(() => {
+        this.toastrService.success('Rol de administrador eliminado');
+        this.reload();
+      });
+  }
+
+  updateFormEmail(e: Event) {
+    const value = (e.target as HTMLInputElement).value;
+    this.form.update((f) => ({ ...f, email: value }));
+  }
+
+  updateFormPassword(e: Event) {
+    const value = (e.target as HTMLInputElement).value;
+    this.form.update((f) => ({ ...f, password: value }));
+  }
 }
