@@ -48,3 +48,9 @@ export interface CreateMenuItemDto {
   price: number;
   isActive?: boolean;
 }
+
+export interface UpdateMenuItemDto {
+  categoryId?: number;
+  price?: number;
+  isActive?: boolean;
+}

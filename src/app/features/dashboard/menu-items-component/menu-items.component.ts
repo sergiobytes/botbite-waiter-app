@@ -15,7 +15,7 @@ import { IconsService } from '../../../core/services/icons.service';
 import { MenusService } from '../../../core/services/menus.service';
 import { OrgService } from '../../../core/services/org.service';
 import { ProductsService } from '../../../core/services/products.service';
-import { Menu, MenuItem } from '../../../core/services/types/menus.types';
+import { Menu, MenuItem, UpdateMenuItemDto } from '../../../core/services/types/menus.types';
 import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state';
 import { PaginationComponent } from '../../../shared/components/pagination/pagination';
 import { TitleComponent } from '../../../shared/components/title/title';
@@ -54,8 +54,11 @@ export class MenuItemsComponent {
   protected readonly loading = signal(false);
   protected readonly showModal = signal(false);
   protected readonly showConfirmModal = signal(false);
+  protected readonly confirming = signal(false);
+  private confirmEnable = signal<boolean | null>(null);
   protected readonly target = signal<MenuItem | null>(null);
   protected readonly filters = signal<{ isActive?: boolean }>({});
+  protected readonly mode = signal<'create' | 'edit' | null>(null);
 
   protected readonly form = signal<MenuItemForm>({
     product: [],
@@ -72,6 +75,7 @@ export class MenuItemsComponent {
   protected readonly productPrice = signal<number>(0);
   protected readonly productSearchTerm = signal<string>('');
   protected readonly saving = signal(false);
+  protected readonly editingItemId = signal<string | null>(null);
 
   protected readonly categories = computed(() => this.categoryService.categories());
 
@@ -97,11 +101,14 @@ export class MenuItemsComponent {
   });
 
   protected readonly menuName = computed(() => this.menu()?.name ?? 'Menú');
-  protected readonly isEditing = computed(() => !!this.form().id);
+  protected readonly isEditing = computed(() => this.mode() === 'edit');
   protected readonly modalTitle = computed(() =>
     this.isEditing() ? 'Editar Producto' : 'Agregar Productos'
   );
-  protected readonly confirmTargetStatus = computed(() => !this.target()?.isActive);
+  protected readonly confirmTargetStatus = computed(() => !!this.confirmEnable());
+  protected readonly confirmTitle = computed(() =>
+    this.confirmTargetStatus() ? 'Activar producto' : 'Desactivar producto'
+  );
   protected readonly confirmMessage = computed(() => {
     const action = this.confirmTargetStatus() ? 'activar' : 'desactivar';
     const productName = this.target()?.product?.name ?? 'este producto';
@@ -109,11 +116,18 @@ export class MenuItemsComponent {
   });
 
   protected readonly canSaveProducts = computed(() => {
+    if (this.mode() === 'edit') {
+      return this.selectedCategoryId() !== '' && this.productPrice() > 0;
+    }
     return (
       this.selectedProductIds().length > 0 &&
       this.selectedCategoryId() !== '' &&
       this.productPrice() > 0
     );
+  });
+
+  protected readonly isFormValid = computed(() => {
+    return this.selectedCategoryId() !== '' && this.productPrice() > 0;
   });
 
   protected readonly activeFilterValue = computed(() => {
@@ -257,19 +271,33 @@ export class MenuItemsComponent {
   }
 
   protected openAddProductsModal(): void {
+    this.mode.set('create');
     this.selectedProductIds.set([]);
     this.selectedCategoryId.set('');
     this.productPrice.set(0);
+    this.productSearchTerm.set('');
+    this.editingItemId.set(null);
+    this.showModal.set(true);
+  }
+
+  protected openEdit(menuItem: MenuItem): void {
+    this.mode.set('edit');
+    this.editingItemId.set(menuItem.id);
+    this.selectedCategoryId.set(menuItem.category.id.toString());
+    this.productPrice.set(menuItem.price);
+    this.selectedProductIds.set([]);
     this.productSearchTerm.set('');
     this.showModal.set(true);
   }
 
   protected closeModal(): void {
     this.showModal.set(false);
+    this.mode.set(null);
     this.selectedProductIds.set([]);
     this.selectedCategoryId.set('');
     this.productPrice.set(0);
     this.productSearchTerm.set('');
+    this.editingItemId.set(null);
   }
 
   protected updateProductSearch(event: Event): void {
@@ -304,35 +332,101 @@ export class MenuItemsComponent {
 
   protected saveProducts(): void {
     const mid = this.menuId();
-    const productIds = this.selectedProductIds();
     const categoryId = this.selectedCategoryId();
     const price = this.productPrice();
 
-    if (!mid || productIds.length === 0 || !categoryId || price <= 0) {
+    if (!mid || !categoryId || price <= 0) {
       return;
     }
 
     this.saving.set(true);
 
-    // Crear un array de observables para crear cada menu item
-    const createObservables = productIds.map((productId) =>
-      this.menusService.createMenuItem(mid, {
-        productId,
+    if (this.mode() === 'edit') {
+      const itemId = this.editingItemId();
+      if (!itemId) {
+        this.saving.set(false);
+        return;
+      }
+
+      const updateDto: UpdateMenuItemDto = {
         categoryId: parseInt(categoryId),
         price,
-        isActive: true,
-      })
-    );
+      };
 
-    // Ejecutar todas las creaciones en paralelo
-    combineLatest(createObservables).subscribe({
+      this.menusService.updateMenuItem(mid, itemId, updateDto).subscribe({
+        next: () => {
+          this.saving.set(false);
+          this.closeModal();
+          this.fetch();
+        },
+        error: (err) => {
+          console.error('Error updating menu item:', err);
+          this.saving.set(false);
+        },
+      });
+    } else {
+      const productIds = this.selectedProductIds();
+      if (productIds.length === 0) {
+        this.saving.set(false);
+        return;
+      }
+
+      const createObservables = productIds.map((productId) =>
+        this.menusService.createMenuItem(mid, {
+          productId,
+          categoryId: parseInt(categoryId),
+          price,
+          isActive: true,
+        })
+      );
+
+      combineLatest(createObservables).subscribe({
+        next: () => {
+          this.saving.set(false);
+          this.closeModal();
+          this.fetch();
+        },
+        error: (err) => {
+          console.error('Error saving menu items:', err);
+          this.saving.set(false);
+        },
+      });
+    }
+  }
+
+  protected confirmToggle(menuItem: MenuItem, enable: boolean): void {
+    this.target.set(menuItem);
+    this.confirmEnable.set(!enable);
+    this.confirming.set(true);
+  }
+
+  protected closeConfirmation(): void {
+    this.confirming.set(false);
+    this.target.set(null);
+    this.confirmEnable.set(null);
+  }
+
+  protected toggleActive(): void {
+    const menuItem = this.target();
+    const enable = this.confirmEnable();
+    const mid = this.menuId();
+
+    if (!menuItem || enable === null || !mid) return;
+
+    this.saving.set(true);
+
+    const updateDto: UpdateMenuItemDto = {
+      isActive: enable,
+    };
+
+    this.menusService.updateMenuItem(mid, menuItem.id, updateDto).subscribe({
       next: () => {
         this.saving.set(false);
-        this.closeModal();
+        this.closeConfirmation();
         this.fetch();
       },
       error: (err) => {
-        console.error('Error saving menu items:', err);
+        console.error('Error toggling menu item:', err);
         this.saving.set(false);
       },
     });

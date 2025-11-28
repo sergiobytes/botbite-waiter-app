@@ -10,6 +10,7 @@ import {
   MenuListResponse,
   MenuResponse,
   CreateMenuItemDto,
+  UpdateMenuItemDto,
 } from './types/menus.types';
 import { map, Observable, tap } from 'rxjs';
 
@@ -150,9 +151,9 @@ export class MenusService {
       );
   }
 
-  updateMenuItem(menuId: string, itemId: string): Observable<MenuItem> {
+  updateMenuItem(menuId: string, itemId: string, updatedItem: UpdateMenuItemDto): Observable<MenuItem> {
     return this.http
-      .patch<MenuItemResponse>(`${this.apiUrl}/menus/menu/${menuId}/items/${itemId}`, {})
+      .patch<MenuItemResponse>(`${this.apiUrl}/menus/menu/${menuId}/items/${itemId}`, updatedItem)
       .pipe(map((response) => response.menuItem));
   }
 
