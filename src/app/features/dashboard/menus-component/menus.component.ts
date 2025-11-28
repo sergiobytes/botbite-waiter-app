@@ -22,12 +22,8 @@ import { createPaginationState } from '../../../shared/utils/pagination.util';
 import { createSearchState } from '../../../shared/utils/search.util';
 import { createMenuSlug } from '../../../shared/utils/slug-genarator.util';
 import { Router } from '@angular/router';
+import { MenuForm } from '../../../core/services/forms/forms.interfaces';
 
-interface MenuForm {
-  readonly id?: string;
-  name: string;
-  isActive: boolean;
-}
 @Component({
   selector: 'app-menus.component',
   imports: [
