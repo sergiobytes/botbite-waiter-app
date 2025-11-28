@@ -41,3 +41,10 @@ export interface MenuItemListResponse {
   total: number;
   pagination: Pagination;
 }
+
+export interface CreateMenuItemDto {
+  productId: string;
+  categoryId: number;
+  price: number;
+  isActive?: boolean;
+}
