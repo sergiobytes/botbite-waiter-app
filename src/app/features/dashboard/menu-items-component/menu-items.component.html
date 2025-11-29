@@ -72,8 +72,7 @@
                 [img]="menuItem.isActive ? iconsService.active : iconsService.inactive"
                 size="20"
                 [color]="menuItem.isActive ? 'green' : 'red'"
-              ></lucide-icon>
-
+              />
               <span class="">
                 {{ menuItem.isActive ? 'Activa' : 'Inactiva' }}
               </span>
@@ -144,7 +143,7 @@
   <!-- Modal para agregar/editar productos -->
   <app-modal
     [isOpen]="showModal()"
-    [title]="modalTitle()"
+    [title]="modalTitle() + (isEditing() ? ': ' + productName() : '')"
     [maxWidth]="'max-w-4xl'"
     [showActions]="true"
     [loading]="saving()"

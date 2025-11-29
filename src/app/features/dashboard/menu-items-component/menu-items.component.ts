@@ -72,6 +72,7 @@ export class MenuItemsComponent {
 
   protected readonly selectedProductIds = signal<string[]>([]);
   protected readonly selectedCategoryId = signal<string>('');
+  protected readonly productName = signal<string>('');
   protected readonly productPrice = signal<number>(0);
   protected readonly productSearchTerm = signal<string>('');
   protected readonly saving = signal(false);
@@ -284,6 +285,7 @@ export class MenuItemsComponent {
     this.mode.set('edit');
     this.editingItemId.set(menuItem.id);
     this.selectedCategoryId.set(menuItem.category.id.toString());
+    this.productName.set(menuItem.product.name);
     this.productPrice.set(menuItem.price);
     this.selectedProductIds.set([]);
     this.productSearchTerm.set('');
