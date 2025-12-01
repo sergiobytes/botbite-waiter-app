@@ -79,3 +79,49 @@
     }
   </section>
 </div>
+
+<!-- Modal para personalizar QR -->
+<app-modal
+  [isOpen]="showQrModal()"
+  title="Personalizar código QR"
+  [maxWidth]="'max-w-md'"
+  [showActions]="true"
+  [loading]="downloadingQr()"
+  confirmText="Descargar"
+  (close)="closeQrModal()"
+  (cancel)="closeQrModal()"
+  (confirm)="confirmDownloadQr()"
+>
+  <div class="space-y-4">
+    <p class="text-sm text-neutral-600">
+      Puedes agregar un texto personalizado al código QR. Por ejemplo: "Mesa 5" o "Barra". Si no
+      deseas agregar texto, deja el campo vacío.
+    </p>
+
+    <div class="space-y-2">
+      <label for="qrText" class="text-sm font-medium text-neutral-700">
+        Texto personalizado (opcional)
+      </label>
+      <input
+        id="qrText"
+        type="text"
+        class="w-full rounded-xl border border-black/10 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black/20"
+        placeholder="Ejemplo: Mesa 5"
+        [value]="qrCustomText()"
+        (input)="updateQrText($event)"
+        maxlength="50"
+      />
+      <p class="text-xs text-neutral-500">Máximo 50 caracteres</p>
+    </div>
+
+    @if (qrCustomText()) {
+    <div class="bg-blue-50 border border-blue-200 rounded-xl p-3">
+      <p class="text-sm text-blue-800">
+        <span class="font-medium">Vista previa:</span> El QR incluirá el texto "{{
+          qrCustomText()
+        }}"
+      </p>
+    </div>
+    }
+  </div>
+</app-modal>

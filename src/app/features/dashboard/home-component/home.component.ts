@@ -17,6 +17,7 @@ import { OrgService } from '../../../core/services/org.service';
 import { Branch } from '../../../core/services/types/branches.types';
 import { Order } from '../../../core/services/types/orders.type';
 import { todayYYYYMMDD } from '../../../shared/utils/date.utils';
+import { ModalComponent } from '../../../shared/components/modal/modal';
 
 interface MetricCard {
   label: string;
@@ -26,7 +27,7 @@ interface MetricCard {
 
 @Component({
   selector: 'app-home',
-  imports: [CommonModule, LucideAngularModule],
+  imports: [CommonModule, LucideAngularModule, ModalComponent],
   templateUrl: './home.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -40,6 +41,8 @@ export class HomeComponent {
   protected readonly loadingToday = signal<boolean>(false);
   protected readonly generatingQr = signal<boolean>(false);
   protected readonly downloadingQr = signal<boolean>(false);
+  protected readonly showQrModal = signal<boolean>(false);
+  protected readonly qrCustomText = signal<string>('');
 
   private readonly todayCount = signal<number>(0);
   private readonly avgInteractions = signal<number>(0);
@@ -174,16 +177,94 @@ export class HomeComponent {
 
     if (!url || !branch) return;
 
+    // Abrir modal para personalizar el QR
+    this.showQrModal.set(true);
+  }
+
+  protected closeQrModal(): void {
+    this.showQrModal.set(false);
+    this.qrCustomText.set('');
+  }
+
+  protected updateQrText(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.qrCustomText.set(input.value);
+  }
+
+  protected async confirmDownloadQr(): Promise<void> {
+    const url = this.branchQrUrl();
+    const branch = this.orgService.selectedBranch();
+    const customText = this.qrCustomText().trim();
+
+    if (!url || !branch) return;
+
     this.downloadingQr.set(true);
+    this.closeQrModal();
 
     try {
-      await this.downloadQrDirectly(url, branch);
+      if (customText) {
+        await this.downloadQrWithText(url, branch, customText);
+      } else {
+        await this.downloadQrDirectly(url, branch);
+      }
       this.toastrService.success('Descarga iniciada');
     } catch {
       this.handleDownloadFallback(url);
     } finally {
       this.downloadingQr.set(false);
     }
+  }
+
+  private async downloadQrWithText(url: string, branch: Branch, text: string): Promise<void> {
+    const response = await fetch(url, { mode: 'cors' });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+    const blob = await response.blob();
+    const imageUrl = URL.createObjectURL(blob);
+
+    // Crear canvas para combinar QR + texto
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    if (!ctx) throw new Error('Canvas not supported');
+
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+
+    await new Promise<void>((resolve, reject) => {
+      img.onload = () => resolve();
+      img.onerror = () => reject(new Error('Image load failed'));
+      img.src = imageUrl;
+    });
+
+    // Configurar tamaño del canvas (texto + QR + padding)
+    const padding = 40;
+    const textHeight = 80;
+    canvas.width = img.width + padding * 2;
+    canvas.height = img.height + padding * 2 + textHeight;
+
+    // Fondo blanco
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Dibujar texto en la parte superior (más centrado)
+    ctx.fillStyle = '#000000';
+    ctx.font = 'bold 24px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(text, canvas.width / 2, textHeight / 2 + padding);
+
+    // Dibujar QR debajo del texto
+    ctx.drawImage(img, padding, textHeight + padding);
+
+    // Convertir canvas a blob y descargar
+    canvas.toBlob((finalBlob) => {
+      if (finalBlob) {
+        const filename = this.generateQrFilename(branch, finalBlob);
+        this.triggerDownload(finalBlob, filename);
+      }
+    }, 'image/png');
+
+    URL.revokeObjectURL(imageUrl);
   }
 
   private async downloadQrDirectly(url: string, branch: Branch): Promise<void> {
