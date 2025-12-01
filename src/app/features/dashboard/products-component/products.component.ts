@@ -295,7 +295,7 @@ export class ProductsComponent {
       )
       .subscribe(() => {
         input.value = '';
-        this.toastrService.success('Sucursales cargadas correctamente');
+        this.toastrService.success('Productos cargados correctamente');
         this.paginationState.resetToFirstPage();
         this.reload();
       });
