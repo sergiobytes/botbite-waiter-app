@@ -224,10 +224,10 @@ export class MenuItemsComponent {
     if (!mid || !rid) {
       this.menusService.menuItems.set([]);
       this.menusService.totalMenuItems.set(0);
+      this.stableTotal.set(0);
       return;
     }
 
-    this.stableTotal.set(this.menusService.totalMenuItems());
     this.loading.set(true);
 
     const params = {
@@ -244,7 +244,17 @@ export class MenuItemsComponent {
         limit: 1000,
       }),
       this.categoryService.list({ limit: 100 }),
-    ]).subscribe();
+    ]).subscribe({
+      next: () => {
+        // Actualizar stableTotal después de recibir los datos
+        this.stableTotal.set(this.menusService.totalMenuItems());
+        this.loading.set(false);
+      },
+      error: (err) => {
+        console.error('Error fetching menu items:', err);
+        this.loading.set(false);
+      },
+    });
   }
 
   nextPage = () => this.paginationState.nextPage();
