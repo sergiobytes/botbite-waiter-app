@@ -77,6 +77,9 @@ export class HomeComponent {
         return;
       }
 
+      // Resetear métricas antes de cargar nuevos datos al cambiar de sucursal
+      this.resetMetrics();
+
       this.fetchToday(branchId);
       this.availableMessages.set(this.orgService.selectedBranch()?.availableMessages ?? 0);
       this.branchQrUrl.set(this.orgService.selectedBranch()?.qrUrl ?? '');
