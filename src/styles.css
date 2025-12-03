@@ -2,6 +2,10 @@
 @import 'ngx-toastr/toastr';
 @plugin '@midudev/tailwind-animations';
 
+@theme {
+  --font-sans: 'Inter', sans-serif;
+}
+
 /* Toast customization */
 .toast-container .toast-success {
   background-color: #10b981;
