@@ -47,6 +47,7 @@
     <table class="w-full text-sm min-w-[600px]">
       <thead class="bg-neutral-50 text-neutral-600">
         <tr>
+          <th class="text-left font-medium px-4 py-3"></th>
           <th class="text-left font-medium px-4 py-3">Producto</th>
           <th class="text-left font-medium px-4 py-3">Categoria</th>
           <th class="text-left font-medium px-4 py-3">Estado</th>
@@ -57,6 +58,13 @@
       <tbody>
         @for(menuItem of menuItems(); track menuItem.id) {
         <tr class="border-t border-black/10 animate-fade-in animate-duration-300">
+          <td class="px-4 py-3 items-center flex justify-center">
+            @if(menuItem.shouldRecommend) {
+            <lucide-icon [img]="iconsService.favorite" size="16" color="red" />
+            } @else {
+            <span class="text-neutral-400">---</span>
+            }
+          </td>
           <td class="px-4 py-3">{{ menuItem.product.name }}</td>
           <td class="px-4 py-3">{{ menuItem.category.name }}</td>
           <td class="px-4 py-3 flex">
@@ -81,6 +89,20 @@
           <td class="px-4 py-3 text-right">{{ menuItem.price | currency : 'USD' }}</td>
           <td class="px-4 py-3">
             <div class="flex items-center gap-2 justify-end">
+              <!-- Recomendar -->
+              <button
+                class="px-3 py-1 border border-pink-200 bg-pink-100 text-pink-800 rounded-lg hover:bg-pink-50 transition-all hover:animate-scale"
+                (click)="toggleRecommend(menuItem)"
+                [attr.aria-label]="'Recomendar ' + menuItem.product.name"
+              >
+                <div class="flex items-center gap-2">
+                  <lucide-icon
+                    [img]="menuItem.shouldRecommend ? iconsService.dislike : iconsService.favorite"
+                    size="15"
+                    color="purple"
+                  ></lucide-icon>
+                </div>
+              </button>
               <!-- Editar -->
               <button
                 class="px-3 py-1 border border-yellow-200 bg-yellow-100 text-yellow-800 rounded-lg hover:bg-yellow-50 transition-all hover:animate-scale"

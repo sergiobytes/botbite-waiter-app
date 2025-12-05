@@ -67,6 +67,7 @@ export class MenuItemsComponent {
       isActive: true,
     },
     price: 0,
+    shouldRecommend: false,
     isActive: true,
   });
 
@@ -74,6 +75,7 @@ export class MenuItemsComponent {
   protected readonly selectedCategoryId = signal<string>('');
   protected readonly productName = signal<string>('');
   protected readonly productPrice = signal<number>(0);
+  protected readonly productShouldRecommend = signal<boolean>(false);
   protected readonly productSearchTerm = signal<string>('');
   protected readonly saving = signal(false);
   protected readonly editingItemId = signal<string | null>(null);
@@ -286,6 +288,7 @@ export class MenuItemsComponent {
     this.selectedProductIds.set([]);
     this.selectedCategoryId.set('');
     this.productPrice.set(0);
+    this.productShouldRecommend.set(false);
     this.productSearchTerm.set('');
     this.editingItemId.set(null);
     this.showModal.set(true);
@@ -297,6 +300,7 @@ export class MenuItemsComponent {
     this.selectedCategoryId.set(menuItem.category.id.toString());
     this.productName.set(menuItem.product.name);
     this.productPrice.set(menuItem.price);
+    this.productShouldRecommend.set(menuItem.shouldRecommend);
     this.selectedProductIds.set([]);
     this.productSearchTerm.set('');
     this.showModal.set(true);
@@ -308,6 +312,7 @@ export class MenuItemsComponent {
     this.selectedProductIds.set([]);
     this.selectedCategoryId.set('');
     this.productPrice.set(0);
+    this.productShouldRecommend.set(false);
     this.productSearchTerm.set('');
     this.editingItemId.set(null);
   }
@@ -439,6 +444,28 @@ export class MenuItemsComponent {
       },
       error: (err) => {
         console.error('Error toggling menu item:', err);
+        this.saving.set(false);
+      },
+    });
+  }
+
+  protected toggleRecommend(menuItem: MenuItem): void {
+    const mid = this.menuId();
+
+    if (!mid) return;
+
+    this.saving.set(true);
+
+    const updateDto: UpdateMenuItemDto = {
+      shouldRecommend: !menuItem.shouldRecommend,
+    };
+    this.menusService.updateMenuItem(mid, menuItem.id, updateDto).subscribe({
+      next: () => {
+        this.saving.set(false);
+        this.fetch();
+      },
+      error: (err) => {
+        console.error('Error toggling recommend status:', err);
         this.saving.set(false);
       },
     });

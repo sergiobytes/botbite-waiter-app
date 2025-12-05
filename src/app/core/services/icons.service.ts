@@ -31,6 +31,8 @@ import {
   FileUp,
   FileDown,
   CircleAlert,
+  Heart,
+  HeartOff,
 } from 'lucide-angular';
 
 @Injectable({
@@ -68,4 +70,6 @@ export class IconsService {
   readonly uploadFile = FileUp;
   readonly downloadFile = FileDown;
   readonly alertCircle = CircleAlert;
+  readonly favorite = Heart;
+  readonly dislike = HeartOff;
 }

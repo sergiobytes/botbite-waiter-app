@@ -43,5 +43,6 @@ export interface MenuItemForm {
   product: ProductForm[];
   category: CategoryForm;
   price: number;
+  shouldRecommend: boolean;
   isActive: boolean;
 }

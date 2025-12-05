@@ -16,6 +16,7 @@ export interface MenuItem {
   category: Category;
   product: Product;
   isActive: boolean;
+  shouldRecommend: boolean;
   createdAt: Date | string;
   updatedAt: Date | string;
 }
@@ -47,10 +48,12 @@ export interface CreateMenuItemDto {
   categoryId: number;
   price: number;
   isActive?: boolean;
+  shouldRecommend?: boolean;
 }
 
 export interface UpdateMenuItemDto {
   categoryId?: number;
   price?: number;
   isActive?: boolean;
+  shouldRecommend?: boolean;
 }
