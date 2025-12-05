@@ -278,6 +278,17 @@
           maxlength="30"
         />
       </div>
+      <div class="md:col-span-2">
+        <label for="surveyUrl" class="text-sm font-medium">URL Encuesta</label>
+        <input
+          id="surveyUrl"
+          type="text"
+          class="w-full rounded-xl border border-black/10 px-3 py-2"
+          [value]="form().surveyUrl"
+          (input)="updateForm('surveyUrl', $event)"
+          maxlength="30"
+        />
+      </div>
 
       @if (!isFormValid() && (form().name || form().address)) {
       <p class="md:col-span-2 text-sm text-red-600">Nombre y dirección son obligatorios</p>

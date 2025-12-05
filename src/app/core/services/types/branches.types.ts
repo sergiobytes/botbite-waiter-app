@@ -7,6 +7,7 @@ export interface Branch {
   phoneNumberAssistant?: string | null;
   phoneNumberReception?: string | null;
   qrUrl?: string | null;
+  surveyUrl?: string;
   availableMessages: number;
   restaurantId: string;
   isActive: boolean;

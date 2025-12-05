@@ -22,6 +22,7 @@ export interface BranchForm {
   phoneNumberAssistant?: string;
   phoneNumberReception?: string;
   isActive: boolean;
+  surveyUrl: string;
 }
 
 export interface ProductForm {

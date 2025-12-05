@@ -65,6 +65,7 @@ export class BranchesComponent {
     address: '',
     phoneNumberAssistant: '',
     phoneNumberReception: '',
+    surveyUrl: '',
     isActive: true,
   });
 
@@ -203,6 +204,7 @@ export class BranchesComponent {
       phoneNumberAssistant: '',
       phoneNumberReception: '',
       isActive: true,
+      surveyUrl: '',
     });
   }
 
@@ -215,6 +217,7 @@ export class BranchesComponent {
       phoneNumberAssistant: branch.phoneNumberAssistant ?? '',
       phoneNumberReception: branch.phoneNumberReception ?? '',
       isActive: branch.isActive,
+      surveyUrl: branch.surveyUrl ?? '',
     });
   }
 
@@ -226,6 +229,7 @@ export class BranchesComponent {
       phoneNumberAssistant: '',
       phoneNumberReception: '',
       isActive: true,
+      surveyUrl: '',
     });
   }
 
@@ -245,6 +249,7 @@ export class BranchesComponent {
       address: data.address.trim(),
       phoneNumberAssistant: data.phoneNumberAssistant?.trim() || null,
       phoneNumberReception: data.phoneNumberReception?.trim() || null,
+      surveyUrl: data.surveyUrl?.trim(),
     };
 
     const op =
