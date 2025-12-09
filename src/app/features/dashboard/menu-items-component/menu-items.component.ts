@@ -89,7 +89,9 @@ export class MenuItemsComponent {
     const menuProductIds = new Set(currentMenuItems.map((item) => item.product.id));
     const searchTerm = this.productSearchTerm().toLowerCase().trim();
 
-    let filtered = allProducts.filter((product) => !menuProductIds.has(product.id));
+    let filtered = allProducts.filter(
+      (product) => !menuProductIds.has(product.id) && product.isActive === true
+    );
 
     // Aplicar búsqueda si hay término
     if (searchTerm) {
