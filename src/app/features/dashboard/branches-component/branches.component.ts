@@ -249,7 +249,7 @@ export class BranchesComponent {
       address: data.address.trim(),
       phoneNumberAssistant: data.phoneNumberAssistant?.trim() || null,
       phoneNumberReception: data.phoneNumberReception?.trim() || null,
-      surveyUrl: data.surveyUrl?.trim(),
+      surveyUrl: data.surveyUrl?.trim() || null,
     };
 
     const op =
