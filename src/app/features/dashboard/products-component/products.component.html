@@ -5,7 +5,7 @@
       description="Administra los productos del restaurante seleccionado"
     />
 
-    <div class="flex items-center gap-2 self-start sm:self-auto">
+    <div class="flex items-center gap-4 self-start sm:self-auto">
       <button
         class="rounded-xl border border-green-200 bg-green-100 text-green-800 hover:bg-green-50 px-4 py-2 disabled:opacity-50 transition-all hover:animate-scale cursor-pointer"
         (click)="onDownloadTemplate()"
@@ -76,20 +76,20 @@
     class="rounded-2xl border border-black/10 overflow-hidden overflow-x-auto transition-opacity duration-200"
     [class.opacity-50]="loading()"
   >
-    <table class="w-full text-sm min-w-4xl">
+    <table class="w-full text-sm table-fixed">
       <thead class="bg-neutral-50 text-neutral-600">
         <tr>
-          <th class="text-left font-medium px-4 py-3">Imagen</th>
-          <th class="text-left font-medium px-4 py-3">Nombre</th>
-          <th class="text-left font-medium px-4 py-3">Descripción</th>
-          <th class="text-left font-medium px-4 py-3">Estado</th>
+          <th class="text-left font-medium px-4 py-3 w-20">Imagen</th>
+          <th class="text-left font-medium px-4 py-3 w-1/5">Nombre</th>
+          <th class="text-left font-medium px-4 py-3 w-2/5">Descripción</th>
+          <th class="text-left font-medium px-4 py-3 w-28">Estado</th>
           <th class="text-right font-medium px-4 py-3">Acciones</th>
         </tr>
       </thead>
       <tbody>
         @for(product of productsService.products(); track product.id){
         <tr class="border-t border-black/10">
-          <td class="px-4 py-3">
+          <td class="px-4 py-3 w-20">
             <button
               class="px-2 py-1 border border-purple-200 bg-purple-100 text-purple-800 rounded-lg hover:bg-purple-50 transition-all hover:animate-scale disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-purple-100 cursor-pointer"
               (click)="openImagePreview(product)"
@@ -99,9 +99,11 @@
               <lucide-icon [img]="iconsService.image" size="15" color="purple"></lucide-icon>
             </button>
           </td>
-          <td class="px-4 py-3">{{ product.name }}</td>
-          <td class="px-4 py-3">{{ product.description }}</td>
-          <td class="px-4 py-3 flex">
+          <td class="px-4 py-3 w-1/5 truncate" [title]="product.name">{{ product.name }}</td>
+          <td class="px-4 py-3 w-2/5 truncate" [title]="product.description || ''">
+            {{ product.description }}
+          </td>
+          <td class="px-4 py-3 w-28">
             <div
               class="flex items-center justify-center gap-2 rounded-full border text-xs px-2 py-0.5"
               [class]="
@@ -131,48 +133,48 @@
                 (change)="onImageSelected(product, $event)"
               />
               <button
-                class="px-2 py-1 border border-blue-200 bg-blue-100 text-blue-800 rounded-lg hover:bg-blue-50 transition-all hover:animate-scale cursor-pointer"
+                class="w-20 px-2 py-1 border border-blue-200 bg-blue-100 text-blue-800 rounded-lg hover:bg-blue-50 transition-all hover:animate-scale cursor-pointer"
                 (click)="imageInput.click()"
                 [attr.aria-label]="'Subir imagen de ' + product.name"
               >
-                <div class="flex items-center gap-2">
+                <div class="flex items-center justify-center gap-1">
                   <lucide-icon [img]="iconsService.upload" size="15" color="blue"></lucide-icon>
-                  <span>Foto</span>
+                  <span class="text-xs">Foto</span>
                 </div>
               </button>
 
               <button
-                class="px-3 py-1 border border-yellow-200 bg-yellow-100 text-yellow-800 rounded-lg hover:bg-yellow-50 transition-all hover:animate-scale cursor-pointer"
+                class="w-20 px-2 py-1 border border-yellow-200 bg-yellow-100 text-yellow-800 rounded-lg hover:bg-yellow-50 transition-all hover:animate-scale cursor-pointer"
                 (click)="openEdit(product)"
                 [attr.aria-label]="'Editar producto ' + product.name"
               >
-                <div class="flex items-center gap-2">
+                <div class="flex items-center justify-center gap-1">
                   <lucide-icon [img]="iconsService.edit" size="15" color="orange"></lucide-icon>
-                  <span>Editar</span>
+                  <span class="text-xs">Editar</span>
                 </div>
               </button>
 
               @if(product.isActive) {
               <button
-                class="px-3 py-1 border rounded-lg hover:bg-red-50 transition-all hover:animate-scale bg-red-100 text-red-800 border-red-200 cursor-pointer"
+                class="w-28 px-2 py-1 border rounded-lg hover:bg-red-50 transition-all hover:animate-scale bg-red-100 text-red-800 border-red-200 cursor-pointer"
                 (click)="confirmToggle(product, false)"
                 [attr.aria-label]="'Desactivar ' + product.name"
               >
-                <div class="flex items-center gap-2">
+                <div class="flex items-center justify-center gap-1">
                   <lucide-icon [img]="iconsService.disable" size="15" color="red"></lucide-icon>
-                  <span>Desactivar</span>
+                  <span class="text-xs">Desactivar</span>
                 </div>
               </button>
 
               } @else {
               <button
-                class="px-3 py-1 border rounded-lg hover:bg-green-50 transition-all hover:animate-scale bg-green-100 text-green-800 border-green-200 cursor-pointer"
+                class="w-28 px-2 py-1 border rounded-lg hover:bg-green-50 transition-all hover:animate-scale bg-green-100 text-green-800 border-green-200 cursor-pointer"
                 (click)="confirmToggle(product, true)"
                 [attr.aria-label]="'Activar ' + product.name"
               >
-                <div class="flex items-center gap-2">
+                <div class="flex items-center justify-center gap-1">
                   <lucide-icon [img]="iconsService.active" size="15" color="green"></lucide-icon>
-                  <span>Activar</span>
+                  <span class="text-xs">Activar</span>
                 </div>
               </button>
               }

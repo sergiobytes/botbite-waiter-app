@@ -39,19 +39,19 @@
   </div>
 
   <div class="rounded-2xl border border-black/10 overflow-hidden overflow-x-auto">
-    <table class="w-full text-sm min-w-[600px]">
+    <table class="w-full text-sm table-fixed min-w-[600px]">
       <thead class="bg-neutral-50 text-neutral-600">
         <tr>
-          <th class="text-left font-medium px-4 py-3">Nombre</th>
-          <th class="text-left font-medium px-4 py-3">Estado</th>
+          <th class="text-left font-medium px-4 py-3 w-2/5">Nombre</th>
+          <th class="text-left font-medium px-4 py-3 w-28">Estado</th>
           <th class="text-right font-medium px-4 py-3">Acciones</th>
         </tr>
       </thead>
       <tbody>
         @for(category of categories(); track category.id) {
         <tr class="border-t border-black/10 animate-fade-in animate-duration-300">
-          <td class="px-4 py-3">{{ category.name }}</td>
-          <td class="px-4 py-3 flex">
+          <td class="px-4 py-3 w-2/5 truncate" [title]="category.name">{{ category.name }}</td>
+          <td class="px-4 py-3 w-28">
             <div
               class="flex items-center justify-center gap-2 rounded-full border text-xs px-2 py-0.5"
               [class]="
@@ -74,24 +74,24 @@
           <td class="px-4 py-3">
             <div class="flex items-center gap-2 justify-end">
               <button
-                class="px-3 py-1 border border-yellow-200 bg-yellow-100 text-yellow-800 rounded-lg hover:bg-yellow-50 transition-all hover:animate-scale cursor-pointer"
+                class="w-20 px-2 py-1 border border-yellow-200 bg-yellow-100 text-yellow-800 rounded-lg hover:bg-yellow-50 transition-all hover:animate-scale cursor-pointer"
                 (click)="openEdit(category)"
                 [attr.aria-label]="'Editar categoría ' + category.name"
               >
-                <div class="flex items-center gap-2">
+                <div class="flex items-center justify-center gap-1">
                   <lucide-icon [img]="iconsService.edit" size="15" color="orange"></lucide-icon>
-                  <span>Editar</span>
+                  <span class="text-xs">Editar</span>
                 </div>
               </button>
               @if (category.isActive) {
               <button
-                class="px-3 py-1 border rounded-lg hover:bg-red-50 transition-all hover:animate-scale bg-red-100 text-red-800 border-red-200 cursor-pointer"
+                class="w-28 px-2 py-1 border rounded-lg hover:bg-red-50 transition-all hover:animate-scale bg-red-100 text-red-800 border-red-200 cursor-pointer"
                 (click)="confirmDisable(category)"
                 [attr.aria-label]="'Deshabilitar categoría ' + category.name"
               >
-                <div class="flex items-center gap-2">
+                <div class="flex items-center justify-center gap-1">
                   <lucide-icon [img]="iconsService.disable" size="15" color="red"></lucide-icon>
-                  <span>Deshabilitar</span>
+                  <span class="text-xs">Deshabilitar</span>
                 </div>
               </button>
               }
