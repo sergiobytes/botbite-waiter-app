@@ -5,6 +5,7 @@ export interface Product {
   name: string;
   description?: string | null;
   isActive: boolean;
+  imageUrl?: string | null;
   createdAt: Date | string;
   updatedAt: Date | string;
 }

@@ -60,6 +60,24 @@ export class ProductsService {
     return this.http.delete<Product>(`${this.apiUrl}/products/${restaurantId}/${productId}`, {});
   }
 
+  uploadProductImage(restaurantId: string, productId: string, file: File): Observable<ProductResponse> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    return this.http
+      .patch<ProductResponse>(
+        `${this.apiUrl}/products/picture/${restaurantId}/${productId}`,
+        formData
+      )
+      .pipe(
+        tap((response) => {
+          this.products.update((products) =>
+            products.map((p) => (p.id === response.product.id ? response.product : p))
+          );
+        })
+      );
+  }
+
   findAllProductsByRestaurant(
     restaurantId: string,
     params: {

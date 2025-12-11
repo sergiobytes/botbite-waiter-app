@@ -50,6 +50,7 @@ export class ProductsComponent {
   private confirmEnable = signal<boolean | null>(null);
   readonly target = signal<Product | null>(null);
   readonly filters = signal<{ isActive?: boolean }>({});
+  readonly imagePreview = signal<Product | null>(null);
 
   readonly form = signal<ProductForm>({
     name: '',
@@ -309,5 +310,51 @@ export class ProductsComponent {
   updateFormChecked<K extends keyof ProductForm>(key: K, ev: Event): void {
     const el = ev.target as HTMLInputElement;
     this.form.update((f) => ({ ...f, [key]: el.checked }));
+  }
+
+  onImageSelected(product: Product, ev: Event): void {
+    const input = ev.target as HTMLInputElement;
+    const file = input.files?.[0];
+
+    if (!file) return;
+
+    // Validar que sea una imagen
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
+    if (!allowedTypes.includes(file.type)) {
+      this.toastrService.error('Solo se permiten archivos JPEG, PNG, WebP y GIF');
+      input.value = '';
+      return;
+    }
+
+    // Validar tamaño máximo (5MB)
+    const maxSize = 5 * 1024 * 1024;
+    if (file.size > maxSize) {
+      this.toastrService.error('El archivo excede el tamaño máximo de 5MB');
+      input.value = '';
+      return;
+    }
+
+    this.productsService
+      .uploadProductImage(this.restaurantId()!, product.id, file)
+      .pipe(
+        catchError((e) => {
+          console.error('Error uploading image:', e);
+          this.toastrService.error('Error al subir la imagen');
+          return EMPTY;
+        })
+      )
+      .subscribe(() => {
+        input.value = '';
+        this.toastrService.success('Imagen subida correctamente');
+        this.reload();
+      });
+  }
+
+  openImagePreview(product: Product): void {
+    this.imagePreview.set(product);
+  }
+
+  closeImagePreview(): void {
+    this.imagePreview.set(null);
   }
 }

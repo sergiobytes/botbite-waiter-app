@@ -33,6 +33,7 @@ import {
   CircleAlert,
   Heart,
   HeartOff,
+  Image,
 } from 'lucide-angular';
 
 @Injectable({
@@ -72,4 +73,5 @@ export class IconsService {
   readonly alertCircle = CircleAlert;
   readonly favorite = Heart;
   readonly dislike = HeartOff;
+  readonly image = Image;
 }
