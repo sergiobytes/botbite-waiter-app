@@ -6,8 +6,8 @@
     role="navigation"
     aria-label="Menú principal"
   >
-    <div class="h-full flex flex-col">
-      <div class="px-5 py-4 border-b border-white/10">
+    <div class="h-full flex flex-col overflow-hidden">
+      <div class="px-5 py-4 border-b border-white/10 shrink-0">
         <h1 class="text-2xl font-semibold tracking-tight">BotBite</h1>
         <p class="text-white/60 text-xs mt-1">Panel de administración</p>
       </div>
@@ -29,7 +29,7 @@
         }
       </nav>
 
-      <div class="p-4 border-t border-white/10">
+      <div class="p-4 border-t border-white/10 shrink-0">
         <button
           (click)="logout()"
           class="w-full rounded-xl bg-white text-black py-3 hover:opacity-90 transition-all hover:animate-scale text-sm cursor-pointer"
