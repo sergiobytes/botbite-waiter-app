@@ -157,7 +157,7 @@
               }
 
               <button
-                class="w-20 px-2 py-1 border border-yellow-200 bg-yellow-100 text-yellow-800 rounded-lg hover:bg-yellow-50 transition-all hover:animate-scale cursor-pointer"
+                class="w-24 px-2 py-1 border border-yellow-200 bg-yellow-100 text-yellow-800 rounded-lg hover:bg-yellow-50 transition-all hover:animate-scale cursor-pointer"
                 (click)="openEdit(branch)"
                 [attr.aria-label]="'Editar sucursal ' + branch.name"
               >
@@ -181,7 +181,7 @@
 
               } @else {
               <button
-                class="w-20 px-2 py-1 border rounded-lg hover:bg-green-50 transition-all hover:animate-scale bg-green-100 text-green-800 border-green-200 cursor-pointer"
+                class="w-24 px-2 py-1 border rounded-lg hover:bg-green-50 transition-all hover:animate-scale bg-green-100 text-green-800 border-green-200 cursor-pointer"
                 (click)="confirmToggle(branch, true)"
                 [attr.aria-label]="'Activar ' + branch.name"
               >
