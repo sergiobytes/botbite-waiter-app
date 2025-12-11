@@ -4,7 +4,7 @@
 
     <div class="flex items-center gap-2 self-start sm:self-auto">
       <button
-        class="rounded-xl bg-black text-white px-4 py-2 hover:opacity-90 disabled:opacity-50 transition-all hover:animate-scale"
+        class="rounded-xl bg-black text-white px-4 py-2 hover:opacity-90 disabled:opacity-50 transition-all hover:animate-scale cursor-pointer"
         (click)="openCreate()"
         [disabled]="!branchId()"
         aria-label="Crear nuevo menú"
@@ -66,7 +66,7 @@
               } @else {
               <button
                 (click)="downloadPdf(menu)"
-                class="px-3 py-1 border border-blue-200 bg-blue-100 text-blue-800 rounded-lg hover:bg-blue-50 transition-all hover:animate-scale"
+                class="px-3 py-1 border border-blue-200 bg-blue-100 text-blue-800 rounded-lg hover:bg-blue-50 transition-all hover:animate-scale cursor-pointer"
                 [attr.aria-label]="'Descargar PDF del menú ' + menu.name"
               >
                 <div class="flex items-center gap-2">
@@ -112,7 +112,7 @@
                 (change)="onPdfSelected($event, menu.id)"
               />
               <button
-                class="px-3 py-1 border rounded-lg transition-all hover:animate-scale"
+                class="px-3 py-1 border rounded-lg transition-all hover:animate-scale cursor-pointer"
                 (click)="pdfInput.click()"
               >
                 <div class="flex items-center gap-2">
@@ -126,7 +126,7 @@
               </button>
               <!-- Ver items del menú -->
               <button
-                class="px-3 py-1 border border-blue-200 bg-blue-100 text-blue-800 rounded-lg hover:bg-blue-50 transition-all hover:animate-scale"
+                class="px-3 py-1 border border-blue-200 bg-blue-100 text-blue-800 rounded-lg hover:bg-blue-50 transition-all hover:animate-scale cursor-pointer"
                 (click)="viewProducts(menu)"
                 [attr.aria-label]="'Ver productos del menú ' + menu.name"
               >
@@ -137,7 +137,7 @@
               </button>
               <!-- Editar -->
               <button
-                class="px-3 py-1 border border-yellow-200 bg-yellow-100 text-yellow-800 rounded-lg hover:bg-yellow-50 transition-all hover:animate-scale"
+                class="px-3 py-1 border border-yellow-200 bg-yellow-100 text-yellow-800 rounded-lg hover:bg-yellow-50 transition-all hover:animate-scale cursor-pointer"
                 (click)="openEdit(menu)"
                 [attr.aria-label]="'Editar menú ' + menu.name"
               >
@@ -148,7 +148,7 @@
               </button>
               <!-- Desactivar/Activar -->
               <button
-                class="px-3 py-1 border rounded-lg transition-all hover:animate-scale"
+                class="px-3 py-1 border rounded-lg transition-all hover:animate-scale cursor-pointer"
                 [class]="
                   menu.isActive
                     ? 'bg-red-100 text-red-800 border-red-200 hover:bg-red-50'

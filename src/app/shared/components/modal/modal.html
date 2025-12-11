@@ -19,7 +19,7 @@
         type="button"
         (click)="cancel.emit()"
         [disabled]="loading()"
-        class="flex-1 rounded-xl border border-black/10 px-4 py-2 hover:bg-black/5 transition-all hover:animate-scale"
+        class="flex-1 rounded-xl border border-black/10 px-4 py-2 hover:bg-black/5 transition-all hover:animate-scale cursor-pointer"
         [class.opacity-50]="loading()"
       >
         {{ cancelText() }}
@@ -28,7 +28,7 @@
         type="button"
         (click)="confirm.emit()"
         [disabled]="loading() || confirmDisabled()"
-        class="flex-1 rounded-xl bg-black text-white px-4 py-2 hover:opacity-90 transition-all hover:animate-scale"
+        class="flex-1 rounded-xl bg-black text-white px-4 py-2 hover:opacity-90 transition-all hover:animate-scale cursor-pointer"
         [class.opacity-50]="loading() || confirmDisabled()"
       >
         {{ loading() ? loadingText() : confirmText() }}

@@ -5,7 +5,7 @@
     <div class="flex items-center gap-2 self-start sm:self-auto">
       <button
         (click)="openCreateUser()"
-        class="rounded-xl border border-black/10 px-4 py-2 hover:bg-black/5 transition-all hover:animate-scale"
+        class="rounded-xl border border-black/10 px-4 py-2 hover:bg-black/5 transition-all hover:animate-scale cursor-pointer"
         aria-label="Crear usuario"
       >
         <div class="flex items-center gap-2">
@@ -15,7 +15,7 @@
       </button>
       <button
         (click)="openCreateClient()"
-        class="rounded-xl bg-black text-white px-4 py-2 hover:opacity-90 transition-all hover:animate-scale"
+        class="rounded-xl bg-black text-white px-4 py-2 hover:opacity-90 transition-all hover:animate-scale cursor-pointer"
         aria-label="Crear cliente"
       >
         <div class="flex items-center gap-2">
@@ -102,7 +102,7 @@
             <div class="flex items-center gap-2 justify-end">
               @if (canActOn(row)) {
               <button
-                class="px-3 py-1 border border-black/10 rounded-lg hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed w-32 transition"
+                class="px-3 py-1 border border-black/10 rounded-lg hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed w-32 transition cursor-pointer"
                 [class]="
                   !row.isActive
                     ? 'bg-green-100 text-green-800 border-green-200'
@@ -126,7 +126,7 @@
               </button>
               @if (isSuper()) { @if (!hasRole(row, 'admin')) {
               <button
-                class="px-3 py-1 border border-blue-200 bg-blue-100 text-blue-800 rounded-lg hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                class="px-3 py-1 border border-blue-200 bg-blue-100 text-blue-800 rounded-lg hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                 (click)="confirmAdminRoleChange(row, 'add')"
                 [attr.aria-label]="'Hacer administrador a ' + row.email"
               >
@@ -137,7 +137,7 @@
               </button>
               } @else {
               <button
-                class="px-3 py-1 border border-orange-200 bg-orange-100 text-orange-800 rounded-lg hover:bg-yellow-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                class="px-3 py-1 border border-orange-200 bg-orange-100 text-orange-800 rounded-lg hover:bg-yellow-50 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                 (click)="confirmAdminRoleChange(row, 'remove')"
                 [attr.aria-label]="'Quitar rol de administrador a ' + row.email"
               >

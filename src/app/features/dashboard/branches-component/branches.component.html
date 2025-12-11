@@ -7,7 +7,7 @@
 
     <div class="flex item-center gap-2 self-start sm:self-auto">
       <button
-        class="rounded-xl border border-green-200 bg-green-100 text-green-800 hover:bg-green-50 px-4 py-2 disabled:opacity-50 transition-all hover:animate-scale"
+        class="rounded-xl border border-green-200 bg-green-100 text-green-800 hover:bg-green-50 px-4 py-2 disabled:opacity-50 transition-all hover:animate-scale cursor-pointer"
         (click)="onDownloadTemplate()"
         aria-label="Plantilla de carga masiva por CSV"
       >
@@ -24,7 +24,7 @@
         (change)="onCsvSelected($event)"
       />
       <button
-        class="rounded-xl border border-black/10 px-4 py-2 hover:bg-black/5 disabled:opacity-50 transition-all hover:animate-scale"
+        class="rounded-xl border border-black/10 px-4 py-2 hover:bg-black/5 disabled:opacity-50 transition-all hover:animate-scale cursor-pointer"
         (click)="csvInput.click()"
         [disabled]="!restaurantId()"
         aria-label="Carga masiva por CSV"
@@ -35,7 +35,7 @@
         </div>
       </button>
       <button
-        class="rounded-xl bg-black text-white px-4 py-2 hover:opacity-90 disabled:opacity-50 transition-all hover:animate-scale"
+        class="rounded-xl bg-black text-white px-4 py-2 hover:opacity-90 disabled:opacity-50 transition-all hover:animate-scale cursor-pointer"
         (click)="openCreate()"
         [disabled]="!restaurantId()"
         aria-label="Crear nueva sucursal"
@@ -135,7 +135,7 @@
             <div class="flex items-center gap-2 justify-end">
               @if(canAddMessages()) {
               <button
-                class="px-3 py-1 border border-black/10 rounded-lg hover:bg-black/5 transition-all hover:animate-scale"
+                class="px-3 py-1 border border-black/10 rounded-lg hover:bg-black/5 transition-all hover:animate-scale cursor-pointer"
                 (click)="openAddMessages(branch)"
                 [attr.aria-label]="'Agregar mensajes a ' + branch.name"
               >
@@ -146,7 +146,7 @@
               </button>
               } @if(!branch.qrUrl) {
               <button
-                class="px-3 py-1 border border-black/10 rounded-lg hover:bg-black/5 transition-all hover:animate-scale"
+                class="px-3 py-1 border border-black/10 rounded-lg hover:bg-black/5 transition-all hover:animate-scale cursor-pointer"
                 (click)="onGenerateQr(branch)"
                 [attr.aria-label]="'Generar QR de ' + branch.name"
               >
@@ -158,7 +158,7 @@
               }
 
               <button
-                class="px-3 py-1 border border-yellow-200 bg-yellow-100 text-yellow-800 rounded-lg hover:bg-yellow-50 transition-all hover:animate-scale"
+                class="px-3 py-1 border border-yellow-200 bg-yellow-100 text-yellow-800 rounded-lg hover:bg-yellow-50 transition-all hover:animate-scale cursor-pointer"
                 (click)="openEdit(branch)"
                 [attr.aria-label]="'Editar sucursal ' + branch.name"
               >
@@ -170,7 +170,7 @@
 
               @if(branch.isActive) {
               <button
-                class="px-3 py-1 border rounded-lg hover:bg-red-50 transition-all hover:animate-scale bg-red-100 text-red-800 border-red-200"
+                class="px-3 py-1 border rounded-lg hover:bg-red-50 transition-all hover:animate-scale bg-red-100 text-red-800 border-red-200 cursor-pointer"
                 (click)="confirmToggle(branch, false)"
                 [attr.aria-label]="'Desactivar ' + branch.name"
               >
@@ -182,7 +182,7 @@
 
               } @else {
               <button
-                class="px-3 py-1 border rounded-lg hover:bg-green-50 transition-all hover:animate-scale bg-green-100 text-green-800 border-green-200"
+                class="px-3 py-1 border rounded-lg hover:bg-green-50 transition-all hover:animate-scale bg-green-100 text-green-800 border-green-200 cursor-pointer"
                 (click)="confirmToggle(branch, true)"
                 [attr.aria-label]="'Activar ' + branch.name"
               >

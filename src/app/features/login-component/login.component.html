@@ -2,7 +2,7 @@
   <div class="hidden md:block bg-black text-white text-center">
     <div class="h-full flex items-center justify-center p-12">
       <div class="max-w-md">
-        <img src="/assets/logo.png" class="invert scale-75" />
+        <img src="/assets/logo.png" class="invert scale-75 animate-zoom-in" />
         <!-- <h1 class="text-4xl font-semibold tracking-tight">BotBite</h1> -->
         <p class="text-white/70 text-xl font-semibold tracking-tight mt-4">
           Panel de administración
@@ -45,13 +45,9 @@
         <button
           type="submit"
           [disabled]="form.invalid || loading()"
-          class="w-full rounded-xl bg-black text-white py-3 disabled:opacity-50 transition-all hover:opacity-90 hover:animate-scale"
+          class="w-full rounded-xl bg-black text-white py-3 disabled:opacity-50 transition-all hover:opacity-90 hover:animate-scale cursor-pointer"
         >
-          @if (!loading()) {
-          <span>Entrar</span>
-          } @else {
-          <span>Procesando...</span>
-          }
+          <span>{{ !loading() ? 'Entrar' : 'Procesando...' }}</span>
         </button>
       </form>
 

@@ -24,7 +24,7 @@
         class="w-40 h-40 md:w-48 md:h-48 object-contain border border-black/10 rounded-xl shadow-sm animate-zoom-in animate-duration-400"
       />
       <button
-        class="rounded-xl border border-black/10 px-4 py-2 bg-white text-black hover:bg-black/5 disabled:opacity-50 transition-all hover:animate-scale text-sm"
+        class="rounded-xl border border-black/10 px-4 py-2 bg-white text-black hover:bg-black/5 disabled:opacity-50 transition-all hover:animate-scale text-sm cursor-pointer"
         (click)="downloadBranchQr()"
         [disabled]="downloadingQr()"
         [attr.aria-label]="downloadingQr() ? 'Descargando QR' : 'Descargar código QR'"

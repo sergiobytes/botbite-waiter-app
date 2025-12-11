@@ -3,7 +3,7 @@
     <shared-title title="Categorías" description="Administra las categorías de los productos" />
 
     <button
-      class="rounded-xl bg-black text-white px-4 py-2 hover:opacity-90 disabled:opacity-50 self-start sm:self-auto transition-all hover:animate-scale"
+      class="rounded-xl bg-black text-white px-4 py-2 hover:opacity-90 disabled:opacity-50 self-start sm:self-auto transition-all hover:animate-scale cursor-pointer"
       (click)="openCreate()"
       aria-label="Crear nueva categoría"
     >
@@ -74,7 +74,7 @@
           <td class="px-4 py-3">
             <div class="flex items-center gap-2 justify-end">
               <button
-                class="px-3 py-1 border border-yellow-200 bg-yellow-100 text-yellow-800 rounded-lg hover:bg-yellow-50 transition-all hover:animate-scale"
+                class="px-3 py-1 border border-yellow-200 bg-yellow-100 text-yellow-800 rounded-lg hover:bg-yellow-50 transition-all hover:animate-scale cursor-pointer"
                 (click)="openEdit(category)"
                 [attr.aria-label]="'Editar categoría ' + category.name"
               >
@@ -85,7 +85,7 @@
               </button>
               @if (category.isActive) {
               <button
-                class="px-3 py-1 border rounded-lg hover:bg-red-50 transition-all hover:animate-scale bg-red-100 text-red-800 border-red-200"
+                class="px-3 py-1 border rounded-lg hover:bg-red-50 transition-all hover:animate-scale bg-red-100 text-red-800 border-red-200 cursor-pointer"
                 (click)="confirmDisable(category)"
                 [attr.aria-label]="'Deshabilitar categoría ' + category.name"
               >
