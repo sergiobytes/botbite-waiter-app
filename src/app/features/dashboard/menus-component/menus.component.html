@@ -42,7 +42,7 @@
   </div>
 
   <div class="rounded-2xl border border-black/10 overflow-hidden overflow-x-auto">
-    <table class="w-full text-sm table-fixed">
+    <table class="w-full text-sm table-fixed min-w-[800px]">
       <thead class="bg-neutral-50 text-neutral-600">
         <tr>
           <th class="text-left font-medium px-4 py-3 w-1/5">Nombre</th>
@@ -108,7 +108,7 @@
                 (change)="onPdfSelected($event, menu.id)"
               />
               <button
-                class="w-28 px-2 py-1 border rounded-lg transition-all hover:animate-scale cursor-pointer"
+                class="w-12 md:w-28 px-2 py-1 border rounded-lg transition-all hover:animate-scale cursor-pointer"
                 (click)="pdfInput.click()"
               >
                 <div class="flex items-center justify-center gap-1">
@@ -117,34 +117,34 @@
                     size="15"
                     color="green"
                   ></lucide-icon>
-                  <span class="text-xs"> Cargar menú </span>
+                  <span class="text-xs hidden md:inline"> Cargar menú </span>
                 </div>
               </button>
               <!-- Ver items del menú -->
               <button
-                class="w-24 px-2 py-1 border border-blue-200 bg-blue-100 text-blue-800 rounded-lg hover:bg-blue-50 transition-all hover:animate-scale cursor-pointer"
+                class="w-12 md:w-24 px-2 py-1 border border-blue-200 bg-blue-100 text-blue-800 rounded-lg hover:bg-blue-50 transition-all hover:animate-scale cursor-pointer"
                 (click)="viewProducts(menu)"
                 [attr.aria-label]="'Ver productos del menú ' + menu.name"
               >
                 <div class="flex items-center justify-center gap-1">
                   <lucide-icon [img]="iconsService.eye" size="15" color="blue"></lucide-icon>
-                  <span class="text-xs">Productos</span>
+                  <span class="text-xs hidden md:inline">Productos</span>
                 </div>
               </button>
               <!-- Editar -->
               <button
-                class="w-20 px-2 py-1 border border-yellow-200 bg-yellow-100 text-yellow-800 rounded-lg hover:bg-yellow-50 transition-all hover:animate-scale cursor-pointer"
+                class="w-12 md:w-20 px-2 py-1 border border-yellow-200 bg-yellow-100 text-yellow-800 rounded-lg hover:bg-yellow-50 transition-all hover:animate-scale cursor-pointer"
                 (click)="openEdit(menu)"
                 [attr.aria-label]="'Editar menú ' + menu.name"
               >
                 <div class="flex items-center justify-center gap-1">
                   <lucide-icon [img]="iconsService.edit" size="15" color="orange"></lucide-icon>
-                  <span class="text-xs">Editar</span>
+                  <span class="text-xs hidden md:inline">Editar</span>
                 </div>
               </button>
               <!-- Desactivar/Activar -->
               <button
-                class="w-24 px-2 py-1 border rounded-lg transition-all hover:animate-scale cursor-pointer"
+                class="w-12 md:w-24 px-2 py-1 border rounded-lg transition-all hover:animate-scale cursor-pointer"
                 [class]="
                   menu.isActive
                     ? 'bg-red-100 text-red-800 border-red-200 hover:bg-red-50'
@@ -159,7 +159,7 @@
                     size="15"
                     [color]="menu.isActive ? 'red' : 'green'"
                   ></lucide-icon>
-                  <span class="text-xs">{{ menu.isActive ? 'Desactivar' : 'Activar' }}</span>
+                  <span class="text-xs hidden md:inline">{{ menu.isActive ? 'Desactivar' : 'Activar' }}</span>
                 </div>
               </button>
             </div>
