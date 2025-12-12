@@ -1,21 +1,21 @@
 <div class="min-h-screen bg-linear-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
   @if (loading()) {
-  <div class="text-center">
-    <div class="animate-spin rounded-full h-16 w-16 border-b-4 border-black mx-auto"></div>
+  <div class="text-center" role="status" aria-live="polite">
+    <div class="animate-spin rounded-full h-16 w-16 border-b-4 border-black mx-auto" aria-hidden="true"></div>
     <p class="mt-4 text-gray-600 font-medium">Cargando menú...</p>
   </div>
   } @else if (error()) {
-  <div class="max-w-md mx-auto text-center bg-white rounded-2xl shadow-lg p-8">
-    <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+  <article class="max-w-md mx-auto text-center bg-white rounded-2xl shadow-lg p-8" role="alert">
+    <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4" aria-hidden="true">
       <lucide-icon [img]="iconsService.alertCircle" size="32" color="red"></lucide-icon>
     </div>
     <h1 class="text-2xl font-bold text-gray-900 mb-2">Error al cargar el menú</h1>
     <p class="text-gray-600">No se pudo encontrar el menú solicitado.</p>
-  </div>
+  </article>
   } @else {
-  <div class="w-full max-w-6xl bg-white rounded-2xl shadow-2xl overflow-hidden animate-fade-in">
+  <article class="w-full max-w-6xl bg-white rounded-2xl shadow-2xl overflow-hidden animate-fade-in">
     <!-- Header -->
-    <div class="bg-linear-to-r from-gray-900 to-gray-800 text-white p-6">
+    <header class="bg-linear-to-r from-gray-900 to-gray-800 text-white p-6">
       <div class="flex items-center justify-between">
         <div>
           <h1 class="text-2xl font-bold">{{ menuName() }}</h1>
@@ -24,31 +24,32 @@
         <button
           (click)="downloadPdf()"
           class="flex items-center gap-2 bg-white text-gray-900 px-4 py-2 rounded-lg hover:bg-gray-100 transition-all hover:scale-105 font-medium"
-          aria-label="Descargar PDF"
+          aria-label="Descargar menú en formato PDF"
         >
-          <lucide-icon [img]="iconsService.download" size="18" color="black"></lucide-icon>
+          <lucide-icon [img]="iconsService.download" size="18" color="black" aria-hidden="true"></lucide-icon>
           <span>Descargar</span>
         </button>
       </div>
-    </div>
+    </header>
 
     <!-- PDF Viewer -->
-    <div class="p-4 bg-gray-100">
+    <section class="p-4 bg-gray-100" aria-label="Visor de menú">
       <div class="bg-white rounded-lg shadow-inner overflow-hidden">
         @if (pdfLoadError()) {
-        <div class="flex flex-col items-center justify-center p-12 text-center">
-          <div class="w-20 h-20 bg-yellow-100 rounded-full flex items-center justify-center mb-4">
+        <div class="flex flex-col items-center justify-center p-12 text-center" role="alert">
+          <div class="w-20 h-20 bg-yellow-100 rounded-full flex items-center justify-center mb-4" aria-hidden="true">
             <lucide-icon [img]="iconsService.alertCircle" size="40" color="orange"></lucide-icon>
           </div>
-          <h3 class="text-xl font-bold text-gray-900 mb-2">No se pudo cargar el PDF</h3>
+          <h2 class="text-xl font-bold text-gray-900 mb-2">No se pudo cargar el PDF</h2>
           <p class="text-gray-600 mb-6 max-w-md">
             El archivo PDF no está disponible en este momento. Por favor, intenta descargarlo directamente.
           </p>
           <button
             (click)="downloadPdf()"
             class="flex items-center gap-2 bg-gray-900 text-white px-6 py-3 rounded-lg hover:bg-gray-800 transition-all hover:scale-105 font-medium"
+            aria-label="Descargar menú en formato PDF"
           >
-            <lucide-icon [img]="iconsService.download" size="18" color="white"></lucide-icon>
+            <lucide-icon [img]="iconsService.download" size="18" color="white" aria-hidden="true"></lucide-icon>
             <span>Descargar PDF</span>
           </button>
         </div>
@@ -62,18 +63,19 @@
           [autoresize]="true"
           style="width: 100%; height: calc(100vh - 200px);"
           (error)="onPdfError()"
+          aria-label="Visualizador de menú en PDF"
         ></pdf-viewer>
         }
       </div>
-    </div>
+    </section>
 
     <!-- Footer -->
-    <div class="bg-gray-50 px-6 py-4 text-center border-t border-gray-200">
+    <footer class="bg-gray-50 px-6 py-4 text-center border-t border-gray-200">
       <p class="text-sm text-gray-600">
         ¿Listo para ordenar?
         <span class="font-semibold text-gray-900">Contáctanos por WhatsApp</span>
       </p>
-    </div>
-  </div>
+    </footer>
+  </article>
   }
 </div>

@@ -6,21 +6,24 @@
   aria-modal="true"
   [attr.aria-labelledby]="ariaLabelId()"
 >
-  <div class="absolute inset-0 bg-black/40" (click)="handleOverlayClick()" aria-hidden="true"></div>
+  <div class="absolute inset-0 bg-black/40" (click)="handleOverlayClick()" aria-hidden="true" role="presentation"></div>
 
   <div [class]="containerClasses()" @scaleIn>
     <h2 [id]="ariaLabelId()" class="text-lg font-semibold mb-4">{{ title() }}</h2>
 
-    <ng-content />
+    <div role="document">
+      <ng-content />
+    </div>
 
     @if (showActions()) {
-    <div class="flex gap-6 mt-6">
+    <div class="flex gap-6 mt-6" role="group" aria-label="Acciones del modal">
       <button
         type="button"
         (click)="cancel.emit()"
         [disabled]="loading()"
         class="flex-1 rounded-xl border border-black/10 px-4 py-2 hover:bg-black/5 transition-all hover:animate-scale cursor-pointer"
         [class.opacity-50]="loading()"
+        [attr.aria-label]="'Cancelar: ' + cancelText()"
       >
         {{ cancelText() }}
       </button>
@@ -30,6 +33,7 @@
         [disabled]="loading() || confirmDisabled()"
         class="flex-1 rounded-xl bg-black text-white px-4 py-2 hover:opacity-90 transition-all hover:animate-scale cursor-pointer"
         [class.opacity-50]="loading() || confirmDisabled()"
+        [attr.aria-label]="loading() ? loadingText() : confirmText()"
       >
         {{ loading() ? loadingText() : confirmText() }}
       </button>

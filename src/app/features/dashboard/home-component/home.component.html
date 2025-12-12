@@ -4,10 +4,10 @@
   >
     <div class="text-center md:text-left md:flex-1">
       <div class="flex gap-2 items-center">
-        <lucide-icon [img]="iconsService.hand" size="30" color="black"></lucide-icon>
-        <h1 class="text-2xl sm:text-3xl font-semibold text-black tracking-tight mb-2">
+        <lucide-icon [img]="iconsService.hand" size="30" color="black" aria-hidden="true"></lucide-icon>
+        <h2 class="text-2xl sm:text-3xl font-semibold text-black tracking-tight mb-2">
           ¡Hola de nuevo!
-        </h1>
+        </h2>
       </div>
       <p class="text-neutral-600 max-w-2xl leading-relaxed text-sm sm:text-base">
         Bienvenido al panel de administración de
@@ -20,8 +20,9 @@
       @if (branchQrUrl(); as qrUrl) {
       <img
         [src]="qrUrl"
-        alt="Código QR de la sucursal {{ orgService.selectedBranch()?.name || 'actual' }}"
+        alt="Código QR para la sucursal {{ orgService.selectedBranch()?.name || 'actual' }}. Escanea para ver el menú digital."
         class="w-40 h-40 md:w-48 md:h-48 object-contain border border-black/10 rounded-xl shadow-sm animate-zoom-in animate-duration-400"
+        loading="lazy"
       />
       <button
         class="w-40 md:w-48 rounded-xl border border-black/10 px-4 py-2 bg-white text-black hover:bg-black/5 disabled:opacity-50 transition-all hover:animate-scale text-sm cursor-pointer"
@@ -33,7 +34,7 @@
           <span>
             {{ downloadingQr() ? 'Descargando...' : 'Descargar QR' }}
           </span>
-          <lucide-icon [img]="iconsService.download" size="18"></lucide-icon>
+          <lucide-icon [img]="iconsService.download" size="18" aria-hidden="true"></lucide-icon>
         </div>
       </button>
       } @else {

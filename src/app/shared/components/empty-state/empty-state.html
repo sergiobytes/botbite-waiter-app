@@ -1,15 +1,15 @@
 @if(loading()) {
 <tr>
-  <td [attr.colspan]="colspan()" class="px-4 py-8 text-center">
-    <div class="animate-pulse space-y-2">
-      <div class="h-4 bg-neutral-200 rounded w-3/4 mx-auto"></div>
-      <div class="h-4 bg-neutral-200 rounded w-1/2 mx-auto"></div>
+  <td [attr.colspan]="colspan()" class="px-4 py-8 text-center" role="status" aria-live="polite">
+    <div class="animate-pulse space-y-2" aria-label="Cargando contenido">
+      <div class="h-4 bg-neutral-200 rounded w-3/4 mx-auto" aria-hidden="true"></div>
+      <div class="h-4 bg-neutral-200 rounded w-1/2 mx-auto" aria-hidden="true"></div>
     </div>
   </td>
 </tr>
 } @else if(isEmpty()) {
 <tr>
-  <td [attr.colspan]="colspan()" class="px-4 py-8 text-center text-neutral-500">
+  <td [attr.colspan]="colspan()" class="px-4 py-8 text-center text-neutral-500" role="status">
     {{ message() }}
   </td>
 </tr>

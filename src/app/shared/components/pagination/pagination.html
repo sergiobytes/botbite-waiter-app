@@ -1,5 +1,5 @@
-<div class="flex flex-col md:flex-row items-center justify-between gap-3">
-  <div class="text-sm text-neutral-600 text-center md:text-left">
+<nav class="flex flex-col md:flex-row items-center justify-between gap-3" aria-label="Paginación">
+  <div class="text-sm text-neutral-600 text-center md:text-left" role="status" aria-live="polite">
     <span class="hidden md:inline">Mostrando </span>{{ pageFrom() }} - {{ pageTo() }} de {{ total() }}
   </div>
 
@@ -11,10 +11,10 @@
       class="rounded-xl border border-black/10 px-3 md:px-4 py-2 hover:bg-black/5 transition-all hover:animate-scale cursor-pointer"
       [class.opacity-50]="!canPrev()"
       [class.cursor-not-allowed]="!canPrev()"
-      aria-label="Página anterior"
+      aria-label="Ir a la página anterior"
     >
       <div class="flex items-center gap-2">
-        <lucide-icon [img]="iconsService.previous" size="15" color="black"></lucide-icon>
+        <lucide-icon [img]="iconsService.previous" size="15" color="black" aria-hidden="true"></lucide-icon>
         <span class="hidden md:inline">Anterior</span>
       </div>
     </button>
@@ -25,20 +25,22 @@
       class="rounded-xl border border-black/10 px-3 md:px-4 py-2 hover:bg-black/5 transition-all hover:animate-scale cursor-pointer"
       [class.opacity-50]="!canNext()"
       [class.cursor-not-allowed]="!canNext()"
-      aria-label="Página siguiente"
+      aria-label="Ir a la página siguiente"
     >
       <div class="flex items-center gap-2">
         <span class="hidden md:inline">Siguiente</span>
-        <lucide-icon [img]="iconsService.next" size="15" color="black"></lucide-icon>
+        <lucide-icon [img]="iconsService.next" size="15" color="black" aria-hidden="true"></lucide-icon>
       </div>
     </button>
 
     @if (showLimitSelector()) {
+    <label for="pageSizeSelect" class="sr-only">Elementos por página</label>
     <select
+      id="pageSizeSelect"
       [value]="currentLimit()"
       (change)="limitChange.emit($event)"
       class="rounded-xl border border-black/10 px-3 py-2"
-      aria-label="Elementos por página"
+      aria-label="Seleccionar número de elementos por página"
     >
       <option value="10">10</option>
       <option value="25">25</option>
@@ -47,4 +49,4 @@
     </select>
     }
   </div>
-</div>
+</nav>

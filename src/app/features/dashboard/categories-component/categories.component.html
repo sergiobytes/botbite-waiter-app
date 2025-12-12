@@ -9,7 +9,7 @@
         aria-label="Crear nueva categoría"
       >
         <div class="flex items-center justify-center gap-2">
-          <lucide-icon [img]="iconsService.add" size="15" color="white"></lucide-icon>
+          <lucide-icon [img]="iconsService.add" size="15" color="white" aria-hidden="true"></lucide-icon>
           <span>Nueva categoría</span>
         </div>
       </button>
@@ -19,8 +19,10 @@
   <div class="flex flex-col md:flex-row gap-3 items-stretch md:items-center">
     <div class="md:ml-auto flex flex-col md:flex-row items-stretch md:items-center gap-2 w-full md:w-auto">
       <div class="flex items-center gap-2">
-        <lucide-icon [img]="iconsService.search" size="15" color="black"></lucide-icon>
+        <label for="categoriesSearch" class="sr-only">Buscar categorías</label>
+        <lucide-icon [img]="iconsService.search" size="15" color="black" aria-hidden="true"></lucide-icon>
         <input
+          id="categoriesSearch"
           type="text"
           placeholder="Buscar..."
           class="flex-1 md:w-64 rounded-xl border border-black/10 px-3 py-2"
