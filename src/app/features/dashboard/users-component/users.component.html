@@ -2,13 +2,13 @@
   <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
     <shared-title title="Usuarios" description="Administra los usuarios del sistema" />
 
-    <div class="flex items-center gap-4 self-start sm:self-auto">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-3 self-start sm:self-auto w-full sm:w-auto">
       <button
         (click)="openCreateUser()"
         class="rounded-xl border border-black/10 px-4 py-2 hover:bg-black/5 transition-all hover:animate-scale cursor-pointer"
         aria-label="Crear usuario"
       >
-        <div class="flex items-center gap-2">
+        <div class="flex items-center justify-center gap-2">
           <lucide-icon [img]="iconsService.addUser" size="15" color="black"></lucide-icon>
           <span> Crear usuario </span>
         </div>
@@ -18,7 +18,7 @@
         class="rounded-xl bg-black text-white px-4 py-2 hover:opacity-90 transition-all hover:animate-scale cursor-pointer"
         aria-label="Crear cliente"
       >
-        <div class="flex items-center gap-2">
+        <div class="flex items-center justify-center gap-2">
           <lucide-icon [img]="iconsService.addUser" size="15" color="white"></lucide-icon>
           <span> Crear cliente </span>
         </div>

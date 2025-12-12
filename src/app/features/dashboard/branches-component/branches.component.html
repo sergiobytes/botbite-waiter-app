@@ -5,13 +5,13 @@
       description="Administra las sucursales del restaurante seleccionado"
     />
 
-    <div class="flex flex-wrap items-center gap-2 sm:gap-4 self-start sm:self-auto">
+    <div class="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-3 self-start sm:self-auto w-full sm:w-auto">
       <button
         class="rounded-xl border border-green-200 bg-green-100 text-green-800 hover:bg-green-50 px-3 sm:px-4 py-2 disabled:opacity-50 transition-all hover:animate-scale cursor-pointer"
         (click)="onDownloadTemplate()"
         aria-label="Plantilla de carga masiva por CSV"
       >
-        <div class="flex items-center gap-2">
+        <div class="flex items-center justify-center gap-2">
           <lucide-icon [img]="iconsService.download" size="15" color="green"></lucide-icon>
           <span class="text-sm sm:text-base">Plantilla CSV</span>
         </div>
@@ -29,7 +29,7 @@
         [disabled]="!restaurantId()"
         aria-label="Carga masiva por CSV"
       >
-        <div class="flex items-center gap-2">
+        <div class="flex items-center justify-center gap-2">
           <lucide-icon [img]="iconsService.upload" size="15" color="black"></lucide-icon>
           <span class="text-sm sm:text-base">Cargar masiva (CSV)</span>
         </div>
@@ -40,7 +40,7 @@
         [disabled]="!restaurantId()"
         aria-label="Crear nueva sucursal"
       >
-        <div class="flex items-center gap-2">
+        <div class="flex items-center justify-center gap-2">
           <lucide-icon [img]="iconsService.add" size="15" color="white"></lucide-icon>
           <span class="text-sm sm:text-base"> Nueva sucursal </span>
         </div>
