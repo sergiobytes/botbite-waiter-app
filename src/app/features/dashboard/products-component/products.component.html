@@ -135,48 +135,48 @@
                 (change)="onImageSelected(product, $event)"
               />
               <button
-                class="w-12 md:w-24 px-2 py-1 border border-blue-200 bg-blue-100 text-blue-800 rounded-lg hover:bg-blue-50 transition-all hover:animate-scale cursor-pointer"
+                class="w-12 lg:w-24 px-2 py-1 border border-blue-200 bg-blue-100 text-blue-800 rounded-lg hover:bg-blue-50 transition-all hover:animate-scale cursor-pointer"
                 (click)="imageInput.click()"
                 [attr.aria-label]="'Subir imagen de ' + product.name"
               >
                 <div class="flex items-center justify-center gap-1">
                   <lucide-icon [img]="iconsService.upload" size="15" color="blue"></lucide-icon>
-                  <span class="text-xs hidden md:inline">Foto</span>
+                  <span class="text-xs hidden lg:inline">Foto</span>
                 </div>
               </button>
 
               <button
-                class="w-12 md:w-24 px-2 py-1 border border-yellow-200 bg-yellow-100 text-yellow-800 rounded-lg hover:bg-yellow-50 transition-all hover:animate-scale cursor-pointer"
+                class="w-12 lg:w-24 px-2 py-1 border border-yellow-200 bg-yellow-100 text-yellow-800 rounded-lg hover:bg-yellow-50 transition-all hover:animate-scale cursor-pointer"
                 (click)="openEdit(product)"
                 [attr.aria-label]="'Editar producto ' + product.name"
               >
                 <div class="flex items-center justify-center gap-1">
                   <lucide-icon [img]="iconsService.edit" size="15" color="orange"></lucide-icon>
-                  <span class="text-xs hidden md:inline">Editar</span>
+                  <span class="text-xs hidden lg:inline">Editar</span>
                 </div>
               </button>
 
               @if(product.isActive) {
               <button
-                class="w-12 md:w-24 px-2 py-1 border rounded-lg hover:bg-red-50 transition-all hover:animate-scale bg-red-100 text-red-800 border-red-200 cursor-pointer"
+                class="w-12 lg:w-24 px-2 py-1 border rounded-lg hover:bg-red-50 transition-all hover:animate-scale bg-red-100 text-red-800 border-red-200 cursor-pointer"
                 (click)="confirmToggle(product, false)"
                 [attr.aria-label]="'Desactivar ' + product.name"
               >
                 <div class="flex items-center justify-center gap-1">
                   <lucide-icon [img]="iconsService.disable" size="15" color="red"></lucide-icon>
-                  <span class="text-xs hidden md:inline">Desactivar</span>
+                  <span class="text-xs hidden lg:inline">Desactivar</span>
                 </div>
               </button>
 
               } @else {
               <button
-                class="w-12 md:w-24 px-2 py-1 border rounded-lg hover:bg-green-50 transition-all hover:animate-scale bg-green-100 text-green-800 border-green-200 cursor-pointer"
+                class="w-12 lg:w-24 px-2 py-1 border rounded-lg hover:bg-green-50 transition-all hover:animate-scale bg-green-100 text-green-800 border-green-200 cursor-pointer"
                 (click)="confirmToggle(product, true)"
                 [attr.aria-label]="'Activar ' + product.name"
               >
                 <div class="flex items-center justify-center gap-1">
                   <lucide-icon [img]="iconsService.active" size="15" color="green"></lucide-icon>
-                  <span class="text-xs hidden md:inline">Activar</span>
+                  <span class="text-xs hidden lg:inline">Activar</span>
                 </div>
               </button>
               }
