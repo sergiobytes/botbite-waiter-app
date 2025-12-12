@@ -1,10 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../../core/services/auth.service';
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { catchError, finalize, of, switchMap } from 'rxjs';
+import { Meta, Title } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-login-component',
@@ -12,14 +13,27 @@ import { catchError, finalize, of, switchMap } from 'rxjs';
   templateUrl: './login.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit, OnDestroy {
   private readonly fb = inject(FormBuilder);
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
   private readonly toast = inject(ToastrService);
+  private readonly meta = inject(Meta);
+  private readonly title = inject(Title);
 
   protected readonly date = new Date();
   protected readonly loading = signal(false);
+
+  ngOnInit(): void {
+    // Evitar que la página de login se indexe en motores de búsqueda
+    this.meta.addTag({ name: 'robots', content: 'noindex, nofollow' });
+    this.title.setTitle('Iniciar Sesión - BotBite');
+  }
+
+  ngOnDestroy(): void {
+    // Remover el meta tag cuando se salga de la página
+    this.meta.removeTag('name="robots"');
+  }
 
   protected readonly form = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
