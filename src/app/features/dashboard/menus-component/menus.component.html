@@ -19,17 +19,12 @@
 
   <div class="flex flex-col md:flex-row gap-3 items-stretch md:items-center">
     <div class="md:ml-auto flex flex-col md:flex-row items-stretch md:items-center gap-2 w-full md:w-auto">
-      <div class="relative w-full md:w-64">
-        <lucide-icon
-          [img]="iconsService.search"
-          size="15"
-          color="black"
-          class="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
-        ></lucide-icon>
+      <div class="flex items-center gap-2">
+        <lucide-icon [img]="iconsService.search" size="15" color="black"></lucide-icon>
         <input
           type="text"
           placeholder="Buscar..."
-          class="w-full rounded-xl border border-black/10 pl-9 pr-3 py-2"
+          class="flex-1 md:w-64 rounded-xl border border-black/10 px-3 py-2"
           [value]="searchTerm()"
           (input)="updateFilterSearch($event)"
           aria-label="Buscar menús"
