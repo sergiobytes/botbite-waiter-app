@@ -1,20 +1,18 @@
 <div class="space-y-6">
-  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+  <div class="flex flex-col gap-4">
     <shared-title title="Menús" description="Administra la sucursal seleccionada" />
 
-    <div class="flex items-center gap-2 self-start sm:self-auto">
-      <button
-        class="rounded-xl bg-black text-white px-4 py-2 hover:opacity-90 disabled:opacity-50 transition-all hover:animate-scale cursor-pointer"
-        (click)="openCreate()"
-        [disabled]="!branchId()"
-        aria-label="Crear nuevo menú"
-      >
-        <div class="flex items-center gap-2">
-          <lucide-icon [img]="iconsService.add" size="15" color="white"></lucide-icon>
-          <span> Nuevo menú </span>
-        </div>
-      </button>
-    </div>
+    <button
+      class="rounded-xl bg-black text-white px-4 py-2 hover:opacity-90 disabled:opacity-50 transition-all hover:animate-scale cursor-pointer w-full"
+      (click)="openCreate()"
+      [disabled]="!branchId()"
+      aria-label="Crear nuevo menú"
+    >
+      <div class="flex items-center justify-center gap-2">
+        <lucide-icon [img]="iconsService.add" size="15" color="white"></lucide-icon>
+        <span> Nuevo menú </span>
+      </div>
+    </button>
   </div>
 
   <div class="flex flex-col md:flex-row gap-3 items-stretch md:items-center">

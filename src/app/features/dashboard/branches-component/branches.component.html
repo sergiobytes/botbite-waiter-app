@@ -1,13 +1,13 @@
 <div class="space-y-6">
-  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+  <div class="flex flex-col gap-4">
     <shared-title
       title="Sucursales"
       description="Administra las sucursales del restaurante seleccionado"
     />
 
-    <div class="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-3 self-start sm:self-auto w-full sm:w-auto">
+    <div class="flex flex-col md:flex-row flex-wrap gap-3 md:justify-end">
       <button
-        class="rounded-xl border border-green-200 bg-green-100 text-green-800 hover:bg-green-50 px-3 sm:px-4 py-2 disabled:opacity-50 transition-all hover:animate-scale cursor-pointer"
+        class="rounded-xl border border-green-200 bg-green-100 text-green-800 hover:bg-green-50 px-3 sm:px-4 py-2 disabled:opacity-50 transition-all hover:animate-scale cursor-pointer w-full md:w-auto"
         (click)="onDownloadTemplate()"
         aria-label="Plantilla de carga masiva por CSV"
       >
@@ -24,7 +24,7 @@
         (change)="onCsvSelected($event)"
       />
       <button
-        class="rounded-xl border border-black/10 px-3 sm:px-4 py-2 hover:bg-black/5 disabled:opacity-50 transition-all hover:animate-scale cursor-pointer"
+        class="rounded-xl border border-black/10 px-3 sm:px-4 py-2 hover:bg-black/5 disabled:opacity-50 transition-all hover:animate-scale cursor-pointer w-full md:w-auto"
         (click)="csvInput.click()"
         [disabled]="!restaurantId()"
         aria-label="Carga masiva por CSV"
@@ -35,7 +35,7 @@
         </div>
       </button>
       <button
-        class="rounded-xl bg-black text-white px-3 sm:px-4 py-2 hover:opacity-90 disabled:opacity-50 transition-all hover:animate-scale cursor-pointer"
+        class="rounded-xl bg-black text-white px-3 sm:px-4 py-2 hover:opacity-90 disabled:opacity-50 transition-all hover:animate-scale cursor-pointer w-full md:w-auto"
         (click)="openCreate()"
         [disabled]="!restaurantId()"
         aria-label="Crear nueva sucursal"

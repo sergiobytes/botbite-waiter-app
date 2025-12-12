@@ -1,17 +1,17 @@
 <div class="space-y-6">
-  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+  <div class="flex flex-col gap-4">
     <shared-title
       [title]="menuName()"
       description="Administración de productos relacionados al menú y sucursal seleccionada."
     />
 
     <button
-      class="rounded-xl bg-black text-white px-4 py-2 hover:opacity-90 disabled:opacity-50 self-start sm:self-auto transition-all hover:animate-scale cursor-pointer"
+      class="rounded-xl bg-black text-white px-4 py-2 hover:opacity-90 disabled:opacity-50 transition-all hover:animate-scale cursor-pointer w-full"
       (click)="openAddProductsModal()"
       [disabled]="!menuId()"
       aria-label="Agregar productos al menú"
     >
-      <div class="flex items-center gap-2">
+      <div class="flex items-center justify-center gap-2">
         <lucide-icon [img]="iconsService.add" size="15" color="white"></lucide-icon>
         <span>Agregar productos</span>
       </div>
