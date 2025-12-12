@@ -5,17 +5,19 @@
       description="Administración de productos relacionados al menú y sucursal seleccionada."
     />
 
-    <button
-      class="rounded-xl bg-black text-white px-4 py-2 hover:opacity-90 disabled:opacity-50 transition-all hover:animate-scale cursor-pointer w-full"
-      (click)="openAddProductsModal()"
-      [disabled]="!menuId()"
-      aria-label="Agregar productos al menú"
-    >
-      <div class="flex items-center justify-center gap-2">
-        <lucide-icon [img]="iconsService.add" size="15" color="white"></lucide-icon>
-        <span>Agregar productos</span>
-      </div>
-    </button>
+    <div class="flex md:justify-end">
+      <button
+        class="rounded-xl bg-black text-white px-4 py-2 hover:opacity-90 disabled:opacity-50 transition-all hover:animate-scale cursor-pointer w-full md:w-auto"
+        (click)="openAddProductsModal()"
+        [disabled]="!menuId()"
+        aria-label="Agregar productos al menú"
+      >
+        <div class="flex items-center justify-center gap-2">
+          <lucide-icon [img]="iconsService.add" size="15" color="white"></lucide-icon>
+          <span>Agregar productos</span>
+        </div>
+      </button>
+    </div>
   </div>
 
   <!-- Buscador -->
