@@ -49,7 +49,7 @@
     <table class="w-full text-sm table-fixed min-w-[600px]">
       <thead class="bg-neutral-50 text-neutral-600">
         <tr>
-          <th class="text-left font-medium px-4 py-3 w-12"></th>
+          <th class="text-center font-medium px-4 py-3 w-12"></th>
           <th class="text-left font-medium px-4 py-3 w-1/4">Producto</th>
           <th class="text-left font-medium px-4 py-3 w-1/6">Categoria</th>
           <th class="text-left font-medium px-4 py-3 w-28">Estado</th>
@@ -60,7 +60,7 @@
       <tbody>
         @for(menuItem of menuItems(); track menuItem.id) {
         <tr class="border-t border-black/10 animate-fade-in animate-duration-300">
-          <td class="px-4 py-3 items-center flex justify-center">
+          <td class="px-4 py-3 text-center">
             @if(menuItem.shouldRecommend) {
             <lucide-icon [img]="iconsService.favorite" size="16" color="red" />
             } @else {
@@ -107,18 +107,18 @@
               </button>
               <!-- Editar -->
               <button
-                class="w-12 md:w-20 px-2 py-1 border border-yellow-200 bg-yellow-100 text-yellow-800 rounded-lg hover:bg-yellow-50 transition-all hover:animate-scale cursor-pointer"
+                class="w-12 2xl:w-20 px-2 py-1 border border-yellow-200 bg-yellow-100 text-yellow-800 rounded-lg hover:bg-yellow-50 transition-all hover:animate-scale cursor-pointer"
                 (click)="openEdit(menuItem)"
                 [attr.aria-label]="'Editar ' + menuItem.product.name"
               >
                 <div class="flex items-center justify-center gap-1">
                   <lucide-icon [img]="iconsService.edit" size="15" color="orange"></lucide-icon>
-                  <span class="text-xs hidden md:inline">Editar</span>
+                  <span class="text-xs hidden 2xl:inline">Editar</span>
                 </div>
               </button>
               <!-- Desactivar/Activar -->
               <button
-                class="w-12 md:w-24 px-2 py-1 border rounded-lg transition-all hover:animate-scale cursor-pointer"
+                class="w-12 2xl:w-24 px-2 py-1 border rounded-lg transition-all hover:animate-scale cursor-pointer"
                 [class]="
                   menuItem.isActive
                     ? 'bg-red-100 text-red-800 border-red-200 hover:bg-red-50'
@@ -135,7 +135,7 @@
                     size="15"
                     [color]="menuItem.isActive ? 'red' : 'green'"
                   ></lucide-icon>
-                  <span class="text-xs hidden md:inline">{{ menuItem.isActive ? 'Desactivar' : 'Activar' }}</span>
+                  <span class="text-xs hidden 2xl:inline">{{ menuItem.isActive ? 'Desactivar' : 'Activar' }}</span>
                 </div>
               </button>
             </div>
