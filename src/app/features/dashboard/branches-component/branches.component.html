@@ -5,15 +5,15 @@
       description="Administra las sucursales del restaurante seleccionado"
     />
 
-    <div class="flex item-center gap-4 self-start sm:self-auto">
+    <div class="flex flex-wrap items-center gap-2 sm:gap-4 self-start sm:self-auto">
       <button
-        class="rounded-xl border border-green-200 bg-green-100 text-green-800 hover:bg-green-50 px-4 py-2 disabled:opacity-50 transition-all hover:animate-scale cursor-pointer"
+        class="rounded-xl border border-green-200 bg-green-100 text-green-800 hover:bg-green-50 px-3 sm:px-4 py-2 disabled:opacity-50 transition-all hover:animate-scale cursor-pointer"
         (click)="onDownloadTemplate()"
         aria-label="Plantilla de carga masiva por CSV"
       >
         <div class="flex items-center gap-2">
           <lucide-icon [img]="iconsService.download" size="15" color="green"></lucide-icon>
-          <span>Plantilla CSV</span>
+          <span class="text-sm sm:text-base">Plantilla CSV</span>
         </div>
       </button>
       <input
@@ -24,25 +24,25 @@
         (change)="onCsvSelected($event)"
       />
       <button
-        class="rounded-xl border border-black/10 px-4 py-2 hover:bg-black/5 disabled:opacity-50 transition-all hover:animate-scale cursor-pointer"
+        class="rounded-xl border border-black/10 px-3 sm:px-4 py-2 hover:bg-black/5 disabled:opacity-50 transition-all hover:animate-scale cursor-pointer"
         (click)="csvInput.click()"
         [disabled]="!restaurantId()"
         aria-label="Carga masiva por CSV"
       >
         <div class="flex items-center gap-2">
           <lucide-icon [img]="iconsService.upload" size="15" color="black"></lucide-icon>
-          <span>Cargar masiva (CSV)</span>
+          <span class="text-sm sm:text-base">Cargar masiva (CSV)</span>
         </div>
       </button>
       <button
-        class="rounded-xl bg-black text-white px-4 py-2 hover:opacity-90 disabled:opacity-50 transition-all hover:animate-scale cursor-pointer"
+        class="rounded-xl bg-black text-white px-3 sm:px-4 py-2 hover:opacity-90 disabled:opacity-50 transition-all hover:animate-scale cursor-pointer"
         (click)="openCreate()"
         [disabled]="!restaurantId()"
         aria-label="Crear nueva sucursal"
       >
         <div class="flex items-center gap-2">
           <lucide-icon [img]="iconsService.add" size="15" color="white"></lucide-icon>
-          <span> Nueva sucursal </span>
+          <span class="text-sm sm:text-base"> Nueva sucursal </span>
         </div>
       </button>
     </div>
