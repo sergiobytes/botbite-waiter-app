@@ -1,6 +1,6 @@
-<div class="flex items-center justify-between">
-  <div class="text-sm text-neutral-600">
-    Mostrando {{ pageFrom() }} - {{ pageTo() }} de {{ total() }}
+<div class="flex flex-col md:flex-row items-center justify-between gap-3">
+  <div class="text-sm text-neutral-600 text-center md:text-left">
+    <span class="hidden md:inline">Mostrando </span>{{ pageFrom() }} - {{ pageTo() }} de {{ total() }}
   </div>
 
   <div class="flex items-center gap-2">
@@ -8,27 +8,27 @@
       type="button"
       [disabled]="!canPrev()"
       (click)="previousPage.emit()"
-      class="rounded-xl border border-black/10 px-4 py-2 hover:bg-black/5 transition-all hover:animate-scale cursor-pointer"
+      class="rounded-xl border border-black/10 px-3 md:px-4 py-2 hover:bg-black/5 transition-all hover:animate-scale cursor-pointer"
       [class.opacity-50]="!canPrev()"
       [class.cursor-not-allowed]="!canPrev()"
       aria-label="Página anterior"
     >
       <div class="flex items-center gap-2">
         <lucide-icon [img]="iconsService.previous" size="15" color="black"></lucide-icon>
-        Anterior
+        <span class="hidden md:inline">Anterior</span>
       </div>
     </button>
     <button
       type="button"
       [disabled]="!canNext()"
       (click)="nextPage.emit()"
-      class="rounded-xl border border-black/10 px-4 py-2 hover:bg-black/5 transition-all hover:animate-scale cursor-pointer"
+      class="rounded-xl border border-black/10 px-3 md:px-4 py-2 hover:bg-black/5 transition-all hover:animate-scale cursor-pointer"
       [class.opacity-50]="!canNext()"
       [class.cursor-not-allowed]="!canNext()"
       aria-label="Página siguiente"
     >
       <div class="flex items-center gap-2">
-        Siguiente
+        <span class="hidden md:inline">Siguiente</span>
         <lucide-icon [img]="iconsService.next" size="15" color="black"></lucide-icon>
       </div>
     </button>
