@@ -83,7 +83,7 @@
           <td class="px-4 py-3">
             <div class="flex items-center gap-2 justify-end">
               <button
-                class="w-12 2xl:w-20 px-2 py-1 border border-yellow-200 bg-yellow-100 text-yellow-800 rounded-lg hover:bg-yellow-50 transition-all hover:animate-scale cursor-pointer"
+                class="w-12 2xl:w-24 px-2 py-1 border border-yellow-200 bg-yellow-100 text-yellow-800 rounded-lg hover:bg-yellow-50 transition-all hover:animate-scale cursor-pointer"
                 (click)="openEdit(restaurant)"
                 [attr.aria-label]="'Editar restaurante ' + restaurant.name"
               >
@@ -94,7 +94,7 @@
               </button>
               @if (restaurant.isActive) {
               <button
-                class="w-12 2xl:w-28 px-2 py-1 border rounded-lg hover:bg-red-50 transition-all hover:animate-scale bg-red-100 text-red-800 border-red-200 cursor-pointer"
+                class="w-12 2xl:w-24 px-2 py-1 border rounded-lg hover:bg-red-50 transition-all hover:animate-scale bg-red-100 text-red-800 border-red-200 cursor-pointer"
                 (click)="confirmDisable(restaurant)"
                 [attr.aria-label]="'Deshabilitar restaurante ' + restaurant.name"
               >
