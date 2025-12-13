@@ -159,7 +159,7 @@
             <div class="flex items-center gap-2 justify-end flex-wrap">
               @if(canAddMessages()) {
               <button
-                class="w-12 2xl:w-24 px-2 py-1 border border-black/10 rounded-lg hover:bg-black/5 transition-all hover:animate-scale cursor-pointer"
+                class="w-12 2xl:w-28 px-2 py-1 border border-black/10 rounded-lg hover:bg-black/5 transition-all hover:animate-scale cursor-pointer"
                 (click)="openAddMessages(branch)"
                 [attr.aria-label]="'Agregar mensajes a ' + branch.name"
               >
@@ -170,7 +170,7 @@
               </button>
               } @if(!branch.qrUrl) {
               <button
-                class="w-12 2xl:w-24 px-2 py-1 border border-black/10 rounded-lg hover:bg-black/5 transition-all hover:animate-scale cursor-pointer"
+                class="w-12 2xl:w-28 px-2 py-1 border border-black/10 rounded-lg hover:bg-black/5 transition-all hover:animate-scale cursor-pointer"
                 (click)="onGenerateQr(branch)"
                 [attr.aria-label]="'Generar QR de ' + branch.name"
               >
@@ -184,7 +184,7 @@
               }
 
               <button
-                class="w-12 2xl:w-24 px-2 py-1 border border-yellow-200 bg-yellow-100 text-yellow-800 rounded-lg hover:bg-yellow-50 transition-all hover:animate-scale cursor-pointer"
+                class="w-12 2xl:w-28 px-2 py-1 border border-yellow-200 bg-yellow-100 text-yellow-800 rounded-lg hover:bg-yellow-50 transition-all hover:animate-scale cursor-pointer"
                 (click)="openEdit(branch)"
                 [attr.aria-label]="'Editar sucursal ' + branch.name"
               >
@@ -196,7 +196,7 @@
 
               @if(branch.isActive) {
               <button
-                class="w-12 2xl:w-24 px-2 py-1 border rounded-lg hover:bg-red-50 transition-all hover:animate-scale bg-red-100 text-red-800 border-red-200 cursor-pointer"
+                class="w-12 2xl:w-28 px-2 py-1 border rounded-lg hover:bg-red-50 transition-all hover:animate-scale bg-red-100 text-red-800 border-red-200 cursor-pointer"
                 (click)="confirmToggle(branch, false)"
                 [attr.aria-label]="'Desactivar ' + branch.name"
               >
@@ -208,7 +208,7 @@
 
               } @else {
               <button
-                class="w-12 2xl:w-24 px-2 py-1 border rounded-lg hover:bg-green-50 transition-all hover:animate-scale bg-green-100 text-green-800 border-green-200 cursor-pointer"
+                class="w-12 2xl:w-28 px-2 py-1 border rounded-lg hover:bg-green-50 transition-all hover:animate-scale bg-green-100 text-green-800 border-green-200 cursor-pointer"
                 (click)="confirmToggle(branch, true)"
                 [attr.aria-label]="'Activar ' + branch.name"
               >

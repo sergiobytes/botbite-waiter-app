@@ -105,7 +105,7 @@
             <div class="flex items-center gap-2 justify-end flex-wrap">
               @if (canActOn(row)) {
               <button
-                class="w-12 2xl:w-24 px-2 py-1 border border-black/10 rounded-lg hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:animate-scale cursor-pointer"
+                class="w-12 2xl:w-28 px-2 py-1 border border-black/10 rounded-lg hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:animate-scale cursor-pointer"
                 [class]="
                   !row.isActive
                     ? 'bg-green-100 text-green-800 border-green-200'
@@ -129,7 +129,7 @@
               </button>
               @if (isSuper()) { @if (!hasRole(row, 'admin')) {
               <button
-                class="w-12 2xl:w-24 px-2 py-1 border border-blue-200 bg-blue-100 text-blue-800 rounded-lg hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:animate-scale cursor-pointer"
+                class="w-12 2xl:w-28 px-2 py-1 border border-blue-200 bg-blue-100 text-blue-800 rounded-lg hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:animate-scale cursor-pointer"
                 (click)="confirmAdminRoleChange(row, 'add')"
                 [attr.aria-label]="'Hacer administrador a ' + row.email"
               >
@@ -140,7 +140,7 @@
               </button>
               } @else {
               <button
-                class="w-12 2xl:w-24 px-2 py-1 border border-orange-200 bg-orange-100 text-orange-800 rounded-lg hover:bg-yellow-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:animate-scale cursor-pointer"
+                class="w-12 2xl:w-28 px-2 py-1 border border-orange-200 bg-orange-100 text-orange-800 rounded-lg hover:bg-yellow-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:animate-scale cursor-pointer"
                 (click)="confirmAdminRoleChange(row, 'remove')"
                 [attr.aria-label]="'Quitar rol de administrador a ' + row.email"
               >
