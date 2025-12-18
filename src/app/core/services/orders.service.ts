@@ -3,6 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { environment } from '../../../environments/environment';
 import { map, Observable } from 'rxjs';
 import { Order, OrderListResponse } from './types/orders.type';
+import { ConversationsListResponse } from './types/conversations.types';
 
 @Injectable({
   providedIn: 'root',
@@ -17,5 +18,13 @@ export class OrdersService {
     return this.http
       .get<OrderListResponse>(`${this.apiUrl}/orders`, { params })
       .pipe(map((res: OrderListResponse) => res.orders));
+  }
+
+  activeOrders(branchId: string): Observable<ConversationsListResponse> {
+    const params = new HttpParams().set('branchId', branchId);
+
+    return this.http.get<ConversationsListResponse>(`${this.apiUrl}/messages/conversations`, {
+      params,
+    });
   }
 }

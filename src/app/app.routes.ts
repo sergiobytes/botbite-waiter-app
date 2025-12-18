@@ -85,6 +85,14 @@ export const routes: Routes = [
             (m) => m.MenuItemsComponent
           ),
       },
+      {
+        path: 'orders',
+        canActivate: [userGuard],
+        loadComponent: () =>
+          import('./features/dashboard/orders-component/orders.component').then(
+            (m) => m.OrdersComponent
+          ),
+      },
     ],
   },
   { path: '', pathMatch: 'full', redirectTo: '/login' },

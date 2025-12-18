@@ -85,6 +85,12 @@ export class ShellComponent implements OnInit {
       requiredRole: 'client',
       icon: this.iconsService.menus,
     },
+    {
+      label: 'Órdenes',
+      to: '/dashboard/orders',
+      requiredRole: 'user',
+      icon: this.iconsService.bell,
+    },
   ];
 
   items = computed(() => {
