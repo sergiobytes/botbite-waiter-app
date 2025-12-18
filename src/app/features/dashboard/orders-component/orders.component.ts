@@ -49,11 +49,13 @@ export class OrdersComponent implements OnInit, OnDestroy {
       return;
     }
 
+    // Unirse a la room de la sucursal
+    this.socketService.joinBranch(branchId);
+
     this.loadOrders(branchId);
 
     this.socketSubscription = this.socketService
       .getOrderUpdates()
-      .pipe(filter((data) => data.branchId === branchId))
       .subscribe(() => {
         this.loadOrders(branchId);
       });

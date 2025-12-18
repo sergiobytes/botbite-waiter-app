@@ -46,6 +46,20 @@ export class SocketService implements OnDestroy {
     return this.orderUpdateSubject.asObservable();
   }
 
+  joinBranch(branchId: string): void {
+    if (this.socket) {
+      this.socket.emit('joinBranch', branchId);
+      console.log(`Joined branch room: ${branchId}`);
+    }
+  }
+
+  leaveBranch(branchId: string): void {
+    if (this.socket) {
+      this.socket.emit('leaveBranch', branchId);
+      console.log(`Left branch room: ${branchId}`);
+    }
+  }
+
   disconnect(): void {
     if (this.socket) {
       this.socket.disconnect();
