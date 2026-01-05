@@ -1,9 +1,82 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Montserrat+Alternates:wght@100;300;400;700&display=swap');
 @import 'tailwindcss';
 @import 'ngx-toastr/toastr';
 @plugin '@midudev/tailwind-animations';
 
 @theme {
-  --font-sans: 'Inter', sans-serif;
+  --bg-custom: oklch(100% 0 100);
+  --fg-custom: oklch(18% 0 100);
+  --muted-custom: oklch(71% 0.02 261);
+
+  --font-inter: 'Inter', sans-serif;
+}
+
+@layer base {
+  html,
+  body {
+    height: 100%;
+  }
+
+  body {
+    font-family: var(--font-inter);
+    background: rgb(var(--bg-custom));
+    color: rgb(var(--fg-custom));
+    overflow-y: scroll;
+  }
+
+  header {
+    @apply animate-fade-in animate-duration-400;
+  }
+
+  h2 {
+    @apply text-2xl font-semibold;
+  }
+
+  p {
+    @apply text-sm text-neutral-600;
+  }
+
+  button {
+    @apply cursor-pointer disabled:cursor-not-allowed;
+  }
+}
+
+@layer components {
+  .badge {
+    @apply animate-fade-in animate-duration-200;
+  }
+
+  .pagination-container {
+    @apply flex flex-col md:flex-row items-center justify-between gap-3;
+  }
+
+  .pagination-info {
+    @apply text-sm text-neutral-600 text-center md:text-left;
+  }
+
+  .pagination-btn {
+    @apply rounded-xl border border-black/10 px-3 md:px-4 py-2 hover:bg-black/5 transition-all hover:animate-scale;
+  }
+
+  .modal-container {
+    @apply fixed inset-0 z-50 flex items-center justify-center p-4;
+  }
+
+  .modal-title {
+    @apply text-lg font-inter mb-4;
+  }
+
+  .backdrop {
+    @apply absolute inset-0 bg-black/40;
+  }
+
+  .modal-cancel-button {
+    @apply flex-1 rounded-xl border border-black/10 px-4 py-2 hover:bg-black/5 transition-all hover:animate-scale;
+  }
+
+  .modal-save-button {
+    @apply flex-1 rounded-xl bg-black text-white px-4 py-2 hover:opacity-90 transition-all hover:animate-scale;
+  }
 }
 
 /* Toast customization */
@@ -25,25 +98,6 @@
 .toast-container .toast-warning {
   background-color: #f59e0b;
   border-radius: 12px;
-}
-
-:root {
-  --bg: 255 255 255;
-  --fg: 17 17 17;
-  --muted: 156 163 175;
-}
-
-html,
-body {
-  height: 100%;
-}
-
-body {
-  background: rgb(var(--bg));
-  color: rgb(var(--fg));
-  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial,
-    'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji';
-  overflow-y: scroll;
 }
 
 /* Scrollbar personalizado */
