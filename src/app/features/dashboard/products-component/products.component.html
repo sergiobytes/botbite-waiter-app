@@ -123,7 +123,9 @@
                 [disabled]="!product.imageUrl"
                 [attr.aria-label]="'Ver imagen de ' + product.name"
               >
-                <lucide-icon [img]="iconsService.image" size="15" color="purple"></lucide-icon>
+                <div class="flex items-center justify-center gap-1">
+                  <lucide-icon [img]="iconsService.image" size="15" color="purple"></lucide-icon>
+                </div>
               </button>
             </td>
             <td class="w-1/5 truncate px-4 py-3" [title]="product.name">{{ product.name }}</td>

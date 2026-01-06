@@ -171,7 +171,7 @@
                 }
                 @if (!branch.qrUrl) {
                   <button
-                    class="w-12 cursor-pointer rounded-lg border border-black/10 px-2 py-1 transition-all hover:bg-black/5 2xl:w-28"
+                    class="btn-table-neutral"
                     (click)="onGenerateQr(branch)"
                     [attr.aria-label]="'Generar QR de ' + branch.name"
                   >
