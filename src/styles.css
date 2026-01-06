@@ -21,7 +21,7 @@
     font-family: var(--font-inter);
     background: rgb(var(--bg-custom));
     color: rgb(var(--fg-custom));
-    overflow-y: scroll;
+    overflow: hidden;
   }
 
   header {
