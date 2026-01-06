@@ -75,19 +75,19 @@
 
   /* Buttons */
   .btn {
-    @apply hover:animate-scale rounded-xl px-4 py-2 transition-all;
+    @apply hover:animate-scale rounded-xl px-4 py-2 transition-all disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:animate-none;
   }
 
   .btn-primary {
-    @apply btn bg-black text-white hover:opacity-90 disabled:opacity-50;
+    @apply hover:animate-scale rounded-xl bg-black px-4 py-2 text-white transition-all hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:animate-none;
   }
 
   .btn-secondary {
-    @apply btn border border-black/10 hover:bg-black/5;
+    @apply hover:animate-scale rounded-xl border border-black/10 px-4 py-2 transition-all hover:bg-black/5 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:animate-none;
   }
 
   .btn-icon {
-    @apply rounded-full border border-black/10 p-2 transition hover:bg-black/5;
+    @apply rounded-full border border-black/10 p-2 transition hover:bg-black/5 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent;
   }
 
   .btn-full {
@@ -96,35 +96,35 @@
 
   /* Table Action Buttons */
   .btn-table {
-    @apply hover:animate-scale w-12 cursor-pointer rounded-lg border px-2 py-1 transition-all 2xl:w-28;
+    @apply hover:animate-scale w-12 cursor-pointer rounded-lg border px-2 py-1 transition-all disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:animate-none 2xl:w-28;
   }
 
   .btn-table-primary {
-    @apply btn-table border-blue-200 bg-blue-100 text-blue-800 hover:bg-blue-50;
+    @apply hover:animate-scale w-12 cursor-pointer rounded-lg border border-blue-200 bg-blue-100 px-2 py-1 text-blue-800 transition-all hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:animate-none 2xl:w-28;
   }
 
   .btn-table-success {
-    @apply btn-table border-green-200 bg-green-100 text-green-800 hover:bg-green-50;
+    @apply hover:animate-scale w-12 cursor-pointer rounded-lg border border-green-200 bg-green-100 px-2 py-1 text-green-800 transition-all hover:bg-green-50 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:animate-none 2xl:w-28;
   }
 
   .btn-table-warning {
-    @apply btn-table border-yellow-200 bg-yellow-100 text-yellow-800 hover:bg-yellow-50;
+    @apply hover:animate-scale w-12 cursor-pointer rounded-lg border border-yellow-200 bg-yellow-100 px-2 py-1 text-yellow-800 transition-all hover:bg-yellow-50 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:animate-none 2xl:w-28;
   }
 
   .btn-table-danger {
-    @apply btn-table border-red-200 bg-red-100 text-red-800 hover:bg-red-50;
+    @apply hover:animate-scale w-12 cursor-pointer rounded-lg border border-red-200 bg-red-100 px-2 py-1 text-red-800 transition-all hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:animate-none 2xl:w-28;
   }
 
   .btn-table-info {
-    @apply btn-table border-purple-200 bg-purple-100 text-purple-800 hover:bg-purple-50;
+    @apply hover:animate-scale w-12 cursor-pointer rounded-lg border border-purple-200 bg-purple-100 px-2 py-1 text-purple-800 transition-all hover:bg-purple-50 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:animate-none 2xl:w-28;
   }
 
   .btn-table-pink {
-    @apply btn-table border-pink-200 bg-pink-100 text-pink-800 hover:bg-pink-50;
+    @apply hover:animate-scale w-12 cursor-pointer rounded-lg border border-pink-200 bg-pink-100 px-2 py-1 text-pink-800 transition-all hover:bg-pink-50 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:animate-none 2xl:w-28;
   }
 
   .btn-table-neutral {
-    @apply btn-table border-black/10 hover:bg-black/5;
+    @apply hover:animate-scale w-12 cursor-pointer rounded-lg border border-black/10 px-2 py-1 transition-all hover:bg-black/5 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:animate-none 2xl:w-28;
   }
 
   /* Inputs */
@@ -141,7 +141,7 @@
   }
 
   .select-full {
-    @apply select w-full md:w-auto;
+    @apply w-full rounded-xl border border-black/10 px-3 py-2 md:w-auto;
   }
 
   /* Tables */
@@ -184,7 +184,7 @@
   }
 
   .pagination-btn {
-    @apply hover:animate-scale rounded-xl border border-black/10 px-3 py-2 transition-all hover:bg-black/5 md:px-4;
+    @apply hover:animate-scale rounded-xl border border-black/10 px-3 py-2 transition-all hover:bg-black/5 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:animate-none disabled:hover:bg-transparent md:px-4;
   }
 
   /* Modals */
@@ -201,11 +201,11 @@
   }
 
   .modal-cancel-button {
-    @apply hover:animate-scale flex-1 rounded-xl border border-black/10 px-4 py-2 transition-all hover:bg-black/5;
+    @apply hover:animate-scale flex-1 rounded-xl border border-black/10 px-4 py-2 transition-all hover:bg-black/5 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:animate-none disabled:hover:bg-transparent;
   }
 
   .modal-save-button {
-    @apply hover:animate-scale flex-1 rounded-xl bg-black px-4 py-2 text-white transition-all hover:opacity-90;
+    @apply hover:animate-scale flex-1 rounded-xl bg-black px-4 py-2 text-white transition-all hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:animate-none;
   }
 
   /* Shell (Layout) */
@@ -218,11 +218,11 @@
   }
 
   .shell-button {
-    @apply hover:animate-scale block rounded-xl px-4 py-2 text-sm transition-all hover:bg-white/10 sm:py-3;
+    @apply hover:animate-scale block rounded-xl px-4 py-2 text-sm transition-all hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:animate-none disabled:hover:bg-transparent sm:py-3;
   }
 
   .shell-logout-button {
-    @apply hover:animate-scale w-full rounded-xl bg-white px-4 py-2 text-sm text-black transition-all hover:opacity-90 sm:py-3;
+    @apply hover:animate-scale w-full rounded-xl bg-white px-4 py-2 text-sm text-black transition-all hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:animate-none sm:py-3;
   }
 
   .shell-select {

@@ -28,7 +28,7 @@
           loading="lazy"
         />
         <button
-          class="hover:animate-scale w-40 cursor-pointer rounded-xl border border-black/10 bg-white px-4 py-2 text-sm text-black transition-all hover:bg-black/5 disabled:opacity-50 md:w-48"
+          class="w-40 cursor-pointer rounded-xl border border-black/10 bg-white px-4 py-2 text-sm text-black transition-all hover:bg-black/5 disabled:cursor-not-allowed disabled:opacity-50 md:w-48"
           (click)="downloadBranchQr()"
           [disabled]="downloadingQr()"
           [attr.aria-label]="downloadingQr() ? 'Descargando QR' : 'Descargar código QR'"

@@ -74,7 +74,7 @@
                 } @else {
                   <button
                     (click)="downloadPdf(menu)"
-                    class="hover:animate-scale w-12 cursor-pointer rounded-lg border border-blue-200 bg-blue-100 px-2 py-1 text-blue-800 transition-all hover:bg-blue-50 2xl:w-24"
+                    class="btn-table-primary"
                     [attr.aria-label]="'Descargar PDF del menú ' + menu.name"
                   >
                     <div class="flex items-center gap-2">
@@ -119,10 +119,7 @@
                   class="hidden"
                   (change)="onPdfSelected($event, menu.id)"
                 />
-                <button
-                  class="btn-table-success"
-                  (click)="pdfInput.click()"
-                >
+                <button class="btn-table-success" (click)="pdfInput.click()">
                   <div class="flex items-center justify-center gap-1">
                     <lucide-icon
                       [img]="iconsService.uploadFile"
@@ -156,9 +153,9 @@
                 </button>
                 <!-- Desactivar/Activar -->
                 <button
-                  class=\"btn-table\"
-                  [class.btn-table-danger]=\"menu.isActive\"
-                  [class.btn-table-success]=\"!menu.isActive\"
+                  class="btn-table"
+                  [class.btn-table-danger]="menu.isActive"
+                  [class.btn-table-success]="!menu.isActive"
                   [attr.aria-label]="(menu.isActive ? 'Desactivar ' : 'Activar ') + menu.name"
                   (click)="confirmToggle(menu, menu.isActive)"
                 >

@@ -7,7 +7,7 @@
 
     <div class="flex flex-col flex-wrap gap-3 md:flex-row md:justify-end">
       <button
-        class="hover:animate-scale w-full cursor-pointer rounded-xl border border-green-200 bg-green-100 px-3 py-2 text-green-800 transition-all hover:bg-green-50 disabled:opacity-50 sm:px-4 md:w-auto"
+        class="w-full cursor-pointer rounded-xl border border-green-200 bg-green-100 px-3 py-2 text-green-800 transition-all hover:bg-green-50 disabled:cursor-not-allowed disabled:opacity-50 sm:px-4 md:w-auto"
         (click)="onDownloadTemplate()"
         aria-label="Plantilla de carga masiva por CSV"
       >
@@ -30,7 +30,7 @@
         aria-label="Seleccionar archivo CSV para carga masiva"
       />
       <button
-        class="hover:animate-scale w-full cursor-pointer rounded-xl border border-black/10 px-3 py-2 transition-all hover:bg-black/5 disabled:opacity-50 sm:px-4 md:w-auto"
+        class="w-full cursor-pointer rounded-xl border border-black/10 px-3 py-2 transition-all hover:bg-black/5 disabled:cursor-not-allowed disabled:opacity-50 sm:px-4 md:w-auto"
         (click)="csvInput.click()"
         [disabled]="!restaurantId()"
         aria-label="Carga masiva por CSV"
@@ -46,7 +46,7 @@
         </div>
       </button>
       <button
-        class="hover:animate-scale w-full cursor-pointer rounded-xl bg-black px-3 py-2 text-white transition-all hover:opacity-90 disabled:opacity-50 sm:px-4 md:w-auto"
+        class="w-full cursor-pointer rounded-xl bg-black px-3 py-2 text-white transition-all hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 sm:px-4 md:w-auto"
         (click)="openCreate()"
         [disabled]="!restaurantId()"
         aria-label="Nuevo producto"
@@ -118,7 +118,7 @@
           <tr class="border-t border-black/10">
             <td class="w-20 px-4 py-3">
               <button
-                class="btn-table-info disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-purple-100"
+                class="btn-table-info"
                 (click)="openImagePreview(product)"
                 [disabled]="!product.imageUrl"
                 [attr.aria-label]="'Ver imagen de ' + product.name"
