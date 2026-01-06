@@ -1,57 +1,70 @@
-<div class="min-h-svh grid md:grid-cols-2">
-  <aside class="hidden md:block bg-black text-white text-center" aria-label="Bienvenida">
-    <div class="h-full flex items-center justify-center p-12">
+<div class="grid min-h-svh md:grid-cols-2">
+  <aside class="hidden bg-black text-center text-white md:block" aria-label="Bienvenida">
+    <div class="flex h-full items-center justify-center p-12">
       <div class="max-w-md">
-        <img src="/assets/logo.png" alt="BotBite - Logo de la plataforma" class="invert scale-75 animate-zoom-in" />
+        <img
+          src="/assets/logo.png"
+          alt="BotBite - Logo de la plataforma"
+          class="animate-zoom-in scale-75 invert"
+        />
         <!-- <h1 class="text-4xl font-semibold tracking-tight">BotBite</h1> -->
-        <p class="text-white/70 text-xl font-semibold tracking-tight mt-4">
+        <p class="mt-4 text-xl font-semibold tracking-tight text-white/70">
           Panel de administración
         </p>
       </div>
     </div>
   </aside>
 
-  <main class="bg-white text-black flex items-center justify-center p-6">
-    <div class="w-full max-w-sm animate-fade-in animate-duration-500">
-      <h1 class="text-2xl font-semibold mb-6">Iniciar sesión</h1>
+  <main class="flex items-center justify-center bg-white p-6 text-black">
+    <div class="animate-fade-in animate-duration-500 w-full max-w-sm">
+      <h1 class="mb-6 text-2xl font-semibold">Iniciar sesión</h1>
 
-      <form [formGroup]="form" (ngSubmit)="submit()" class="space-y-4" aria-label="Formulario de inicio de sesión">
+      <form
+        [formGroup]="form"
+        (ngSubmit)="submit()"
+        class="space-y-4"
+        aria-label="Formulario de inicio de sesión"
+      >
         <div>
-          <label for="email" class="block text-sm mb-1">Correo</label>
+          <label for="email" class="mb-1 block text-sm">Correo</label>
           <input
             id="email"
             formControlName="email"
             type="email"
-            class="w-full rounded-xl border border-black/10 px-4 py-3 outline-none focus:ring-2 focus:ring-black"
+            class="input"
             placeholder="ejemplo@gmail.com"
             aria-required="true"
             aria-describedby="email-error"
           />
           @if (form.controls.email.invalid && form.controls.email.touched) {
-          <p id="email-error" class="mt-1 text-xs text-neutral-500" role="alert">Ingresa un correo válido</p>
+            <p id="email-error" class="mt-1 text-xs text-neutral-500" role="alert">
+              Ingresa un correo válido
+            </p>
           }
         </div>
 
         <div>
-          <label for="password" class="block text-sm mb-1">Contraseña</label>
+          <label for="password" class="mb-1 block text-sm">Contraseña</label>
           <input
             id="password"
             formControlName="password"
             type="password"
-            class="w-full rounded-xl border border-black/10 px-4 py-3 outline-none focus:ring-2 focus:ring-black"
+            class="input"
             placeholder="••••••••"
             aria-required="true"
             aria-describedby="password-error"
           />
           @if (form.controls.password.invalid && form.controls.password.touched) {
-          <p id="password-error" class="mt-1 text-xs text-neutral-500" role="alert">Mínimo 6 caracteres</p>
+            <p id="password-error" class="mt-1 text-xs text-neutral-500" role="alert">
+              Mínimo 6 caracteres
+            </p>
           }
         </div>
 
         <button
           type="submit"
           [disabled]="form.invalid || loading()"
-          class="w-full rounded-xl bg-black text-white py-3 disabled:opacity-50 transition-all hover:opacity-90 hover:animate-scale cursor-pointer"
+          class="btn-primary w-full"
           aria-label="{{ !loading() ? 'Iniciar sesión' : 'Procesando inicio de sesión' }}"
         >
           <span>{{ !loading() ? 'Entrar' : 'Procesando...' }}</span>

@@ -1,118 +1,125 @@
-<div class="space-y-6">
-  <div class="flex flex-col gap-4">
+<div class="section-spacing">
+  <div class="page-header">
     <shared-title title="Restaurantes" description="Administra tus restaurantes aquí" />
 
-    <div class="flex md:justify-end">
+    <div class="actions-bar">
       <button
-        class="rounded-xl bg-black text-white px-4 py-2 hover:opacity-90 disabled:opacity-50 transition-all hover:animate-scale cursor-pointer w-full md:w-auto"
+        class="btn-primary btn-full"
         (click)="openCreate()"
         aria-label="Crear nuevo restaurante"
       >
         <div class="flex items-center justify-center gap-2">
-          <lucide-icon [img]="iconsService.add" size="15" color="white" aria-hidden="true"></lucide-icon>
+          <lucide-icon
+            [img]="iconsService.add"
+            size="15"
+            color="white"
+            aria-hidden="true"
+          ></lucide-icon>
           <span>Nuevo restaurante</span>
         </div>
       </button>
     </div>
   </div>
 
-  <div class="flex flex-col md:flex-row gap-3 items-stretch md:items-center">
-    <div class="md:ml-auto flex flex-col md:flex-row items-stretch md:items-center gap-2 w-full md:w-auto">
-      <div class="flex items-center gap-2">
-        <label for="restaurantsSearch" class="sr-only">Buscar restaurantes</label>
-        <lucide-icon [img]="iconsService.search" size="15" color="black" aria-hidden="true"></lucide-icon>
-        <input
-          id="restaurantsSearch"
-          type="text"
-          placeholder="Buscar..."
-          class="flex-1 md:w-64 rounded-xl border border-black/10 px-3 py-2"
-          [value]="search()"
-          (input)="updateSearch($event)"
-          aria-label="Buscar restaurantes"
-        />
-      </div>
-      <select
-        class="w-full md:w-auto rounded-xl border border-black/10 px-3 py-2"
-        [value]="activeFilterValue()"
-        (change)="updateFilterActive($event)"
-        aria-label="Filtrar por estado"
-      >
-        <option value="">Todos</option>
-        <option value="true">Activos</option>
-        <option value="false">Inactivos</option>
-      </select>
+  <div class="search-bar">
+    <div class="flex items-center gap-2">
+      <label for="restaurantsSearch" class="sr-only">Buscar restaurantes</label>
+      <lucide-icon
+        [img]="iconsService.search"
+        size="15"
+        color="black"
+        aria-hidden="true"
+      ></lucide-icon>
+      <input
+        id="restaurantsSearch"
+        type="text"
+        placeholder="Buscar..."
+        class="input-search"
+        [value]="search()"
+        (input)="updateSearch($event)"
+        aria-label="Buscar restaurantes"
+      />
     </div>
+    <select
+      class="select-full"
+      [value]="activeFilterValue()"
+      (change)="updateFilterActive($event)"
+      aria-label="Filtrar por estado"
+    >
+      <option value="">Todos</option>
+      <option value="true">Activos</option>
+      <option value="false">Inactivos</option>
+    </select>
   </div>
 
-  <div
-    class="rounded-2xl border border-black/10 overflow-hidden overflow-x-auto transition-opacity duration-200"
-    [class.opacity-50]="loading()"
-  >
-    <table class="w-full text-sm table-fixed min-w-[600px]">
+  <div class="table-container" [class.table-loading]="loading()">
+    <table class="min-w-[600px] table-fixed">
       <thead class="bg-neutral-50 text-neutral-600">
         <tr>
-          <th class="text-left font-medium px-4 py-3 w-2/5">Nombre</th>
-          <th class="text-left font-medium px-4 py-3 w-28">Estado</th>
-          <th class="text-right font-medium px-4 py-3">Acciones</th>
+          <th class="w-2/5 px-4 py-3 text-left font-medium">Nombre</th>
+          <th class="w-28 px-4 py-3 text-left font-medium">Estado</th>
+          <th class="px-4 py-3 text-right font-medium">Acciones</th>
         </tr>
       </thead>
       <tbody>
-        @for(restaurant of restaurants(); track restaurant.id) {
-        <tr class="border-t border-black/10 animate-fade-in animate-duration-300">
-          <td class="px-4 py-3 w-2/5 truncate" [title]="restaurant.name">{{ restaurant.name }}</td>
-          <td class="px-4 py-3 w-28">
-            <div
-              class="inline-flex items-center gap-2 rounded-full border text-xs px-2 py-1"
-              [class]="
-                restaurant.isActive
-                  ? 'bg-green-100 text-green-800 border-green-200'
-                  : 'bg-red-100 text-red-800 border-red-200'
-              "
-            >
-              <lucide-icon
-                [img]="restaurant.isActive ? iconsService.active : iconsService.inactive"
-                size="20"
-                [color]="restaurant.isActive ? 'green' : 'red'"
-              ></lucide-icon>
+        @for (restaurant of restaurants(); track restaurant.id) {
+          <tr class="animate-fade-in animate-duration-300 border-t border-black/10">
+            <td class="w-2/5 truncate px-4 py-3" [title]="restaurant.name">
+              {{ restaurant.name }}
+            </td>
+            <td class="w-28 px-4 py-3">
+              <div
+                class="inline-flex items-center gap-2 rounded-full border px-2 py-1 text-xs"
+                [class]="
+                  restaurant.isActive
+                    ? 'border-green-200 bg-green-100 text-green-800'
+                    : 'border-red-200 bg-red-100 text-red-800'
+                "
+              >
+                <lucide-icon
+                  [img]="restaurant.isActive ? iconsService.active : iconsService.inactive"
+                  size="20"
+                  [color]="restaurant.isActive ? 'green' : 'red'"
+                ></lucide-icon>
 
-              <span class="">
-                {{ restaurant.isActive ? 'Activo' : 'Inactivo' }}
-              </span>
-            </div>
-          </td>
-          <td class="px-4 py-3">
-            <div class="flex items-center gap-2 justify-end">
-              <button
-                class="w-12 2xl:w-28 px-2 py-1 border border-yellow-200 bg-yellow-100 text-yellow-800 rounded-lg hover:bg-yellow-50 transition-all hover:animate-scale cursor-pointer"
-                (click)="openEdit(restaurant)"
-                [attr.aria-label]="'Editar restaurante ' + restaurant.name"
-              >
-                <div class="flex items-center justify-center gap-1">
-                  <lucide-icon [img]="iconsService.edit" size="15" color="orange"></lucide-icon>
-                  <span class="text-xs hidden 2xl:inline">Editar</span>
-                </div>
-              </button>
-              @if (restaurant.isActive) {
-              <button
-                class="w-12 2xl:w-28 px-2 py-1 border rounded-lg hover:bg-red-50 transition-all hover:animate-scale bg-red-100 text-red-800 border-red-200 cursor-pointer"
-                (click)="confirmDisable(restaurant)"
-                [attr.aria-label]="'Deshabilitar restaurante ' + restaurant.name"
-              >
-                <div class="flex items-center justify-center gap-1">
-                  <lucide-icon [img]="iconsService.disable" size="15" color="red"></lucide-icon>
-                  <span class="text-xs hidden 2xl:inline">Deshabilitar</span>
-                </div>
-              </button>
-              }
-            </div>
-          </td>
-        </tr>
+                <span class="">
+                  {{ restaurant.isActive ? 'Activo' : 'Inactivo' }}
+                </span>
+              </div>
+            </td>
+            <td class="px-4 py-3">
+              <div class="flex items-center justify-end gap-2">
+                <button
+                  class="btn-table-warning"
+                  (click)="openEdit(restaurant)"
+                  [attr.aria-label]="'Editar restaurante ' + restaurant.name"
+                >
+                  <div class="flex items-center justify-center gap-1">
+                    <lucide-icon [img]="iconsService.edit" size="15" color="orange"></lucide-icon>
+                    <span class="hidden text-xs 2xl:inline">Editar</span>
+                  </div>
+                </button>
+                @if (restaurant.isActive) {
+                  <button
+                    class="btn-table-danger"
+                    (click)="confirmDisable(restaurant)"
+                    [attr.aria-label]="'Deshabilitar restaurante ' + restaurant.name"
+                  >
+                    <div class="flex items-center justify-center gap-1">
+                      <lucide-icon [img]="iconsService.disable" size="15" color="red"></lucide-icon>
+                      <span class="hidden text-xs 2xl:inline">Deshabilitar</span>
+                    </div>
+                  </button>
+                }
+              </div>
+            </td>
+          </tr>
         } @empty {
           <app-empty-state
-          [loading]="loading()"
-          [isEmpty]="restaurants().length === 0"
-          [colspan]="3"
-          message="No hay restaurantes para mostrar"
+            [loading]="loading()"
+            [isEmpty]="restaurants().length === 0"
+            [colspan]="3"
+            message="No hay restaurantes para mostrar"
           />
         }
       </tbody>
@@ -149,7 +156,7 @@
         <input
           id="restaurantName"
           type="text"
-          class="w-full rounded-xl border border-black/10 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black/20"
+          class="w-full rounded-xl border border-black/10 px-3 py-2 focus:ring-2 focus:ring-black/20 focus:outline-none"
           [value]="form().name"
           (input)="updateFormName($event)"
           required
@@ -170,7 +177,7 @@
       </div>
 
       @if (!isFormValid() && form().name) {
-      <p class="text-sm text-red-600">El nombre es obligatorio</p>
+        <p class="text-sm text-red-600">El nombre es obligatorio</p>
       }
     </form>
   </app-modal>

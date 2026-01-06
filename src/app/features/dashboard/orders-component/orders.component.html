@@ -1,59 +1,64 @@
-<div class="space-y-6">
-  <div class="flex flex-col gap-4">
+<div class="section-spacing">
+  <div class="page-header">
     <shared-title title="Órdenes" description="Lista de órdenes activas" />
   </div>
 
-  <div class="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
-    @for(orders of activeOrders(); track orders.id) {
-    <div class="rounded-2xl border border-black/10 bg-white p-6 font-mono text-sm animate-fade-in animate-duration-500 shadow-sm">
-      <!-- Header del ticket -->
-      <div class="flex gap-2 items-center mb-4 pb-3 border-b-2 border-dashed border-black/20">
-        <lucide-icon [img]="iconsService.bell" size="20" color="orange" />
-        <p class="text-xs text-neutral-600 uppercase tracking-wide">Orden de {{ orders.customer.name }}</p>
-      </div>
+  <div class="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+    @for (orders of activeOrders(); track orders.id) {
+      <div class="card animate-fade-in animate-duration-500 font-mono text-sm">
+        <!-- Header del ticket -->
+        <div class="mb-4 flex items-center gap-2 border-b-2 border-dashed border-black/20 pb-3">
+          <lucide-icon [img]="iconsService.bell" size="20" color="orange" />
+          <p class="text-xs tracking-wide text-neutral-600 uppercase">
+            Orden de {{ orders.customer.name }}
+          </p>
+        </div>
 
-      <!-- Ubicación -->
-      <div class="mb-3 pb-2 border-b border-dashed border-black/10">
-        <p class="text-xs text-neutral-500 uppercase">Ubicación</p>
-        <p class="font-semibold">{{ orders.location }}</p>
-      </div>
+        <!-- Ubicación -->
+        <div class="mb-3 border-b border-dashed border-black/10 pb-2">
+          <p class="text-xs text-neutral-500 uppercase">Ubicación</p>
+          <p class="font-semibold">{{ orders.location }}</p>
+        </div>
 
-      <!-- Detalles de la orden -->
-      <div class="mb-3 pb-2 border-b-2 border-dashed border-black/20">
-        <p class="text-xs text-neutral-500 uppercase mb-2">Detalles</p>
-        @for(details of transformLastOrderSentToCashier(orders.lastOrderSentToCashier); track $index)
-        {
-        <div class="mb-2">
-          <div class="flex justify-between items-start mb-1">
-            <div class="flex-1">
-              <p class="font-medium">{{ details.quantity }}x {{ details.name }}</p>
+        <!-- Detalles de la orden -->
+        <div class="mb-3 border-b-2 border-dashed border-black/20 pb-2">
+          <p class="mb-2 text-xs text-neutral-500 uppercase">Detalles</p>
+          @for (
+            details of transformLastOrderSentToCashier(orders.lastOrderSentToCashier);
+            track $index
+          ) {
+            <div class="mb-2">
+              <div class="mb-1 flex items-start justify-between">
+                <div class="flex-1">
+                  <p class="font-medium">{{ details.quantity }}x {{ details.name }}</p>
+                </div>
+                <p class="ml-2 font-semibold">${{ details.price.toFixed(2) }}</p>
+              </div>
+              @if (details.notes !== '') {
+                <p class="ml-4 text-xs text-neutral-600 italic">• {{ details.notes }}</p>
+              }
             </div>
-            <p class="font-semibold ml-2">${{ details.price.toFixed(2) }}</p>
-          </div>
-          @if (details.notes !== '') {
-          <p class="text-xs text-neutral-600 italic ml-4">• {{ details.notes }}</p>
           }
         </div>
-        }
-      </div>
 
-      <!-- Total -->
-      <div class="pt-2">
-        <div class="flex justify-between items-center">
-          <p class="text-sm font-bold uppercase">Total</p>
-          <p class="text-lg font-bold">${{ calculateTotal(orders.lastOrderSentToCashier).toFixed(2) }}</p>
+        <!-- Total -->
+        <div class="pt-2">
+          <div class="flex items-center justify-between">
+            <p class="text-sm font-bold uppercase">Total</p>
+            <p class="text-lg font-bold">
+              ${{ calculateTotal(orders.lastOrderSentToCashier).toFixed(2) }}
+            </p>
+          </div>
         </div>
       </div>
-    </div>
-
     } @empty {
-    <div
-      class="col-span-full p-6 border border-black/10 rounded-2xl text-center text-neutral-500 animate-fade-in animate-duration-500"
-      role="alert"
-      aria-live="polite"
-    >
-      No hay órdenes activas en este momento.
-    </div>
+      <div
+        class="animate-fade-in animate-duration-500 col-span-full rounded-2xl border border-black/10 p-6 text-center text-neutral-500"
+        role="alert"
+        aria-live="polite"
+      >
+        No hay órdenes activas en este momento.
+      </div>
     }
   </div>
 </div>

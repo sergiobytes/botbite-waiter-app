@@ -1,165 +1,181 @@
-<div class="space-y-6">
-  <div class="flex flex-col gap-4">
+<div class="section-spacing">
+  <div class="page-header">
     <shared-title title="Usuarios" description="Administra los usuarios del sistema" />
 
-    <div class="flex flex-col md:flex-row flex-wrap gap-3 md:justify-end">
-      <button
-        (click)="openCreateUser()"
-        class="rounded-xl border border-black/10 px-4 py-2 hover:bg-black/5 transition-all hover:animate-scale cursor-pointer w-full md:w-auto"
-        aria-label="Crear usuario"
-      >
+    <div class="actions-bar">
+      <button (click)="openCreateUser()" class="btn-secondary btn-full" aria-label="Crear usuario">
         <div class="flex items-center justify-center gap-2">
-          <lucide-icon [img]="iconsService.addUser" size="15" color="black" aria-hidden="true"></lucide-icon>
+          <lucide-icon
+            [img]="iconsService.addUser"
+            size="15"
+            color="black"
+            aria-hidden="true"
+          ></lucide-icon>
           <span> Crear usuario </span>
         </div>
       </button>
-      <button
-        (click)="openCreateClient()"
-        class="rounded-xl bg-black text-white px-4 py-2 hover:opacity-90 transition-all hover:animate-scale cursor-pointer w-full md:w-auto"
-        aria-label="Crear cliente"
-      >
+      <button (click)="openCreateClient()" class="btn-primary btn-full" aria-label="Crear cliente">
         <div class="flex items-center justify-center gap-2">
-          <lucide-icon [img]="iconsService.addUser" size="15" color="white" aria-hidden="true"></lucide-icon>
+          <lucide-icon
+            [img]="iconsService.addUser"
+            size="15"
+            color="white"
+            aria-hidden="true"
+          ></lucide-icon>
           <span> Crear cliente </span>
         </div>
       </button>
     </div>
   </div>
 
-  <div class="flex flex-col md:flex-row gap-3 items-stretch md:items-center">
-    <div class="md:ml-auto flex flex-col md:flex-row items-stretch md:items-center gap-2 w-full md:w-auto">
-      <div class="flex items-center gap-2">
-        <label for="search-users" class="sr-only">Buscar usuarios por email</label>
-        <lucide-icon [img]="iconsService.search" size="15" color="black" aria-hidden="true"></lucide-icon>
-        <input
-          id="search-users"
-          type="search"
-          placeholder="Buscar por email..."
-          [value]="search()"
-          (input)="updateSearch($event)"
-          class="flex-1 md:w-64 rounded-xl border border-black/10 px-3 py-2"
-          aria-label="Buscar usuarios por email"
-        />
-      </div>
-
-      <select
-        id="filter-role"
-        [value]="roleFilter()"
-        (change)="updateRole($event)"
-        class="w-full md:w-auto rounded-xl border border-black/10 px-3 py-2"
-        aria-label="Filtrar por rol"
-      >
-        <option value="">Todos los roles</option>
-        <option value="super">Super Admin</option>
-        <option value="admin">Administrador</option>
-        <option value="client">Cliente</option>
-        <option value="user">Usuario</option>
-      </select>
+  <div class="search-bar">
+    <div class="flex items-center gap-2">
+      <label for="search-users" class="sr-only">Buscar usuarios por email</label>
+      <lucide-icon
+        [img]="iconsService.search"
+        size="15"
+        color="black"
+        aria-hidden="true"
+      ></lucide-icon>
+      <input
+        id="search-users"
+        type="search"
+        placeholder="Buscar por email..."
+        [value]="search()"
+        (input)="updateSearch($event)"
+        class="input-search"
+        aria-label="Buscar usuarios por email"
+      />
     </div>
+
+    <select
+      id="filter-role"
+      [value]="roleFilter()"
+      (change)="updateRole($event)"
+      class="select-full"
+      aria-label="Filtrar por rol"
+    >
+      <option value="">Todos los roles</option>
+      <option value="super">Super Admin</option>
+      <option value="admin">Administrador</option>
+      <option value="client">Cliente</option>
+      <option value="user">Usuario</option>
+    </select>
   </div>
 
-  <div class="rounded-2xl border border-black/10 overflow-hidden overflow-x-auto">
-    <table class="w-full text-sm table-fixed min-w-[800px]">
+  <div class="table-container">
+    <table class="min-w-[800px] table-fixed">
       <thead class="bg-neutral-50 text-neutral-600">
         <tr>
-          <th class="text-left font-medium px-4 py-3 w-1/4">Email</th>
-          <th class="text-left font-medium px-4 py-3 w-1/5">Roles</th>
-          <th class="text-left font-medium px-4 py-3 w-28">Estado</th>
-          <th class="text-right font-medium px-4 py-3">Acciones</th>
+          <th class="w-1/4 px-4 py-3 text-left font-medium">Email</th>
+          <th class="w-1/5 px-4 py-3 text-left font-medium">Roles</th>
+          <th class="w-28 px-4 py-3 text-left font-medium">Estado</th>
+          <th class="px-4 py-3 text-right font-medium">Acciones</th>
         </tr>
       </thead>
       <tbody>
         @for (row of usersService.users(); track row.id) {
-        <tr
-          class="border-t border-black/5 hover:bg-neutral-50 animate-fade-in animate-duration-300"
-        >
-          <td class="px-4 py-3 w-1/4 truncate" [title]="row.email">{{ row.email }}</td>
-          <td class="px-4 py-3 w-1/5">
-            <div class="flex gap-1 flex-wrap">
-              @for (r of row.roles; track r) {
-              <app-role-badge [role]="r" />
-              }
-            </div>
-          </td>
-          <td class="px-4 py-3 w-28">
-            <div
-              class="inline-flex items-center gap-2 rounded-full border text-xs px-2 py-1"
-              [class]="
-                row.isActive
-                  ? 'bg-green-100 text-green-800 border-green-200'
-                  : 'bg-red-100 text-red-800 border-red-200'
-              "
-            >
-              <lucide-icon
-                [img]="row.isActive ? iconsService.active : iconsService.inactive"
-                size="20"
-                [color]="row.isActive ? 'green' : 'red'"
-              ></lucide-icon>
-
-              <span class="">
-                {{ row.isActive ? 'Activo' : 'Inactivo' }}
-              </span>
-            </div>
-          </td>
-          <td class="px-4 py-3">
-            <div class="flex items-center gap-2 justify-end flex-wrap">
-              @if (canActOn(row)) {
-              <button
-                class="w-12 2xl:w-28 px-2 py-1 border border-black/10 rounded-lg hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:animate-scale cursor-pointer"
+          <tr
+            class="animate-fade-in animate-duration-300 border-t border-black/5 hover:bg-neutral-50"
+          >
+            <td class="w-1/4 truncate px-4 py-3" [title]="row.email">{{ row.email }}</td>
+            <td class="w-1/5 px-4 py-3">
+              <div class="flex flex-wrap gap-1">
+                @for (r of row.roles; track r) {
+                  <app-role-badge [role]="r" />
+                }
+              </div>
+            </td>
+            <td class="w-28 px-4 py-3">
+              <div
+                class="inline-flex items-center gap-2 rounded-full border px-2 py-1 text-xs"
                 [class]="
-                  !row.isActive
-                    ? 'bg-green-100 text-green-800 border-green-200'
-                    : 'bg-red-100 text-red-800 border-red-200'
-                "
-                (click)="confirmToggleUser(row, row.isActive ? 'deactivate' : 'activate')"
-                [attr.aria-label]="
-                  (row.isActive ? 'Desactivar' : 'Activar') + ' usuario ' + row.email
+                  row.isActive
+                    ? 'border-green-200 bg-green-100 text-green-800'
+                    : 'border-red-200 bg-red-100 text-red-800'
                 "
               >
-                <div class="flex items-center justify-center gap-1">
-                  <lucide-icon
-                    [img]="row.isActive ? iconsService.disable : iconsService.active"
-                    size="15"
-                    [color]="row.isActive ? 'red' : 'green'"
-                  ></lucide-icon>
-                  <span class="text-xs hidden 2xl:inline">
-                    {{ row.isActive ? 'Desactivar' : 'Activar' }}
-                  </span>
-                </div>
-              </button>
-              @if (isSuper()) { @if (!hasRole(row, 'admin')) {
-              <button
-                class="w-12 2xl:w-28 px-2 py-1 border border-blue-200 bg-blue-100 text-blue-800 rounded-lg hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:animate-scale cursor-pointer"
-                (click)="confirmAdminRoleChange(row, 'add')"
-                [attr.aria-label]="'Hacer administrador a ' + row.email"
-              >
-                <div class="flex items-center justify-center gap-1">
-                  <lucide-icon [img]="iconsService.addRole" size="15" color="blue"></lucide-icon>
-                  <span class="text-xs hidden 2xl:inline"> Hacer Admin </span>
-                </div>
-              </button>
-              } @else {
-              <button
-                class="w-12 2xl:w-28 px-2 py-1 border border-orange-200 bg-orange-100 text-orange-800 rounded-lg hover:bg-yellow-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:animate-scale cursor-pointer"
-                (click)="confirmAdminRoleChange(row, 'remove')"
-                [attr.aria-label]="'Quitar rol de administrador a ' + row.email"
-              >
-                <div class="flex items-center justify-center gap-1">
-                  <lucide-icon [img]="iconsService.disable" size="15" color="orange"></lucide-icon>
-                  <span class="text-xs hidden 2xl:inline"> Quitar Admin </span>
-                </div>
-              </button>
-              } } }
-            </div>
-          </td>
-        </tr>
+                <lucide-icon
+                  [img]="row.isActive ? iconsService.active : iconsService.inactive"
+                  size="20"
+                  [color]="row.isActive ? 'green' : 'red'"
+                ></lucide-icon>
+
+                <span class="">
+                  {{ row.isActive ? 'Activo' : 'Inactivo' }}
+                </span>
+              </div>
+            </td>
+            <td class="px-4 py-3">
+              <div class="flex flex-wrap items-center justify-end gap-2">
+                @if (canActOn(row)) {
+                  <button
+                    class="hover:animate-scale w-12 cursor-pointer rounded-lg border border-black/10 px-2 py-1 transition-all hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50 2xl:w-28"
+                    [class]="
+                      !row.isActive
+                        ? 'border-green-200 bg-green-100 text-green-800'
+                        : 'border-red-200 bg-red-100 text-red-800'
+                    "
+                    (click)="confirmToggleUser(row, row.isActive ? 'deactivate' : 'activate')"
+                    [attr.aria-label]="
+                      (row.isActive ? 'Desactivar' : 'Activar') + ' usuario ' + row.email
+                    "
+                  >
+                    <div class="flex items-center justify-center gap-1">
+                      <lucide-icon
+                        [img]="row.isActive ? iconsService.disable : iconsService.active"
+                        size="15"
+                        [color]="row.isActive ? 'red' : 'green'"
+                      ></lucide-icon>
+                      <span class="hidden text-xs 2xl:inline">
+                        {{ row.isActive ? 'Desactivar' : 'Activar' }}
+                      </span>
+                    </div>
+                  </button>
+                  @if (isSuper()) {
+                    @if (!hasRole(row, 'admin')) {
+                      <button
+                        class="hover:animate-scale w-12 cursor-pointer rounded-lg border border-blue-200 bg-blue-100 px-2 py-1 text-blue-800 transition-all hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-50 2xl:w-28"
+                        (click)="confirmAdminRoleChange(row, 'add')"
+                        [attr.aria-label]="'Hacer administrador a ' + row.email"
+                      >
+                        <div class="flex items-center justify-center gap-1">
+                          <lucide-icon
+                            [img]="iconsService.addRole"
+                            size="15"
+                            color="blue"
+                          ></lucide-icon>
+                          <span class="hidden text-xs 2xl:inline"> Hacer Admin </span>
+                        </div>
+                      </button>
+                    } @else {
+                      <button
+                        class="hover:animate-scale w-12 cursor-pointer rounded-lg border border-orange-200 bg-orange-100 px-2 py-1 text-orange-800 transition-all hover:bg-yellow-50 disabled:cursor-not-allowed disabled:opacity-50 2xl:w-28"
+                        (click)="confirmAdminRoleChange(row, 'remove')"
+                        [attr.aria-label]="'Quitar rol de administrador a ' + row.email"
+                      >
+                        <div class="flex items-center justify-center gap-1">
+                          <lucide-icon
+                            [img]="iconsService.disable"
+                            size="15"
+                            color="orange"
+                          ></lucide-icon>
+                          <span class="hidden text-xs 2xl:inline"> Quitar Admin </span>
+                        </div>
+                      </button>
+                    }
+                  }
+                }
+              </div>
+            </td>
+          </tr>
         } @empty {
-        <app-empty-state
-          [loading]="loading()"
-          [isEmpty]="usersService.users().length === 0"
-          [colspan]="4"
-          message="No hay usuarios para mostrar"
-        />
+          <app-empty-state
+            [loading]="loading()"
+            [isEmpty]="usersService.users().length === 0"
+            [colspan]="4"
+            message="No hay usuarios para mostrar"
+          />
         }
       </tbody>
     </table>
@@ -191,7 +207,7 @@
   >
     <form class="space-y-4" (submit)="$event.preventDefault()">
       <div>
-        <label for="user-email" class="text-sm font-medium block mb-2">Email</label>
+        <label for="user-email" class="mb-2 block text-sm font-medium">Email</label>
         <input
           id="user-email"
           type="email"
@@ -205,7 +221,7 @@
       </div>
 
       <div>
-        <label for="user-password" class="text-sm font-medium block mb-2">Contraseña</label>
+        <label for="user-password" class="mb-2 block text-sm font-medium">Contraseña</label>
         <input
           id="user-password"
           type="password"
@@ -220,10 +236,13 @@
       </div>
 
       @if (!isFormValid() && (form().email || form().password)) {
-      <p class="text-sm text-red-600">
-        @if (form().email.trim() === '') { El email es obligatorio } @else if
-        (form().password.length < 6) { La contraseña debe tener al menos 6 caracteres }
-      </p>
+        <p class="text-sm text-red-600">
+          @if (form().email.trim() === '') {
+            El email es obligatorio
+          } @else if (form().password.length < 6) {
+            La contraseña debe tener al menos 6 caracteres
+          }
+        </p>
       }
     </form>
   </app-modal>

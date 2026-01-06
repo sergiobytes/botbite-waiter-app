@@ -5,9 +5,9 @@
       description="Administra las sucursales del restaurante seleccionado"
     />
 
-    <div class="flex flex-col md:flex-row flex-wrap gap-3 md:justify-end">
+    <div class="flex flex-col flex-wrap gap-3 md:flex-row md:justify-end">
       <button
-        class="rounded-xl border border-green-200 bg-green-100 text-green-800 hover:bg-green-50 px-3 sm:px-4 py-2 disabled:opacity-50 transition-all hover:animate-scale cursor-pointer w-full md:w-auto"
+        class="hover:animate-scale w-full cursor-pointer rounded-xl border border-green-200 bg-green-100 px-3 py-2 text-green-800 transition-all hover:bg-green-50 disabled:opacity-50 sm:px-4 md:w-auto"
         (click)="onDownloadTemplate()"
         aria-label="Plantilla de carga masiva por CSV"
       >
@@ -30,7 +30,7 @@
         aria-label="Seleccionar archivo CSV para carga masiva de sucursales"
       />
       <button
-        class="rounded-xl border border-black/10 px-3 sm:px-4 py-2 hover:bg-black/5 disabled:opacity-50 transition-all hover:animate-scale cursor-pointer w-full md:w-auto"
+        class="hover:animate-scale w-full cursor-pointer rounded-xl border border-black/10 px-3 py-2 transition-all hover:bg-black/5 disabled:opacity-50 sm:px-4 md:w-auto"
         (click)="csvInput.click()"
         [disabled]="!restaurantId()"
         aria-label="Carga masiva por CSV"
@@ -46,7 +46,7 @@
         </div>
       </button>
       <button
-        class="rounded-xl bg-black text-white px-3 sm:px-4 py-2 hover:opacity-90 disabled:opacity-50 transition-all hover:animate-scale cursor-pointer w-full md:w-auto"
+        class="hover:animate-scale w-full cursor-pointer rounded-xl bg-black px-3 py-2 text-white transition-all hover:opacity-90 disabled:opacity-50 sm:px-4 md:w-auto"
         (click)="openCreate()"
         [disabled]="!restaurantId()"
         aria-label="Crear nueva sucursal"
@@ -64,9 +64,9 @@
     </div>
   </div>
 
-  <div class="flex flex-col md:flex-row gap-3 items-stretch md:items-center">
+  <div class="flex flex-col items-stretch gap-3 md:flex-row md:items-center">
     <div
-      class="md:ml-auto flex flex-col md:flex-row items-stretch md:items-center gap-2 w-full md:w-auto"
+      class="flex w-full flex-col items-stretch gap-2 md:ml-auto md:w-auto md:flex-row md:items-center"
     >
       <div class="flex items-center gap-2">
         <label for="branchesSearch" class="sr-only">Buscar sucursales</label>
@@ -80,14 +80,14 @@
           id="branchesSearch"
           type="text"
           placeholder="Buscar..."
-          class="flex-1 md:w-64 rounded-xl border border-black/10 px-3 py-2"
+          class="flex-1 rounded-xl border border-black/10 px-3 py-2 md:w-64"
           [value]="searchTerm()"
           (input)="updateFilterSearch($event)"
           aria-label="Buscar sucursales"
         />
       </div>
       <select
-        class="w-full md:w-auto rounded-xl border border-black/10 px-3 py-2"
+        class="w-full rounded-xl border border-black/10 px-3 py-2 md:w-auto"
         [value]="activeFilterValue()"
         (change)="updateFilterActive($event)"
         aria-label="Filtrar por estado"
@@ -99,135 +99,139 @@
     </div>
   </div>
 
-  <div class="rounded-2xl border border-black/10 overflow-hidden overflow-x-auto">
-    <table class="w-full text-sm table-fixed min-w-[1000px]">
+  <div class="overflow-hidden overflow-x-auto rounded-2xl border border-black/10">
+    <table class="w-full min-w-[1000px] table-fixed text-sm">
       <thead class="bg-neutral-50 text-neutral-600">
         <tr>
-          <th class="text-left font-medium px-4 py-3 w-1/5">Nombre</th>
-          <th class="text-left font-medium px-4 py-3 w-1/5">Dirección</th>
-          <th class="text-left font-medium px-4 py-3 w-32">Tel. Asistente</th>
-          <th class="text-left font-medium px-4 py-3 w-32">Tel. Caja</th>
-          <th class="text-left font-medium px-4 py-3 w-24">Mensajes</th>
-          <th class="text-left font-medium px-4 py-3 w-28">Estado</th>
-          <th class="text-right font-medium px-4 py-3">Acciones</th>
+          <th class="w-1/5 px-4 py-3 text-left font-medium">Nombre</th>
+          <th class="w-1/5 px-4 py-3 text-left font-medium">Dirección</th>
+          <th class="w-32 px-4 py-3 text-left font-medium">Tel. Asistente</th>
+          <th class="w-32 px-4 py-3 text-left font-medium">Tel. Caja</th>
+          <th class="w-24 px-4 py-3 text-left font-medium">Mensajes</th>
+          <th class="w-28 px-4 py-3 text-left font-medium">Estado</th>
+          <th class="px-4 py-3 text-right font-medium">Acciones</th>
         </tr>
       </thead>
       <tbody>
-        @for(branch of branches(); track branch.id){
-        <tr class="border-t border-black/10 animate-fade-in animate-duration-300">
-          <td class="px-4 py-3 w-1/5">
-            <div class="flex items-center gap-2">
-              <span class="truncate flex-1" [title]="branch.name">{{ branch.name }}</span>
-              @if(branch.qrUrl){
-              <a
-                [href]="branch.qrUrl"
-                target="_blank"
-                rel="noopener"
-                class="shrink-0 p-1.5 border border-blue-200 bg-blue-50 rounded-lg hover:bg-blue-100 transition-all hover:animate-scale"
-                [attr.aria-label]="'Ver QR de ' + branch.name"
+        @for (branch of branches(); track branch.id) {
+          <tr class="animate-fade-in animate-duration-300 border-t border-black/10">
+            <td class="w-1/5 px-4 py-3">
+              <div class="flex items-center gap-2">
+                <span class="flex-1 truncate" [title]="branch.name">{{ branch.name }}</span>
+                @if (branch.qrUrl) {
+                  <a
+                    [href]="branch.qrUrl"
+                    target="_blank"
+                    rel="noopener"
+                    class="hover:animate-scale shrink-0 rounded-lg border border-blue-200 bg-blue-50 p-1.5 transition-all hover:bg-blue-100"
+                    [attr.aria-label]="'Ver QR de ' + branch.name"
+                  >
+                    <lucide-icon [img]="iconsService.qrCode" size="18" color="blue"></lucide-icon>
+                  </a>
+                }
+              </div>
+            </td>
+            <td class="w-1/5 truncate px-4 py-3" [title]="branch.address">{{ branch.address }}</td>
+            <td class="w-32 px-4 py-3">{{ branch.phoneNumberAssistant }}</td>
+            <td class="w-32 px-4 py-3">{{ branch.phoneNumberReception }}</td>
+            <td class="w-24 px-4 py-3">{{ branch.availableMessages }}</td>
+            <td class="w-28 px-4 py-3">
+              <div
+                class="inline-flex items-center gap-2 rounded-full border px-2 py-1 text-xs"
+                [class]="
+                  branch.isActive
+                    ? 'border-green-200 bg-green-100 text-green-800'
+                    : 'border-red-200 bg-red-100 text-red-800'
+                "
               >
-                <lucide-icon [img]="iconsService.qrCode" size="18" color="blue"></lucide-icon>
-              </a>
-              }
-            </div>
-          </td>
-          <td class="px-4 py-3 w-1/5 truncate" [title]="branch.address">{{ branch.address }}</td>
-          <td class="px-4 py-3 w-32">{{ branch.phoneNumberAssistant }}</td>
-          <td class="px-4 py-3 w-32">{{ branch.phoneNumberReception }}</td>
-          <td class="px-4 py-3 w-24">{{ branch.availableMessages }}</td>
-          <td class="px-4 py-3 w-28">
-            <div
-              class="inline-flex items-center gap-2 rounded-full border text-xs px-2 py-1"
-              [class]="
-                branch.isActive
-                  ? 'bg-green-100 text-green-800 border-green-200'
-                  : 'bg-red-100 text-red-800 border-red-200'
-              "
-            >
-              <lucide-icon
-                [img]="branch.isActive ? iconsService.active : iconsService.inactive"
-                size="20"
-                [color]="branch.isActive ? 'green' : 'red'"
-              ></lucide-icon>
+                <lucide-icon
+                  [img]="branch.isActive ? iconsService.active : iconsService.inactive"
+                  size="20"
+                  [color]="branch.isActive ? 'green' : 'red'"
+                ></lucide-icon>
 
-              <span class="">
-                {{ branch.isActive ? 'Activa' : 'Inactiva' }}
-              </span>
-            </div>
-          </td>
-          <td class="px-4 py-3">
-            <div class="flex items-center gap-2 justify-end flex-wrap">
-              @if(canAddMessages()) {
-              <button
-                class="w-12 2xl:w-28 px-2 py-1 border border-black/10 rounded-lg hover:bg-black/5 transition-all hover:animate-scale cursor-pointer"
-                (click)="openAddMessages(branch)"
-                [attr.aria-label]="'Agregar mensajes a ' + branch.name"
-              >
-                <div class="flex items-center justify-center gap-1">
-                  <lucide-icon [img]="iconsService.add" size="15" color="green"></lucide-icon>
-                  <span class="text-xs hidden 2xl:inline">Mensajes</span>
-                </div>
-              </button>
-              } @if(!branch.qrUrl) {
-              <button
-                class="w-12 2xl:w-28 px-2 py-1 border border-black/10 rounded-lg hover:bg-black/5 transition-all hover:animate-scale cursor-pointer"
-                (click)="onGenerateQr(branch)"
-                [attr.aria-label]="'Generar QR de ' + branch.name"
-              >
-                <div class="flex items-center justify-center gap-1">
-                  <lucide-icon [img]="iconsService.qrCode" size="15"></lucide-icon>
-                  <span class="text-xs hidden 2xl:inline">{{
-                    generatingQr() === branch.id ? 'Generar...' : 'QR'
-                  }}</span>
-                </div>
-              </button>
-              }
+                <span class="">
+                  {{ branch.isActive ? 'Activa' : 'Inactiva' }}
+                </span>
+              </div>
+            </td>
+            <td class="px-4 py-3">
+              <div class="flex flex-wrap items-center justify-end gap-2">
+                @if (canAddMessages()) {
+                  <button
+                    class="btn-table-neutral"
+                    (click)="openAddMessages(branch)"
+                    [attr.aria-label]="'Agregar mensajes a ' + branch.name"
+                  >
+                    <div class="flex items-center justify-center gap-1">
+                      <lucide-icon [img]="iconsService.add" size="15" color="green"></lucide-icon>
+                      <span class="hidden text-xs 2xl:inline">Mensajes</span>
+                    </div>
+                  </button>
+                }
+                @if (!branch.qrUrl) {
+                  <button
+                    class="hover:animate-scale w-12 cursor-pointer rounded-lg border border-black/10 px-2 py-1 transition-all hover:bg-black/5 2xl:w-28"
+                    (click)="onGenerateQr(branch)"
+                    [attr.aria-label]="'Generar QR de ' + branch.name"
+                  >
+                    <div class="flex items-center justify-center gap-1">
+                      <lucide-icon [img]="iconsService.qrCode" size="15"></lucide-icon>
+                      <span class="hidden text-xs 2xl:inline">{{
+                        generatingQr() === branch.id ? 'Generar...' : 'QR'
+                      }}</span>
+                    </div>
+                  </button>
+                }
 
-              <button
-                class="w-12 2xl:w-28 px-2 py-1 border border-yellow-200 bg-yellow-100 text-yellow-800 rounded-lg hover:bg-yellow-50 transition-all hover:animate-scale cursor-pointer"
-                (click)="openEdit(branch)"
-                [attr.aria-label]="'Editar sucursal ' + branch.name"
-              >
-                <div class="flex items-center justify-center gap-1">
-                  <lucide-icon [img]="iconsService.edit" size="15" color="orange"></lucide-icon>
-                  <span class="text-xs hidden 2xl:inline">Editar</span>
-                </div>
-              </button>
+                <button
+                  class="btn-table-warning"
+                  (click)="openEdit(branch)"
+                  [attr.aria-label]="'Editar sucursal ' + branch.name"
+                >
+                  <div class="flex items-center justify-center gap-1">
+                    <lucide-icon [img]="iconsService.edit" size="15" color="orange"></lucide-icon>
+                    <span class="hidden text-xs 2xl:inline">Editar</span>
+                  </div>
+                </button>
 
-              @if(branch.isActive) {
-              <button
-                class="w-12 2xl:w-28 px-2 py-1 border rounded-lg hover:bg-red-50 transition-all hover:animate-scale bg-red-100 text-red-800 border-red-200 cursor-pointer"
-                (click)="confirmToggle(branch, false)"
-                [attr.aria-label]="'Desactivar ' + branch.name"
-              >
-                <div class="flex items-center justify-center gap-1">
-                  <lucide-icon [img]="iconsService.disable" size="15" color="red"></lucide-icon>
-                  <span class="text-xs hidden 2xl:inline">Desactivar</span>
-                </div>
-              </button>
-
-              } @else {
-              <button
-                class="w-12 2xl:w-28 px-2 py-1 border rounded-lg hover:bg-green-50 transition-all hover:animate-scale bg-green-100 text-green-800 border-green-200 cursor-pointer"
-                (click)="confirmToggle(branch, true)"
-                [attr.aria-label]="'Activar ' + branch.name"
-              >
-                <div class="flex items-center justify-center gap-1">
-                  <lucide-icon [img]="iconsService.active" size="15" color="green"></lucide-icon>
-                  <span class="text-xs hidden 2xl:inline">Activar</span>
-                </div>
-              </button>
-              }
-            </div>
-          </td>
-        </tr>
+                @if (branch.isActive) {
+                  <button
+                    class="btn-table-danger"
+                    (click)="confirmToggle(branch, false)"
+                    [attr.aria-label]="'Desactivar ' + branch.name"
+                  >
+                    <div class="flex items-center justify-center gap-1">
+                      <lucide-icon [img]="iconsService.disable" size="15" color="red"></lucide-icon>
+                      <span class="hidden text-xs 2xl:inline">Desactivar</span>
+                    </div>
+                  </button>
+                } @else {
+                  <button
+                    class="btn-table-success"
+                    (click)="confirmToggle(branch, true)"
+                    [attr.aria-label]="'Activar ' + branch.name"
+                  >
+                    <div class="flex items-center justify-center gap-1">
+                      <lucide-icon
+                        [img]="iconsService.active"
+                        size="15"
+                        color="green"
+                      ></lucide-icon>
+                      <span class="hidden text-xs 2xl:inline">Activar</span>
+                    </div>
+                  </button>
+                }
+              </div>
+            </td>
+          </tr>
         } @empty {
-        <app-empty-state
-          [loading]="loading()"
-          [isEmpty]="branches().length === 0"
-          [colspan]="7"
-          message="No hay sucursales para mostrar."
-        />
+          <app-empty-state
+            [loading]="loading()"
+            [isEmpty]="branches().length === 0"
+            [colspan]="7"
+            message="No hay sucursales para mostrar."
+          />
         }
       </tbody>
     </table>
@@ -256,7 +260,7 @@
     (cancel)="closeModal()"
     (confirm)="save()"
   >
-    <form (submit)="$event.preventDefault()" class="grid md:grid-cols-2 gap-4">
+    <form (submit)="$event.preventDefault()" class="grid gap-4 md:grid-cols-2">
       <div class="md:col-span-2">
         <label for="bname" class="text-sm font-medium">Nombre</label>
         <input
@@ -316,7 +320,7 @@
       </div>
 
       @if (!isFormValid() && (form().name || form().address)) {
-      <p class="md:col-span-2 text-sm text-red-600">Nombre y dirección son obligatorios</p>
+        <p class="text-sm text-red-600 md:col-span-2">Nombre y dirección son obligatorios</p>
       }
     </form>
   </app-modal>
@@ -354,7 +358,7 @@
       </p>
 
       <div class="space-y-1">
-        <label for="messagesToAdd" class="text-sm font-medium block">Cantidad a agregar</label>
+        <label for="messagesToAdd" class="block text-sm font-medium">Cantidad a agregar</label>
         <input
           id="messagesToAdd"
           type="number"
@@ -368,7 +372,7 @@
       </div>
 
       @if (addMessagesDisabled() && messagesToAdd() !== null) {
-      <p class="text-sm text-red-600">Ingresa una cantidad válida mayor a 0</p>
+        <p class="text-sm text-red-600">Ingresa una cantidad válida mayor a 0</p>
       }
     </div>
   </app-modal>

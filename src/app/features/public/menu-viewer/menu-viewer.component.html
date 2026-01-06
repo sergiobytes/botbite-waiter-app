@@ -1,81 +1,109 @@
-<div class="min-h-screen bg-linear-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
+<div
+  class="flex min-h-screen items-center justify-center bg-linear-to-br from-gray-50 to-gray-100 p-4"
+>
   @if (loading()) {
-  <div class="text-center" role="status" aria-live="polite">
-    <div class="animate-spin rounded-full h-16 w-16 border-b-4 border-black mx-auto" aria-hidden="true"></div>
-    <p class="mt-4 text-gray-600 font-medium">Cargando menú...</p>
-  </div>
-  } @else if (error()) {
-  <article class="max-w-md mx-auto text-center bg-white rounded-2xl shadow-lg p-8" role="alert">
-    <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4" aria-hidden="true">
-      <lucide-icon [img]="iconsService.alertCircle" size="32" color="red"></lucide-icon>
+    <div class="text-center" role="status" aria-live="polite">
+      <div
+        class="mx-auto h-16 w-16 animate-spin rounded-full border-b-4 border-black"
+        aria-hidden="true"
+      ></div>
+      <p class="mt-4 font-medium text-gray-600">Cargando menú...</p>
     </div>
-    <h1 class="text-2xl font-bold text-gray-900 mb-2">Error al cargar el menú</h1>
-    <p class="text-gray-600">No se pudo encontrar el menú solicitado.</p>
-  </article>
-  } @else {
-  <article class="w-full max-w-6xl bg-white rounded-2xl shadow-2xl overflow-hidden animate-fade-in">
-    <!-- Header -->
-    <header class="bg-linear-to-r from-gray-900 to-gray-800 text-white p-6">
-      <div class="flex items-center justify-between">
-        <div>
-          <h1 class="text-2xl font-bold">{{ menuName() }}</h1>
-          <p class="text-gray-300 text-sm mt-1">Visualiza nuestro menú completo</p>
-        </div>
-        <button
-          (click)="downloadPdf()"
-          class="flex items-center gap-2 bg-white text-gray-900 px-4 py-2 rounded-lg hover:bg-gray-100 transition-all hover:scale-105 font-medium"
-          aria-label="Descargar menú en formato PDF"
-        >
-          <lucide-icon [img]="iconsService.download" size="18" color="black" aria-hidden="true"></lucide-icon>
-          <span>Descargar</span>
-        </button>
+  } @else if (error()) {
+    <article class="mx-auto max-w-md rounded-2xl bg-white p-8 text-center shadow-lg" role="alert">
+      <div
+        class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-100"
+        aria-hidden="true"
+      >
+        <lucide-icon [img]="iconsService.alertCircle" size="32" color="red"></lucide-icon>
       </div>
-    </header>
-
-    <!-- PDF Viewer -->
-    <section class="p-4 bg-gray-100" aria-label="Visor de menú">
-      <div class="bg-white rounded-lg shadow-inner overflow-hidden">
-        @if (pdfLoadError()) {
-        <div class="flex flex-col items-center justify-center p-12 text-center" role="alert">
-          <div class="w-20 h-20 bg-yellow-100 rounded-full flex items-center justify-center mb-4" aria-hidden="true">
-            <lucide-icon [img]="iconsService.alertCircle" size="40" color="orange"></lucide-icon>
+      <h1 class="mb-2 text-2xl font-bold text-gray-900">Error al cargar el menú</h1>
+      <p class="text-gray-600">No se pudo encontrar el menú solicitado.</p>
+    </article>
+  } @else {
+    <article
+      class="animate-fade-in w-full max-w-6xl overflow-hidden rounded-2xl bg-white shadow-2xl"
+    >
+      <!-- Header -->
+      <header class="bg-linear-to-r from-gray-900 to-gray-800 p-6 text-white">
+        <div class="flex items-center justify-between">
+          <div>
+            <h1 class="text-2xl font-bold">{{ menuName() }}</h1>
+            <p class="mt-1 text-sm text-gray-300">Visualiza nuestro menú completo</p>
           </div>
-          <h2 class="text-xl font-bold text-gray-900 mb-2">No se pudo cargar el PDF</h2>
-          <p class="text-gray-600 mb-6 max-w-md">
-            El archivo PDF no está disponible en este momento. Por favor, intenta descargarlo directamente.
-          </p>
           <button
             (click)="downloadPdf()"
-            class="flex items-center gap-2 bg-gray-900 text-white px-6 py-3 rounded-lg hover:bg-gray-800 transition-all hover:scale-105 font-medium"
+            class="btn flex items-center gap-2 bg-white font-medium text-gray-900 hover:bg-gray-100"
             aria-label="Descargar menú en formato PDF"
           >
-            <lucide-icon [img]="iconsService.download" size="18" color="white" aria-hidden="true"></lucide-icon>
-            <span>Descargar PDF</span>
+            <lucide-icon
+              [img]="iconsService.download"
+              size="18"
+              color="black"
+              aria-hidden="true"
+            ></lucide-icon>
+            <span>Descargar</span>
           </button>
         </div>
-        } @else if (pdfUrl()) {
-        <pdf-viewer
-          [src]="pdfUrl()"
-          [render-text]="true"
-          [original-size]="false"
-          [show-all]="true"
-          [fit-to-page]="true"
-          [autoresize]="true"
-          style="width: 100%; height: calc(100vh - 200px);"
-          (error)="onPdfError()"
-          aria-label="Visualizador de menú en PDF"
-        ></pdf-viewer>
-        }
-      </div>
-    </section>
+      </header>
 
-    <!-- Footer -->
-    <footer class="bg-gray-50 px-6 py-4 text-center border-t border-gray-200">
-      <p class="text-sm text-gray-600">
-        ¿Listo para ordenar?
-        <span class="font-semibold text-gray-900">Contáctanos por WhatsApp</span>
-      </p>
-    </footer>
-  </article>
+      <!-- PDF Viewer -->
+      <section class="bg-gray-100 p-4" aria-label="Visor de menú">
+        <div class="overflow-hidden rounded-lg bg-white shadow-inner">
+          @if (pdfLoadError()) {
+            <div class="flex flex-col items-center justify-center p-12 text-center" role="alert">
+              <div
+                class="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-yellow-100"
+                aria-hidden="true"
+              >
+                <lucide-icon
+                  [img]="iconsService.alertCircle"
+                  size="40"
+                  color="orange"
+                ></lucide-icon>
+              </div>
+              <h2 class="mb-2 text-xl font-bold text-gray-900">No se pudo cargar el PDF</h2>
+              <p class="mb-6 max-w-md text-gray-600">
+                El archivo PDF no está disponible en este momento. Por favor, intenta descargarlo
+                directamente.
+              </p>
+              <button
+                (click)="downloadPdf()"
+                class="flex items-center gap-2 rounded-lg bg-gray-900 px-6 py-3 font-medium text-white transition-all hover:scale-105 hover:bg-gray-800"
+                aria-label="Descargar menú en formato PDF"
+              >
+                <lucide-icon
+                  [img]="iconsService.download"
+                  size="18"
+                  color="white"
+                  aria-hidden="true"
+                ></lucide-icon>
+                <span>Descargar PDF</span>
+              </button>
+            </div>
+          } @else if (pdfUrl()) {
+            <pdf-viewer
+              [src]="pdfUrl()"
+              [render-text]="true"
+              [original-size]="false"
+              [show-all]="true"
+              [fit-to-page]="true"
+              [autoresize]="true"
+              style="width: 100%; height: calc(100vh - 200px)"
+              (error)="onPdfError()"
+              aria-label="Visualizador de menú en PDF"
+            ></pdf-viewer>
+          }
+        </div>
+      </section>
+
+      <!-- Footer -->
+      <footer class="border-t border-gray-200 bg-gray-50 px-6 py-4 text-center">
+        <p class="text-sm text-gray-600">
+          ¿Listo para ordenar?
+          <span class="font-semibold text-gray-900">Contáctanos por WhatsApp</span>
+        </p>
+      </footer>
+    </article>
   }
 </div>

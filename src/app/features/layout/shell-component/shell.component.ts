@@ -129,7 +129,7 @@ export class ShellComponent implements OnInit {
             return EMPTY;
           }),
           concatMap(() => this.loadOrganizationData()),
-          catchError(() => EMPTY)
+          catchError(() => EMPTY),
         )
         .subscribe();
     } else {
