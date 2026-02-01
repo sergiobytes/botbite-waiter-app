@@ -56,8 +56,7 @@ export class MenuViewerComponent implements OnInit {
     const fileName = `${this.menuName().replace(/\s+/g, '_')}.pdf`;
 
     link.href = url;
-    link.title = fileName;
-    link.download = fileName;
+    link.download = `${fileName}.pdf`;
 
     link.click();
 
