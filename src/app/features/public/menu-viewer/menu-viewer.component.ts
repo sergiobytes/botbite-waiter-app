@@ -1,10 +1,10 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { CommonModule } from '@angular/common';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { ActivatedRoute } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
-import { IconsService } from '../../../core/services/icons.service';
 import { PdfViewerModule } from 'ng2-pdf-viewer';
+import { IconsService } from '../../../core/services/icons.service';
 
 @Component({
   selector: 'app-menu-viewer',
@@ -48,20 +48,40 @@ export class MenuViewerComponent implements OnInit {
     this.loading.set(false);
   }
 
-  downloadPdf() {
+  async downloadPdf() {
+    console.log('Método downloadPdf llamado');
+
     const url = this.pdfUrl();
     if (!url) return;
 
-    const link = document.createElement('a');
-    link.href = url;
-
-    // Usar el valor de menuName como nombre del archivo con extensión .pdf
     const fileName = `${this.menuName()}.pdf`;
-    link.download = fileName;
 
-    link.click();
+    try {
+      // Descargar el archivo como blob para poder controlar el nombre
+      const response = await fetch(url);
+      const blob = await response.blob();
 
-    console.log('Archivo descargado:', { link, url, fileName });
+      // Crear una URL local del blob
+      const blobUrl = window.URL.createObjectURL(blob);
+
+      // Crear el link de descarga con la URL local
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = fileName;
+
+      // Descargar el archivo
+      link.click();
+
+      // Liberar la URL del blob después de un momento
+      setTimeout(() => window.URL.revokeObjectURL(blobUrl), 100);
+    } catch (error) {
+      console.error('Error al descargar el PDF:', error);
+      // Fallback al método anterior si falla
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = fileName;
+      link.click();
+    }
   }
 
   onPdfError() {
