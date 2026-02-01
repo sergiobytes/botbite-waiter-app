@@ -55,12 +55,13 @@ export class MenuViewerComponent implements OnInit {
     const link = document.createElement('a');
     link.href = url;
 
-    const fileName = this.menuName().endsWith('.pdf') ? this.menuName() : `${this.menuName()}.pdf`;
+    // Asegurarse de que el nombre del archivo tenga la extensión .pdf
+    const fileName = `${this.menuName().replace(/\s+/g, '_')}.pdf`;
     link.download = fileName;
 
     link.click();
 
-    console.log({ link, url, fileName });
+    console.log('Archivo descargado:', { link, url, fileName });
   }
 
   onPdfError() {
