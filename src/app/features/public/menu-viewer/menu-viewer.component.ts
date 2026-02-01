@@ -59,6 +59,8 @@ export class MenuViewerComponent implements OnInit {
     link.download = fileName;
 
     link.click();
+
+    console.log({ link, url, fileName });
   }
 
   onPdfError() {
