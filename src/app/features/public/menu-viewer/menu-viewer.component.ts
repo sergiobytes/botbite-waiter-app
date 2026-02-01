@@ -49,16 +49,16 @@ export class MenuViewerComponent implements OnInit {
   }
 
   downloadPdf() {
-    console.log('Downloading PDF...');
     const url = this.pdfUrl();
     if (!url) return;
 
     const link = document.createElement('a');
     link.href = url;
-    link.download = `${this.menuName()}.pdf`;
-    link.click();
 
-    console.log({ url });
+    const fileName = this.menuName().endsWith('.pdf') ? this.menuName() : `${this.menuName()}.pdf`;
+    link.download = fileName;
+
+    link.click();
   }
 
   onPdfError() {
