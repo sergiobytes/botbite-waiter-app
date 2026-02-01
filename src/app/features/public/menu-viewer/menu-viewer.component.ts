@@ -49,30 +49,23 @@ export class MenuViewerComponent implements OnInit {
   }
 
   async downloadPdf() {
-    console.log('Método downloadPdf llamado');
-
     const url = this.pdfUrl();
     if (!url) return;
 
     const fileName = `${this.menuName()}.pdf`;
 
     try {
-      // Descargar el archivo como blob para poder controlar el nombre
       const response = await fetch(url);
       const blob = await response.blob();
 
-      // Crear una URL local del blob
       const blobUrl = window.URL.createObjectURL(blob);
 
-      // Crear el link de descarga con la URL local
       const link = document.createElement('a');
       link.href = blobUrl;
       link.download = fileName;
 
-      // Descargar el archivo
       link.click();
 
-      // Liberar la URL del blob después de un momento
       setTimeout(() => window.URL.revokeObjectURL(blobUrl), 100);
     } catch (error) {
       console.error('Error al descargar el PDF:', error);
