@@ -91,6 +91,12 @@ export class ShellComponent implements OnInit {
       requiredRole: 'user',
       icon: this.iconsService.bell,
     },
+    {
+      label: 'Notificaciones',
+      to: '/dashboard/notifications',
+      requiredRole: 'user',
+      icon: this.iconsService.whatsapp,
+    },
   ];
 
   items = computed(() => {

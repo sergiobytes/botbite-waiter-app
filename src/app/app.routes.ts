@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
-import { adminGuard, clientGuard, superGuard, userGuard } from './core/guards/roles.guard';
+import { adminGuard, clientGuard, userGuard } from './core/guards/roles.guard';
 
 export const routes: Routes = [
   {
@@ -93,6 +93,14 @@ export const routes: Routes = [
             (m) => m.OrdersComponent
           ),
       },
+      {
+        path: 'notifications',
+        canActivate: [userGuard],
+        loadComponent: () =>
+          import('./features/dashboard/notifications-component/notifications.component').then(
+            m => m.NotificationsComponent
+          )
+      }
     ],
   },
   { path: '', pathMatch: 'full', redirectTo: '/login' },

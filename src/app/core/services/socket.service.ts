@@ -3,12 +3,33 @@ import { io, Socket } from 'socket.io-client';
 import { Observable, Subject } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
+export interface CashierNotification {
+  id: string;
+  message: string;
+  phoneNumber?: string;
+  branchId?: string;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  customer?: {
+    id: string;
+    name: string;
+    phone: string;
+  };
+}
+
+export interface NotificationUpdate {
+  branchId: string;
+  notification: CashierNotification;
+}
+
 @Injectable({
   providedIn: 'root',
 })
 export class SocketService implements OnDestroy {
   private socket: Socket | null = null;
   private orderUpdateSubject = new Subject<{ branchId: string }>();
+  private notificationSubject = new Subject<NotificationUpdate>();
 
   constructor() {
     this.connect();
@@ -37,6 +58,10 @@ export class SocketService implements OnDestroy {
       this.orderUpdateSubject.next(data);
     });
 
+    this.socket.on('notificationUpdate', (data: NotificationUpdate) => {
+      this.notificationSubject.next(data);
+    });
+
     this.socket.on('connect_error', (error) => {
       console.error('WebSocket connection error:', error);
     });
@@ -44,6 +69,10 @@ export class SocketService implements OnDestroy {
 
   getOrderUpdates(): Observable<{ branchId: string }> {
     return this.orderUpdateSubject.asObservable();
+  }
+
+  getNotificationUpdates(): Observable<NotificationUpdate> {
+    return this.notificationSubject.asObservable();
   }
 
   joinBranch(branchId: string): void {

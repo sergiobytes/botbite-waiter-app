@@ -35,6 +35,7 @@ import {
   HeartOff,
   Image,
   Bell,
+  MessageCircle,
 } from 'lucide-angular';
 
 @Injectable({
@@ -76,4 +77,5 @@ export class IconsService {
   readonly dislike = HeartOff;
   readonly image = Image;
   readonly bell = Bell;
+  readonly whatsapp = MessageCircle;
 }
